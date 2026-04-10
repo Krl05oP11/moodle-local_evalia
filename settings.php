@@ -28,6 +28,18 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_evalia', 'EVAL-IA');
     $ADMIN->add('localplugins', $settings);
 
+    // ── Setup Wizard link ────────────────────────────────────────────────────
+    $setup_url = new moodle_url('/local/evalia/setup.php');
+    $settings->add(new admin_setting_heading(
+        'local_evalia_wizard_heading',
+        '🚀 Setup Wizard',
+        html_writer::tag('p',
+            'Use the wizard to configure the AI engine step by step, with a real-time connection test. ' .
+            html_writer::link($setup_url, '▶ Launch Setup Wizard', ['class' => 'btn btn-sm btn-primary ms-2']),
+            ['style' => 'margin-top:6px;']
+        )
+    ));
+
     // ── Motor de IA ──────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_engine_heading',
