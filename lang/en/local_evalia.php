@@ -126,6 +126,10 @@ $string['exam_expired_auto']     = 'Time expired — your exam was submitted aut
 $string['portfolio_export_csv']  = 'Export CSV';
 
 // Privacy API metadata strings
+$string['privacy:metadata:evalia_rubrics']                          = 'Evaluation rubrics created by teachers. Only the teacher ID (created_by) is stored.';
+$string['privacy:metadata:evalia_rubrics:created_by']               = 'The user ID of the teacher who created the rubric.';
+$string['privacy:metadata:evalia_exams']                            = 'Exam templates created by teachers. Only the teacher ID (created_by) is stored.';
+$string['privacy:metadata:evalia_exams:created_by']                 = 'The user ID of the teacher who created the exam.';
 $string['privacy:metadata:evalia_student_exams']                    = 'Stores exam instances assigned to each student, including their answers and score.';
 $string['privacy:metadata:evalia_student_exams:userid']             = 'The ID of the student.';
 $string['privacy:metadata:evalia_student_exams:question_ids']       = 'JSON array of question IDs assigned to this student.';

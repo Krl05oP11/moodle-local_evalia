@@ -39,8 +39,8 @@ class update_question extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'questionid' => new external_value(PARAM_INT,  'Question ID'),
-            'status'     => new external_value(PARAM_TEXT, 'New status: draft|approved|rejected', VALUE_OPTIONAL),
-            'stem'       => new external_value(PARAM_TEXT, 'Updated question text', VALUE_OPTIONAL),
+            'status'     => new external_value(PARAM_TEXT, 'New status: draft|approved|rejected', VALUE_DEFAULT, ''),
+            'stem'       => new external_value(PARAM_TEXT, 'Updated question text', VALUE_DEFAULT, ''),
         ]);
     }
 

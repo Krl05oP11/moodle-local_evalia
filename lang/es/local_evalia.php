@@ -132,6 +132,10 @@ $string['nav_my_exams'] = '📝 Mis Exámenes';
 $string['calendar_exam_event'] = 'Examen: {$a}';
 
 // Cadenas de la API de Privacidad (GDPR)
+$string['privacy:metadata:evalia_rubrics']                          = 'Rúbricas de evaluación creadas por docentes. Solo se almacena el ID del docente (created_by).';
+$string['privacy:metadata:evalia_rubrics:created_by']               = 'ID del docente que creó la rúbrica.';
+$string['privacy:metadata:evalia_exams']                            = 'Plantillas de examen creadas por docentes. Solo se almacena el ID del docente (created_by).';
+$string['privacy:metadata:evalia_exams:created_by']                 = 'ID del docente que creó el examen.';
 $string['privacy:metadata:evalia_student_exams']                    = 'Almacena los exámenes asignados a cada alumno, incluyendo respuestas y calificación.';
 $string['privacy:metadata:evalia_student_exams:userid']             = 'ID del alumno.';
 $string['privacy:metadata:evalia_student_exams:question_ids']       = 'Array JSON con los IDs de preguntas asignadas al alumno.';

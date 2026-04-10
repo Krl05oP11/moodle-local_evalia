@@ -62,6 +62,16 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
 
+        // Teacher-authored data: rubrics and exams store created_by (teacher user ID).
+        // Not personal data in the GDPR sense, but declared for Moodle table-coverage compliance.
+        $collection->add_database_table('evalia_rubrics', [
+            'created_by' => 'privacy:metadata:evalia_rubrics:created_by',
+        ], 'privacy:metadata:evalia_rubrics');
+
+        $collection->add_database_table('evalia_exams', [
+            'created_by' => 'privacy:metadata:evalia_exams:created_by',
+        ], 'privacy:metadata:evalia_exams');
+
         // Per-student exam instances.
         $collection->add_database_table('evalia_student_exams', [
             'userid'        => 'privacy:metadata:evalia_student_exams:userid',

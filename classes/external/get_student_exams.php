@@ -52,7 +52,8 @@ class get_student_exams extends external_api {
 
         // Get enrolled students.
         $students = get_enrolled_users($context, 'local/evalia:take', 0,
-            'u.id, u.firstname, u.lastname, u.email');
+            'u.id, u.firstname, u.lastname, u.email, ' .
+            'u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename');
 
         if (empty($students)) {
             return ['total' => 0, 'students' => []];
