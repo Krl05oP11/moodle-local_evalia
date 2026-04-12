@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
 
-    // Teacher capability: can manage rubrics, questions, and exams for a course
+    // Teacher capability: can manage rubrics, questions, && exams for a course
     'local/evalia:manage' => [
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,

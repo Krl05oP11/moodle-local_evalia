@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,49 +36,53 @@ require_login($course);
 require_capability('local/evalia:manage', $context);
 
 // Load enrolled students.
-$students = get_enrolled_users($context, 'local/evalia:take', 0,
-    'u.id, u.firstname, u.lastname, u.email');
+$students = get_enrolled_users(
+    $context,
+    'local/evalia:take',
+    0,
+    'u.id, u.firstname, u.lastname, u.email'
+);
 
 // Load portfolio records in one query.
-$portfolio_by_user = [];
+$portfoliobyuser = [];
 if (!empty($students)) {
-    $student_ids = array_keys($students);
-    [$in_sql, $in_params] = $DB->get_in_or_equal($student_ids, SQL_PARAMS_NAMED, 'uid');
+    $studentids = array_keys($students);
+    [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
     $portfolios = $DB->get_records_select(
         'evalia_portfolio',
-        "userid $in_sql AND courseid = :courseid",
-        array_merge($in_params, ['courseid' => $courseid]),
+        "userid $insql AND courseid = :courseid",
+        array_merge($inparams, ['courseid' => $courseid]),
         '',
         'userid, total_exams, avg_grade, last_activity'
     );
     foreach ($portfolios as $p) {
-        $portfolio_by_user[$p->userid] = $p;
+        $portfoliobyuser[$p->userid] = $p;
     }
 }
 
 // Load the most recent docente note per student.
-$last_note_by_user = [];
+$lastnotebyuser = [];
 if (!empty($students)) {
-    $student_ids = array_keys($students);
-    [$in_sql, $in_params] = $DB->get_in_or_equal($student_ids, SQL_PARAMS_NAMED, 'nuid');
+    $studentids = array_keys($students);
+    [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'nuid');
     $notes = $DB->get_records_select(
         'evalia_portfolio_notes',
-        "userid $in_sql AND courseid = :courseid",
-        array_merge($in_params, ['courseid' => $courseid]),
+        "userid $insql AND courseid = :courseid",
+        array_merge($inparams, ['courseid' => $courseid]),
         'timecreated DESC',
         'userid, note_text, timecreated'
     );
     foreach ($notes as $n) {
         // get_records_select returns first match; since we order DESC the first = most recent.
-        if (!isset($last_note_by_user[$n->userid])) {
-            $last_note_by_user[$n->userid] = $n->note_text;
+        if (!isset($lastnotebyuser[$n->userid])) {
+            $lastnotebyuser[$n->userid] = $n->note_text;
         }
     }
 }
 
 // ── Emit CSV ─────────────────────────────────────────────────────────────────
-$safe_coursename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', format_string($course->shortname));
-$filename        = 'evalia_legajos_' . $safe_coursename . '_' . date('Ymd') . '.csv';
+$safecoursename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', format_string($course->shortname));
+$filename        = 'evalia_legajos_' . $safecoursename . '_' . date('Ymd') . '.csv';
 
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -101,27 +105,27 @@ fputcsv($out, [
 ]);
 
 // Data rows — sorted alphabetically.
-$student_list = array_values((array) $students);
-usort($student_list, function ($a, $b) {
+$studentlist = array_values((array) $students);
+usort($studentlist, function ($a, $b) {
     return strcmp($a->lastname . ' ' . $a->firstname, $b->lastname . ' ' . $b->firstname);
 });
 
-foreach ($student_list as $u) {
-    $p             = $portfolio_by_user[$u->id] ?? null;
-    $total_exams   = $p ? (int) $p->total_exams : 0;
-    $avg_grade     = $p ? number_format((float) $p->avg_grade, 2, '.', '') : '';
-    $last_activity = ($p && $p->last_activity > 0)
+foreach ($studentlist as $u) {
+    $p             = $portfoliobyuser[$u->id] ?? null;
+    $totalexams   = $p ? (int) $p->total_exams : 0;
+    $avggrade     = $p ? number_format((float) $p->avg_grade, 2, '.', '') : '';
+    $lastactivity = ($p && $p->last_activity > 0)
         ? date('d/m/Y H:i', $p->last_activity)
         : '';
-    $last_note     = $last_note_by_user[$u->id] ?? '';
+    $lastnote     = $lastnotebyuser[$u->id] ?? '';
 
     fputcsv($out, [
         $u->lastname . ', ' . $u->firstname,
         $u->email,
-        $total_exams,
-        $avg_grade,
-        $last_activity,
-        $last_note,
+        $totalexams,
+        $avggrade,
+        $lastactivity,
+        $lastnote,
     ]);
 }
 

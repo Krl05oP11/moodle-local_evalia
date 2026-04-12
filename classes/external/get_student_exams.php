@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,16 +30,23 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_student_exams.
+ */
 class get_student_exams extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'examid' => new external_value(PARAM_INT, 'Exam ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid): array {
         global $DB;
 
@@ -51,34 +58,38 @@ class get_student_exams extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // Get enrolled students.
-        $students = get_enrolled_users($context, 'local/evalia:take', 0,
+        $students = get_enrolled_users(
+            $context,
+            'local/evalia:take',
+            0,
             'u.id, u.firstname, u.lastname, u.email, ' .
-            'u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename');
+            'u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename'
+        );
 
         if (empty($students)) {
             return ['total' => 0, 'students' => []];
         }
 
-        $student_ids = array_keys($students);
-        [$in_sql, $in_params] = $DB->get_in_or_equal($student_ids, SQL_PARAMS_NAMED, 'uid');
+        $studentids = array_keys($students);
+        [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
 
         // Load existing assignments for these students.
         $assignments = $DB->get_records_select(
             'evalia_student_exams',
-            "examid = :examid AND userid $in_sql",
-            array_merge(['examid' => $exam->id], $in_params),
+            "examid = :examid AND userid $insql",
+            array_merge(['examid' => $exam->id], $inparams),
             '',
             'id, userid, score, max_score, status, timesubmitted'
         );
 
-        $assign_by_user = [];
+        $assignbyuser = [];
         foreach ($assignments as $a) {
-            $assign_by_user[$a->userid] = $a;
+            $assignbyuser[$a->userid] = $a;
         }
 
         $result = [];
         foreach ($students as $u) {
-            $a = $assign_by_user[$u->id] ?? null;
+            $a = $assignbyuser[$u->id] ?? null;
             $result[] = [
                 'userid'         => (int) $u->id,
                 'fullname'       => fullname($u),
@@ -110,21 +121,26 @@ class get_student_exams extends external_api {
         return ['total' => count($students), 'students' => $result];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'total'    => new external_value(PARAM_INT, 'Total enrolled students'),
             'students' => new external_multiple_structure(
                 new external_single_structure([
-                    'userid'         => new external_value(PARAM_INT,   'Student user ID'),
-                    'fullname'       => new external_value(PARAM_TEXT,  'Student full name'),
-                    'lastname'       => new external_value(PARAM_TEXT,  'Last name'),
-                    'firstname'      => new external_value(PARAM_TEXT,  'First name'),
-                    'student_examid' => new external_value(PARAM_INT,   'evalia_student_exams ID (0 if not assigned)'),
-                    'status'         => new external_value(PARAM_TEXT,  'assigned|started|submitted|graded|not_assigned'),
+                    'userid'         => new external_value(PARAM_INT, 'Student user ID'),
+                    'fullname'       => new external_value(PARAM_TEXT, 'Student full name'),
+                    'lastname'       => new external_value(PARAM_TEXT, 'Last name'),
+                    'firstname'      => new external_value(PARAM_TEXT, 'First name'),
+                    'student_examid' => new external_value(PARAM_INT, 'evalia_student_exams ID (0 if not assigned)'),
+                    'status'         => new external_value(PARAM_TEXT, 'assigned|started|submitted|graded|not_assigned'),
                     'score'          => new external_value(PARAM_FLOAT, 'Score (null if not graded)', VALUE_OPTIONAL),
-                    'timesubmitted'  => new external_value(PARAM_INT,   'Submission timestamp (0 if not submitted)'),
+                    'timesubmitted'  => new external_value(PARAM_INT, 'Submission timestamp (0 if not submitted)'),
                 ]),
-                'Students', VALUE_DEFAULT, []
+                'Students',
+                VALUE_DEFAULT,
+                []
             ),
         ]);
     }

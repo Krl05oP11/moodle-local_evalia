@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-
 /**
  * EVAL-IA Student Panel — lists assigned exams for the logged-in student.
  *
@@ -42,7 +41,7 @@ $PAGE->set_heading(format_string($course->fullname));
 
 $now = time();
 
-$my_exams = $DB->get_records_sql(
+$myexams = $DB->get_records_sql(
     'SELECT se.id         AS student_examid,
             se.status,
             se.score,
@@ -99,7 +98,7 @@ echo $OUTPUT->header();
         <span class="text-muted"><?php echo format_string($course->fullname); ?></span>
     </div>
 
-<?php if (empty($my_exams)): ?>
+<?php if (empty($myexams)): ?>
     <div class="alert alert-info d-flex align-items-center gap-3">
         <span style="font-size:1.6rem;">📭</span>
         <div>
@@ -109,61 +108,61 @@ echo $OUTPUT->header();
     </div>
 
 <?php else: ?>
-<?php foreach ($my_exams as $ex):
-    $window_open = evalia_window_open($ex, $now);
-    $window_note = evalia_window_note($ex, $now);
+<?php foreach ($myexams as $ex):
+    $windowopen = evalia_window_open($ex, $now);
+    $windownote = evalia_window_note($ex, $now);
 
     // Decide card appearance and CTA per status.
-    $already_closed = ($ex->timeclose > 0 && $now > $ex->timeclose);
+    $alreadyclosed = ($ex->timeclose > 0 && $now > $ex->timeclose);
 
     switch ($ex->status) {
         case 'assigned':
-            $border_cls  = $window_open ? 'border-primary' : 'border-secondary';
-            $status_html = '<span class="badge bg-primary">Pendiente</span>';
-            $show_btn    = $window_open;
-            $btn_label   = '📝 Rendir →';
-            $btn_cls     = 'btn-primary';
+            $bordercls  = $windowopen ? 'border-primary' : 'border-secondary';
+            $statushtml = '<span class="badge bg-primary">Pendiente</span>';
+            $showbtn    = $windowopen;
+            $btnlabel   = '📝 Rendir →';
+            $btncls     = 'btn-primary';
             break;
         case 'started':
-            $border_cls  = $window_open ? 'border-warning' : 'border-secondary';
-            $status_html = '<span class="badge bg-warning text-dark">En progreso</span>';
-            $show_btn    = $window_open;
-            $btn_label   = '▶️ Continuar →';
-            $btn_cls     = 'btn-warning text-dark';
+            $bordercls  = $windowopen ? 'border-warning' : 'border-secondary';
+            $statushtml = '<span class="badge bg-warning text-dark">En progreso</span>';
+            $showbtn    = $windowopen;
+            $btnlabel   = '▶️ Continuar →';
+            $btncls     = 'btn-warning text-dark';
             break;
         case 'submitted':
-            $border_cls  = 'border-secondary';
-            $status_html = '<span class="badge bg-secondary">Enviado</span>';
-            $show_btn    = false;
-            $btn_label   = '';
-            $btn_cls     = '';
+            $bordercls  = 'border-secondary';
+            $statushtml = '<span class="badge bg-secondary">Enviado</span>';
+            $showbtn    = false;
+            $btnlabel   = '';
+            $btncls     = '';
             break;
         case 'graded':
-            $border_cls  = 'border-info';
-            $status_html = '<span class="badge bg-info text-dark">Calificado</span>';
-            $show_btn    = false;
-            $btn_label   = '';
-            $btn_cls     = '';
+            $bordercls  = 'border-info';
+            $statushtml = '<span class="badge bg-info text-dark">Calificado</span>';
+            $showbtn    = false;
+            $btnlabel   = '';
+            $btncls     = '';
             break;
         case 'published':
-            $border_cls  = 'border-success';
-            $status_html = '<span class="badge bg-success">✅ Publicado</span>';
-            $show_btn    = false;
-            $btn_label   = '';
-            $btn_cls     = '';
+            $bordercls  = 'border-success';
+            $statushtml = '<span class="badge bg-success">✅ Publicado</span>';
+            $showbtn    = false;
+            $btnlabel   = '';
+            $btncls     = '';
             break;
         default:
-            $border_cls  = '';
-            $status_html = '<span class="badge bg-light text-dark border">' . htmlspecialchars($ex->status) . '</span>';
-            $show_btn    = false;
-            $btn_label   = '';
-            $btn_cls     = '';
+            $bordercls  = '';
+            $statushtml = '<span class="badge bg-light text-dark border">' . htmlspecialchars($ex->status) . '</span>';
+            $showbtn    = false;
+            $btnlabel   = '';
+            $btncls     = '';
     }
 ?>
-    <div class="card <?php echo $border_cls; ?> mb-3 shadow-sm">
+    <div class="card <?php echo $bordercls; ?> mb-3 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center py-2">
             <span class="fw-bold"><?php echo htmlspecialchars($ex->name); ?></span>
-            <?php echo $status_html; ?>
+            <?php echo $statushtml; ?>
         </div>
         <div class="card-body py-3">
 
@@ -205,17 +204,17 @@ echo $OUTPUT->header();
                     El docente lo revisará pronto.
                 </p>
 
-            <?php elseif (!$window_open && $window_note): ?>
-                <p class="text-danger small mb-0"><?php echo htmlspecialchars($window_note); ?></p>
+            <?php elseif (!$windowopen && $windownote): ?>
+                <p class="text-danger small mb-0"><?php echo htmlspecialchars($windownote); ?></p>
             <?php endif; ?>
 
             <?php // ── CTA button ─────────────────────────────────────────── ?>
-            <?php if ($show_btn): ?>
+            <?php if ($showbtn): ?>
                 <div class="mt-3">
                     <a href="<?php echo (new moodle_url('/local/evalia/student_exam.php',
                         ['student_examid' => $ex->student_examid]))->out(false); ?>"
-                       class="btn <?php echo $btn_cls; ?> px-4">
-                        <?php echo $btn_label; ?>
+                       class="btn <?php echo $btncls; ?> px-4">
+                        <?php echo $btnlabel; ?>
                     </a>
                 </div>
             <?php endif; ?>

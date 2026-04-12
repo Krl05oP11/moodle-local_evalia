@@ -29,17 +29,24 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Save_feedback_prompt.
+ */
 class save_feedback_prompt extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'examid' => new external_value(PARAM_INT,  'evalia_exams ID'),
-            'prompt' => new external_value(PARAM_RAW,  'Custom system prompt (empty = use default)'),
+            'examid' => new external_value(PARAM_INT, 'evalia_exams ID'),
+            'prompt' => new external_value(PARAM_RAW, 'Custom system prompt (empty = use default)'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid, string $prompt): array {
         global $DB;
 
@@ -62,6 +69,9 @@ class save_feedback_prompt extends external_api {
         return ['success' => true, 'message' => 'Prompt guardado correctamente.'];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success flag'),

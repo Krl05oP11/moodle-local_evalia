@@ -1,15 +1,23 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * WS: grade_all_exams — batch-grade all submitted student exams for an exam.
  *
- * Reads stored answers from DB (set during submit_exam) and grades each one.
+ * Reads stored answers from DB (set during submit_exam) && grades each one.
  * Calls the same engine grading + Telegram feedback pipeline as grade_exam.
  * Returns an array of per-student results.
  *
@@ -26,16 +34,23 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Grade_all_exams.
+ */
 class grade_all_exams extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'examid' => new external_value(PARAM_INT, 'evalia_exams ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid): array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/local/evalia/lib.php');
@@ -52,7 +67,8 @@ class grade_all_exams extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // Find all submitted (not yet graded) exams.
-        $submitted = $DB->get_records('evalia_student_exams',
+        $submitted = $DB->get_records(
+            'evalia_student_exams',
             ['examid' => $examid, 'status' => 'submitted'],
             'id ASC',
             'id, userid, answers, question_ids'
@@ -69,8 +85,8 @@ class grade_all_exams extends external_api {
         foreach ($submitted as $se) {
             // Reuse grade_exam::execute() — it reads answers from its param
             // (and overwrites DB answers field, which is idempotent here).
-            $answers_json = $se->answers ?? '{}';
-            if (empty($answers_json) || $answers_json === '{}' || $answers_json === '[]') {
+            $answersjson = $se->answers ?? '{}';
+            if (empty($answersjson) || $answersjson === '{}' || $answersjson === '[]') {
                 $skipped++;
                 $results[] = [
                     'userid'  => (int) $se->userid,
@@ -82,11 +98,11 @@ class grade_all_exams extends external_api {
             }
 
             try {
-                $result = grade_exam::execute((int) $se->id, $answers_json);
+                $result = grade_exam::execute((int) $se->id, $answersjson);
                 $results[] = [
                     'userid'  => (int) $se->userid,
                     'success' => (bool) ($result['success'] ?? false),
-                    'score'   => (float) ($result['score']   ?? 0.0),
+                    'score'   => (float) ($result['score'] ?? 0.0),
                     'message' => $result['message'] ?? '',
                 ];
                 if (!empty($result['success'])) {
@@ -108,16 +124,19 @@ class grade_all_exams extends external_api {
         return ['graded' => $graded, 'skipped' => $skipped, 'results' => $results];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'graded'  => new external_value(PARAM_INT, 'Number successfully graded'),
             'skipped' => new external_value(PARAM_INT, 'Number skipped / failed'),
             'results' => new external_multiple_structure(
                 new external_single_structure([
-                    'userid'  => new external_value(PARAM_INT,   'Moodle user ID'),
-                    'success' => new external_value(PARAM_BOOL,  'Graded successfully'),
+                    'userid'  => new external_value(PARAM_INT, 'Moodle user ID'),
+                    'success' => new external_value(PARAM_BOOL, 'Graded successfully'),
                     'score'   => new external_value(PARAM_FLOAT, 'Score 0–10'),
-                    'message' => new external_value(PARAM_TEXT,  'Result message'),
+                    'message' => new external_value(PARAM_TEXT, 'Result message'),
                 ])
             ),
         ]);

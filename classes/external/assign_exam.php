@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 /**
  * WS: assign_exam — samples a unique question set per student via saipa-engine
- * and inserts one row in evalia_student_exams per student.
+ * && inserts one row in evalia_student_exams per student.
  *
  * Anti-copying guarantee: each student gets a different random sample drawn
  * independently by the engine's pure-Python sampler.
@@ -33,20 +33,28 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/saipa/lib.php');
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Assign_exam.
+ */
 class assign_exam extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'examid' => new external_value(PARAM_INT, 'Exam template ID to assign'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/local/saipa/lib.php');
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB;
 
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
@@ -75,9 +83,9 @@ class assign_exam extends external_api {
         }
 
         // Build question pool for the engine sampler.
-        $question_pool = [];
+        $questionpool = [];
         foreach ($bank as $q) {
-            $question_pool[] = [
+            $questionpool[] = [
                 'id'         => (int) $q->id,
                 'difficulty' => $q->difficulty,
                 'topic'      => $q->topic,
@@ -97,44 +105,44 @@ class assign_exam extends external_api {
         }
 
         // Check which students already have an assignment for this exam.
-        $student_ids = array_keys($students);
-        [$in_sql, $in_params] = $DB->get_in_or_equal($student_ids, SQL_PARAMS_NAMED, 'uid');
+        $studentids = array_keys($students);
+        [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
         $existing = $DB->get_records_select(
             'evalia_student_exams',
-            "examid = :examid AND userid $in_sql",
-            array_merge(['examid' => $exam->id], $in_params),
+            "examid = :examid AND userid $insql",
+            array_merge(['examid' => $exam->id], $inparams),
             '',
             'userid'
         );
-        $already_assigned = array_keys($existing);
+        $alreadyassigned = array_keys($existing);
 
         $now       = time();
         $assigned  = 0;
         $skipped   = 0;
-        $max_score = (float) ($exam->basic_count + $exam->medium_count + $exam->advanced_count);
+        $maxscore = (float) ($exam->basic_count + $exam->medium_count + $exam->advanced_count);
 
         // Topic coverage from exam template (may be null).
-        $topic_coverage = json_decode($exam->topic_coverage ?? 'null', true) ?? [];
+        $topiccoverage = json_decode($exam->topic_coverage ?? 'null', true) ?? [];
 
-        $sample_payload = [
-            'questions'      => $question_pool,
+        $samplepayload = [
+            'questions'      => $questionpool,
             'basic_count'    => (int) $exam->basic_count,
             'medium_count'   => (int) $exam->medium_count,
             'advanced_count' => (int) $exam->advanced_count,
-            'topic_coverage' => (object) $topic_coverage,  // JSON object, not array
+            'topic_coverage' => (object) $topiccoverage, // JSON object, not array
         ];
 
-        foreach ($student_ids as $userid) {
-            if (in_array($userid, $already_assigned)) {
+        foreach ($studentids as $userid) {
+            if (in_array($userid, $alreadyassigned)) {
                 $skipped++;
                 continue;
             }
 
             // Each call to the engine produces an independent random sample.
-            $sample = local_evalia_engine_request('/exam/sample', $sample_payload, 30);
+            $sample = local_evalia_engine_request('/exam/sample', $samplepayload, 30);
 
             if (isset($sample['error']) || empty($sample['selected_ids'])) {
-                // Log and skip this student — don't abort the whole batch.
+                // Log && skip this student — don't abort the whole batch.
                 debugging('assign_exam: sampling failed for userid=' . $userid .
                           ': ' . ($sample['error'] ?? 'empty result'), DEBUG_DEVELOPER);
                 $skipped++;
@@ -147,7 +155,7 @@ class assign_exam extends external_api {
                 'question_ids'  => json_encode($sample['selected_ids']),
                 'answers'       => null,
                 'score'         => null,
-                'max_score'     => $max_score,
+                'max_score'     => $maxscore,
                 'status'        => 'assigned',
                 'timecreated'   => $now,
                 'timemodified'  => $now,
@@ -178,12 +186,15 @@ class assign_exam extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success'  => new external_value(PARAM_BOOL, 'Whether assignment succeeded'),
-            'assigned' => new external_value(PARAM_INT,  'Students who received a new exam'),
-            'skipped'  => new external_value(PARAM_INT,  'Students skipped (already had exam)'),
-            'message'  => new external_value(PARAM_TEXT, 'Status or error message'),
+            'assigned' => new external_value(PARAM_INT, 'Students who received a new exam'),
+            'skipped'  => new external_value(PARAM_INT, 'Students skipped (already had exam)'),
+            'message'  => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

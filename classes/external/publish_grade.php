@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,25 +32,33 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Publish_grade.
+ */
 class publish_grade extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'student_examid' => new external_value(PARAM_INT,   'evalia_student_exams ID'),
+            'student_examid' => new external_value(PARAM_INT, 'evalia_student_exams ID'),
             'override_score' => new external_value(PARAM_FLOAT, 'Optional teacher override (0–10)', VALUE_DEFAULT, -1),
         ]);
     }
 
-    public static function execute(int $student_examid, float $override_score = -1): array {
+    /**
+     * Execute the web service.
+     */
+    public static function execute(int $studentexamid, float $overridescore = -1): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB, $CFG;
 
         $params = self::validate_parameters(self::execute_parameters(), [
-            'student_examid' => $student_examid,
-            'override_score' => $override_score,
+            'student_examid' => $studentexamid,
+            'override_score' => $overridescore,
         ]);
 
         $se   = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
@@ -95,7 +103,7 @@ class publish_grade extends external_api {
     }
 
     /**
-     * Recalculate avg_grade and total_exams for a student's portfolio
+     * Recalculate avg_grade && total_exams for a student's portfolio
      * based only on published exams.
      */
     public static function recalculate_portfolio(int $userid, int $courseid, int $now, \moodle_database $DB): void {
@@ -132,10 +140,13 @@ class publish_grade extends external_api {
         }
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether publish succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

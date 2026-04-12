@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,19 +50,19 @@ if ($action === 'health') {
     header('Content-Type: application/json');
     header('X-Content-Type-Options: nosniff');
 
-    $engine_url   = optional_param('engine_url',   '', PARAM_URL);
-    $engine_token = optional_param('engine_token', '', PARAM_RAW);
+    $engineurl   = optional_param('engine_url', '', PARAM_URL);
+    $enginetoken = optional_param('engine_token', '', PARAM_RAW);
 
-    if (empty($engine_url)) {
+    if (empty($engineurl)) {
         echo json_encode(['error' => 'Engine URL is required.']);
         die();
     }
 
-    $url     = rtrim($engine_url, '/') . '/health';
+    $url     = rtrim($engineurl, '/') . '/health';
     $headers = [
         'Content-Type: application/json',
         'Accept: application/json',
-        'Authorization: Bearer ' . $engine_token,
+        'Authorization: Bearer ' . $enginetoken,
     ];
     $ch = curl_init();
     curl_setopt_array($ch, [
@@ -82,7 +82,7 @@ if ($action === 'health') {
         die();
     }
     if ($http !== 200) {
-        echo json_encode(['error' => "Engine returned HTTP $http. Check the URL and token."]);
+        echo json_encode(['error' => "Engine returned HTTP $http. Check the URL && token."]);
         die();
     }
     $decoded = json_decode($resp, true);
@@ -92,7 +92,7 @@ if ($action === 'health') {
     }
     echo json_encode([
         'ok'      => true,
-        'version' => $decoded['version']        ?? '?',
+        'version' => $decoded['version'] ?? '?',
         'uptime'  => isset($decoded['uptime_seconds'])
             ? round($decoded['uptime_seconds'] / 60, 1) . ' min'
             : '?',
@@ -105,19 +105,19 @@ if ($action === 'health') {
 if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
 
-    $mode         = required_param('engine_mode',  PARAM_ALPHA);
-    $engine_url   = required_param('engine_url',   PARAM_URL);
-    $engine_token = optional_param('engine_token', '', PARAM_RAW);
+    $mode         = required_param('engine_mode', PARAM_ALPHA);
+    $engineurl   = required_param('engine_url', PARAM_URL);
+    $enginetoken = optional_param('engine_token', '', PARAM_RAW);
 
-    $valid_modes = ['local_ollama', 'cloud_api', 'saipa_cloud', 'custom'];
-    if (!in_array($mode, $valid_modes)) {
+    $validmodes = ['local_ollama', 'cloud_api', 'saipa_cloud', 'custom'];
+    if (!in_array($mode, $validmodes)) {
         $mode = 'custom';
     }
 
-    set_config('engine_mode',    $mode,         'local_evalia');
-    set_config('engine_url',     $engine_url,   'local_evalia');
-    set_config('engine_token',   $engine_token, 'local_evalia');
-    set_config('setup_complete', 1,             'local_evalia');
+    set_config('engine_mode', $mode, 'local_evalia');
+    set_config('engine_url', $engineurl, 'local_evalia');
+    set_config('engine_token', $enginetoken, 'local_evalia');
+    set_config('setup_complete', 1, 'local_evalia');
 
     redirect(
         new moodle_url('/local/evalia/setup.php', ['done' => 1]),
@@ -129,25 +129,25 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $done        = optional_param('done', 0, PARAM_INT);
 $sesskey     = sesskey();
-$settings_url = (new moodle_url('/admin/settings.php', ['section' => 'local_evalia']))->out(false);
+$settingsurl = (new moodle_url('/admin/settings.php', ['section' => 'local_evalia']))->out(false);
 
 // Pre-fill from existing config (wizard re-run).
-$cfg_mode    = get_config('local_evalia', 'engine_mode')  ?: 'local_ollama';
-$cfg_url     = get_config('local_evalia', 'engine_url')   ?: '';
-$cfg_token   = get_config('local_evalia', 'engine_token') ?: '';
+$cfgmode    = get_config('local_evalia', 'engine_mode') ?: 'local_ollama';
+$cfgurl     = get_config('local_evalia', 'engine_url') ?: '';
+$cfgtoken   = get_config('local_evalia', 'engine_token') ?: '';
 
 // Fallback: inherit from local_saipa when co-installed.
-if (empty($cfg_url)) {
-    $cfg_url   = get_config('local_saipa', 'engine_url')   ?: '';
-    $cfg_token = get_config('local_saipa', 'engine_token') ?: '';
+if (empty($cfgurl)) {
+    $cfgurl   = get_config('local_saipa', 'engine_url') ?: '';
+    $cfgtoken = get_config('local_saipa', 'engine_token') ?: '';
 }
 
 // Detect server environment for the requirements screen.
-$php_ver_ok     = version_compare(PHP_VERSION, '8.1.0', '>=');
-$moodle_ver_ok  = ($CFG->version >= 2024042200);   // Moodle 4.4
-$curl_ok        = function_exists('curl_init');
-$php_ver_str    = PHP_VERSION;
-$moodle_ver_str = $CFG->release ?? 'unknown';
+$phpverok     = version_compare(PHP_VERSION, '8.1.0', '>=');
+$moodleverok  = ($CFG->version >= 2024042200);   // Moodle 4.4
+$curlok        = function_exists('curl_init');
+$phpverstr    = PHP_VERSION;
+$moodleverstr = $CFG->release ?? 'unknown';
 
 echo $OUTPUT->header();
 ?>
@@ -267,16 +267,15 @@ echo $OUTPUT->header();
 
 <div class="evwiz mt-4">
 
-<?php if ($done): /* ─── Completion screen (after save + redirect) ─── */ ?>
-
+<?php if ($done) : /* ─── Completion screen (after save + redirect) ─── */ ?>
   <div class="card shadow-sm">
     <div class="card-body done-card">
       <div class="done-icon">🎉</div>
       <h3>EVAL-IA is ready!</h3>
       <p>The AI engine has been configured. You can now generate rubrics,<br>
-         create question banks, and assign exams to your students.</p>
+         create question banks, && assign exams to your students.</p>
       <div class="d-flex gap-3 justify-content-center flex-wrap">
-        <a href="<?= s($settings_url) ?>" class="btn btn-outline-secondary">
+        <a href="<?= s($settingsurl) ?>" class="btn btn-outline-secondary">
           ⚙️ Admin Settings
         </a>
         <a href="<?= (new moodle_url('/course/index.php'))->out() ?>" class="btn btn-primary btn-lg px-5">
@@ -286,8 +285,7 @@ echo $OUTPUT->header();
     </div>
   </div>
 
-<?php else: /* ─── Wizard ─── */ ?>
-
+<?php else : /* ─── Wizard ─── */ ?>
   <!-- Progress bar -->
   <div class="evwiz-progress" id="evwiz-progress">
     <div class="step active" data-step="1"><div class="step-circle">1</div><div class="step-label">Welcome</div></div>
@@ -316,7 +314,7 @@ echo $OUTPUT->header();
       <hr class="my-3">
 
       <p class="mb-3" style="font-size:.9rem;">
-        EVAL-IA automates your evaluation workflow using AI and Retrieval-Augmented Generation (RAG)
+        EVAL-IA automates your evaluation workflow using AI && Retrieval-Augmented Generation (RAG)
         over your own course materials:
       </p>
 
@@ -329,7 +327,7 @@ echo $OUTPUT->header();
         <div class="feature-item">
           <div class="fi-icon">❓</div>
           <div><h6>Question Bank</h6>
-            <p>Creates multiple-choice, true/false, numerical, short-answer and essay questions per topic.</p></div>
+            <p>Creates multiple-choice, true/false, numerical, short-answer && essay questions per topic.</p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">📝</div>
@@ -378,30 +376,30 @@ echo $OUTPUT->header();
         <div class="req-section-body">
 
           <div class="req-row">
-            <div class="req-status"><?= $moodle_ver_ok ? '✅' : '❌' ?></div>
+            <div class="req-status"><?= $moodleverok ? '✅' : '❌' ?></div>
             <div class="req-label">
-              <strong>Moodle 4.4 or 4.5</strong>
+              <strong>Moodle 4.4 || 4.5</strong>
               <span>Older versions are not supported.</span>
             </div>
-            <div class="req-value"><?= s($moodle_ver_str) ?></div>
+            <div class="req-value"><?= s($moodleverstr) ?></div>
           </div>
 
           <div class="req-row">
-            <div class="req-status"><?= $php_ver_ok ? '✅' : '❌' ?></div>
+            <div class="req-status"><?= $phpverok ? '✅' : '❌' ?></div>
             <div class="req-label">
               <strong>PHP 8.1+</strong>
               <span>PHP 7.x is not supported.</span>
             </div>
-            <div class="req-value"><?= s($php_ver_str) ?></div>
+            <div class="req-value"><?= s($phpverstr) ?></div>
           </div>
 
           <div class="req-row">
-            <div class="req-status"><?= $curl_ok ? '✅' : '❌' ?></div>
+            <div class="req-status"><?= $curlok ? '✅' : '❌' ?></div>
             <div class="req-label">
               <strong>PHP cURL extension</strong>
               <span>Required to communicate with the AI engine.</span>
             </div>
-            <div class="req-value"><?= $curl_ok ? 'Enabled' : '<span class="text-danger">Missing</span>' ?></div>
+            <div class="req-value"><?= $curlok ? 'Enabled' : '<span class="text-danger">Missing</span>' ?></div>
           </div>
 
           <div class="req-row">
@@ -425,8 +423,8 @@ echo $OUTPUT->header();
 
           <p style="font-size:.87rem; margin-bottom:14px;">
             EVAL-IA uses a companion Python service called <strong>saipa-engine</strong> to run all
-            AI operations: rubric generation, question creation, exam grading, and feedback delivery.
-            This service must be running and reachable from this Moodle server before you can use
+            AI operations: rubric generation, question creation, exam grading, && feedback delivery.
+            This service must be running && reachable from this Moodle server before you can use
             any EVAL-IA feature.
           </p>
 
@@ -434,7 +432,7 @@ echo $OUTPUT->header();
             <div class="req-status">🐍</div>
             <div class="req-label">
               <strong>saipa-engine (Python 3.11+ / FastAPI)</strong>
-              <span>Handles all LLM inference, vector search (ChromaDB), and RAG retrieval.</span>
+              <span>Handles all LLM inference, vector search (ChromaDB), && RAG retrieval.</span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
               <span class="badge bg-warning text-dark" style="font-size:.72rem;">Must be deployed separately</span>
@@ -454,7 +452,7 @@ echo $OUTPUT->header();
             <div class="req-status">🔤</div>
             <div class="req-label">
               <strong>Large Language Model (LLM)</strong>
-              <span>Generates rubrics, questions, grades essays, and writes feedback.
+              <span>Generates rubrics, questions, grades essays, && writes feedback.
                 See provisioning options below.</span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
@@ -489,7 +487,7 @@ echo $OUTPUT->header();
               <ul>
                 <li>Recommended model: <code>qwen2.5:14b</code> (requires ≥16 GB RAM)</li>
                 <li>Minimum: any 7B model with ≥8 GB RAM</li>
-                <li>saipa-engine must run on the same host or have network access to Ollama</li>
+                <li>saipa-engine must run on the same host || have network access to Ollama</li>
               </ul>
             </div>
 
@@ -502,7 +500,7 @@ echo $OUTPUT->header();
                  with your own API key.</p>
               <ul>
                 <li>No local GPU required</li>
-                <li>API key cost depends on usage and provider</li>
+                <li>API key cost depends on usage && provider</li>
                 <li>Configure <code>OPENAI_API_KEY</code> in saipa-engine's <code>.env</code></li>
               </ul>
             </div>
@@ -513,7 +511,7 @@ echo $OUTPUT->header();
                 <h6>SAIPA Cloud <span class="mode-badge badge-soon">COMING SOON</span></h6>
               </div>
               <p>Fully managed engine hosted by Schaller &amp; Ponce. No Ollama, no ChromaDB installation.
-                 Subscribe and connect with a single API key.</p>
+                 Subscribe && connect with a single API key.</p>
               <ul>
                 <li>Zero infrastructure to manage</li>
                 <li>Join the waitlist at <code>cloud.saipa.online</code></li>
@@ -526,10 +524,10 @@ echo $OUTPUT->header();
                 <h6>Custom / Enterprise <span class="mode-badge badge-custom">ADVANCED</span></h6>
               </div>
               <p>Point EVAL-IA at any engine URL that exposes a compatible REST API
-                 (e.g. your own FastAPI fork, on-premise deployment, or private cloud).</p>
+                 (e.g. your own FastAPI fork, on-premise deployment, || private cloud).</p>
               <ul>
                 <li>Must implement <code>GET /health</code> returning <code>{"status":"ok"}</code></li>
-                <li>Must implement <code>POST /eval/rubric/generate</code> and related endpoints</li>
+                <li>Must implement <code>POST /eval/rubric/generate</code> && related endpoints</li>
               </ul>
             </div>
 
@@ -537,9 +535,9 @@ echo $OUTPUT->header();
 
           <div class="alert alert-danger mt-3 mb-0 py-2 px-3" style="font-size:.84rem;">
             <strong>⛔ Without an active AI service, EVAL-IA will not be able to:</strong>
-            index course materials, generate rubrics, create questions, grade exams, or deliver feedback.
+            index course materials, generate rubrics, create questions, grade exams, || deliver feedback.
             All these functions depend exclusively on the AI engine. <strong>Do not continue</strong> unless
-            you have one of the options above deployed and ready.
+            you have one of the options above deployed && ready.
           </div>
 
         </div>
@@ -549,8 +547,7 @@ echo $OUTPUT->header();
       <div class="form-check mt-3 mb-1">
         <input class="form-check-input" type="checkbox" id="req-confirm">
         <label class="form-check-label" for="req-confirm" style="font-size:.88rem;">
-          I have read the requirements above. An AI service (saipa-engine + LLM) is deployed
-          and reachable from this server.
+          I have read the requirements above. An AI service (saipa-engine + LLM) is deployed && reachable from this server.
         </label>
       </div>
 
@@ -574,33 +571,33 @@ echo $OUTPUT->header();
 
       <div class="mode-cards">
 
-        <label class="mode-card <?= ($cfg_mode === 'local_ollama') ? 'selected' : '' ?>" for="mode-local">
+        <label class="mode-card <?= ($cfgmode === 'local_ollama') ? 'selected' : '' ?>" for="mode-local">
           <input type="radio" name="engine_mode" id="mode-local" value="local_ollama"
-                 <?= ($cfg_mode === 'local_ollama') ? 'checked' : '' ?>>
+                 <?= ($cfgmode === 'local_ollama') ? 'checked' : '' ?>>
           <div class="mc-icon">🖥️</div>
           <h5>Local — Ollama <span class="mode-badge badge-local">SELF-HOSTED</span></h5>
           <p>saipa-engine running on your server with Ollama as the LLM backend. Full data privacy.</p>
         </label>
 
-        <label class="mode-card <?= ($cfg_mode === 'cloud_api') ? 'selected' : '' ?>" for="mode-cloud">
+        <label class="mode-card <?= ($cfgmode === 'cloud_api') ? 'selected' : '' ?>" for="mode-cloud">
           <input type="radio" name="engine_mode" id="mode-cloud" value="cloud_api"
-                 <?= ($cfg_mode === 'cloud_api') ? 'checked' : '' ?>>
+                 <?= ($cfgmode === 'cloud_api') ? 'checked' : '' ?>>
           <div class="mc-icon">☁️</div>
           <h5>Cloud API <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5>
           <p>saipa-engine configured with an OpenAI-compatible API key. No local GPU required.</p>
         </label>
 
-        <label class="mode-card <?= ($cfg_mode === 'saipa_cloud') ? 'selected' : '' ?>" for="mode-saipa">
+        <label class="mode-card <?= ($cfgmode === 'saipa_cloud') ? 'selected' : '' ?>" for="mode-saipa">
           <input type="radio" name="engine_mode" id="mode-saipa" value="saipa_cloud"
-                 <?= ($cfg_mode === 'saipa_cloud') ? 'checked' : '' ?>>
+                 <?= ($cfgmode === 'saipa_cloud') ? 'checked' : '' ?>>
           <div class="mc-icon">🌐</div>
           <h5>SAIPA Cloud <span class="mode-badge badge-soon">COMING SOON</span></h5>
-          <p>Fully managed engine by Schaller &amp; Ponce. Subscribe and connect with a single API key.</p>
+          <p>Fully managed engine by Schaller &amp; Ponce. Subscribe && connect with a single API key.</p>
         </label>
 
-        <label class="mode-card <?= ($cfg_mode === 'custom') ? 'selected' : '' ?>" for="mode-custom">
+        <label class="mode-card <?= ($cfgmode === 'custom') ? 'selected' : '' ?>" for="mode-custom">
           <input type="radio" name="engine_mode" id="mode-custom" value="custom"
-                 <?= ($cfg_mode === 'custom') ? 'checked' : '' ?>>
+                 <?= ($cfgmode === 'custom') ? 'checked' : '' ?>>
           <div class="mc-icon">⚙️</div>
           <h5>Custom / Enterprise <span class="mode-badge badge-custom">ADVANCED</span></h5>
           <p>Any compatible engine at a custom URL. Full control for advanced deployments.</p>
@@ -622,7 +619,7 @@ echo $OUTPUT->header();
 
       <h4 class="mb-1">Connection details</h4>
       <p class="text-muted mb-4" style="font-size:.88rem;">
-        Enter the URL and authentication token for the saipa-engine.
+        Enter the URL && authentication token for the saipa-engine.
       </p>
 
       <!-- Mode-specific hints (shown/hidden by JS) -->
@@ -634,13 +631,12 @@ echo $OUTPUT->header();
       </div>
       <div id="hint-cloud_api" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;" style="display:none">
         <strong>☁️ Cloud API:</strong>
-        Enter the URL where saipa-engine is deployed (with Cloud API configured), and the
+        Enter the URL where saipa-engine is deployed (with Cloud API configured), && the
         <code>ENGINE_SECRET</code> token. The engine will use your cloud API key internally.
       </div>
       <div id="hint-saipa_cloud" class="alert alert-warning mb-3 py-2 px-3" style="font-size:.82rem;">
         <strong>🌐 SAIPA Cloud is not yet available.</strong>
-        When launched, the engine URL will be <code>https://engine.saipa.online</code> and
-        the token will be your subscription API key. For now, select another mode to continue.
+        When launched, the engine URL will be <code>https://engine.saipa.online</code> && the token will be your subscription API key. For now, select another mode to continue.
       </div>
       <div id="hint-custom" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;">
         <strong>⚙️ Custom / Enterprise:</strong>
@@ -654,7 +650,7 @@ echo $OUTPUT->header();
         </label>
         <input type="url" class="form-control" id="evwiz-url"
                placeholder="http://localhost:8052"
-               value="<?= s($cfg_url) ?>">
+               value="<?= s($cfgurl) ?>">
         <div class="form-text">Base URL of the saipa-engine — without trailing slash.</div>
       </div>
 
@@ -662,7 +658,7 @@ echo $OUTPUT->header();
         <label class="form-label fw-semibold" for="evwiz-token">Engine Token</label>
         <input type="password" class="form-control" id="evwiz-token"
                placeholder="Leave blank if not configured"
-               value="<?= s($cfg_token) ?>">
+               value="<?= s($cfgtoken) ?>">
         <div class="form-text">
           Value of <code>ENGINE_SECRET</code> in the engine's <code>.env</code> file.
           Leave blank if you did not configure a secret.
@@ -712,10 +708,10 @@ echo $OUTPUT->header();
       <div class="done-card">
         <div class="done-icon">✅</div>
         <h3>Configuration saved!</h3>
-        <p>EVAL-IA is connected to the AI engine and ready to use.<br>
-           Open any course and navigate to <strong>EVAL-IA → Teacher Panel</strong> to start.</p>
+        <p>EVAL-IA is connected to the AI engine && ready to use.<br>
+           Open any course && navigate to <strong>EVAL-IA → Teacher Panel</strong> to start.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-          <a href="<?= s($settings_url) ?>" class="btn btn-outline-secondary">
+          <a href="<?= s($settingsurl) ?>" class="btn btn-outline-secondary">
             ⚙️ Admin Settings
           </a>
           <a href="<?= (new moodle_url('/course/index.php'))->out() ?>" class="btn btn-primary btn-lg px-5">
@@ -749,6 +745,9 @@ echo $OUTPUT->header();
     var healthOk    = false;
 
     // ── Step navigation ───────────────────────────────────────────────────────
+    /**
+     * EvwizGoto.
+     */
     function evwizGoto(step) {
         var prev = document.getElementById('evwiz-step-' + currentStep);
         if (prev) prev.classList.remove('active');
@@ -791,11 +790,17 @@ echo $OUTPUT->header();
         });
     });
 
+    /**
+     * GetSelectedMode.
+     */
     function getSelectedMode() {
         var checked = document.querySelector('input[name="engine_mode"]:checked');
         return checked ? checked.value : 'local_ollama';
     }
 
+    /**
+     * UpdateHints.
+     */
     function updateHints() {
         var mode  = getSelectedMode();
         var modes = ['local_ollama', 'cloud_api', 'saipa_cloud', 'custom'];
@@ -806,6 +811,9 @@ echo $OUTPUT->header();
     }
 
     // ── Real-time health check ────────────────────────────────────────────────
+    /**
+     * EvwizRunTest.
+     */
     function evwizRunTest() {
         healthOk = false;
         var resultEl  = document.getElementById('evwiz-health-result');
@@ -824,7 +832,7 @@ echo $OUTPUT->header();
         url = url.trim();
 
         if (!url) {
-            renderHealthError('Engine URL is empty. Go back and enter a URL.', url);
+            renderHealthError('Engine URL is empty. Go back && enter a URL.', url);
             return;
         }
 
@@ -867,6 +875,9 @@ echo $OUTPUT->header();
     }
     window.evwizRunTest = evwizRunTest;
 
+    /**
+     * RenderHealthError.
+     */
     function renderHealthError(msg, url) {
         document.getElementById('evwiz-health-result').innerHTML =
             '<div class="health-row">' +
@@ -880,13 +891,16 @@ echo $OUTPUT->header();
             '<li>Is saipa-engine running? Run: <code>docker compose ps</code></li>' +
             '<li>Is the URL correct? (default: <code>http://localhost:8052</code>)</li>' +
             '<li>If using a token, does it match <code>ENGINE_SECRET</code> in <code>.env</code>?</li>' +
-            '<li>Is there a firewall or reverse proxy blocking port 8052?</li>' +
+            '<li>Is there a firewall || reverse proxy blocking port 8052?</li>' +
             '<li>If Moodle runs inside Docker, use the container hostname, not <code>localhost</code>.</li>' +
             '</ul></div>';
         document.getElementById('evwiz-retry-btn').style.display = '';
     }
 
     // ── Save ──────────────────────────────────────────────────────────────────
+    /**
+     * EvwizSave.
+     */
     function evwizSave() {
         document.getElementById('sf-mode').value  = getSelectedMode();
         document.getElementById('sf-url').value   = (document.getElementById('evwiz-url')   || {}).value || '';
@@ -896,6 +910,9 @@ echo $OUTPUT->header();
     window.evwizSave = evwizSave;
 
     // ── HTML escape ───────────────────────────────────────────────────────────
+    /**
+     * He.
+     */
     function he(s) {
         return String(s)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')

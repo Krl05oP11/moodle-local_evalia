@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,18 +32,25 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Update_question.
+ */
 class update_question extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'questionid' => new external_value(PARAM_INT,  'Question ID'),
+            'questionid' => new external_value(PARAM_INT, 'Question ID'),
             'status'     => new external_value(PARAM_TEXT, 'New status: draft|approved|rejected', VALUE_DEFAULT, ''),
             'stem'       => new external_value(PARAM_TEXT, 'Updated question text', VALUE_DEFAULT, ''),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $questionid, string $status = '', string $stem = ''): array {
         global $DB;
 
@@ -65,8 +72,8 @@ class update_question extends external_api {
             'timemodified' => time(),
         ];
 
-        $valid_statuses = ['draft', 'approved', 'rejected'];
-        if ($params['status'] !== '' && in_array($params['status'], $valid_statuses)) {
+        $validstatuses = ['draft', 'approved', 'rejected'];
+        if ($params['status'] !== '' && in_array($params['status'], $validstatuses)) {
             $update->status = $params['status'];
         }
 
@@ -79,10 +86,13 @@ class update_question extends external_api {
         return ['success' => true, 'message' => 'Pregunta actualizada.'];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether update succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

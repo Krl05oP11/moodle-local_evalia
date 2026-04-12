@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,39 +32,46 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Submit_exam.
+ */
 class submit_exam extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'student_examid' => new external_value(PARAM_INT,  'evalia_student_exams ID'),
+            'student_examid' => new external_value(PARAM_INT, 'evalia_student_exams ID'),
             'answers'        => new external_value(PARAM_TEXT, 'JSON: {"question_id": "answer_text", ...}'),
         ]);
     }
 
-    public static function execute(int $student_examid, string $answers): array {
+    /**
+     * Execute the web service.
+     */
+    public static function execute(int $studentexamid, string $answers): array {
         global $CFG, $DB, $USER;
         require_once($CFG->dirroot . '/local/evalia/lib.php');
 
         $params = self::validate_parameters(self::execute_parameters(), [
-            'student_examid' => $student_examid,
+            'student_examid' => $studentexamid,
             'answers'        => $answers,
         ]);
 
-        $student_exam = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam         = $DB->get_record('evalia_exams', ['id' => $student_exam->examid], '*', MUST_EXIST);
+        $studentexam = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
+        $exam         = $DB->get_record('evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
         $context      = \context_course::instance($exam->courseid);
         self::validate_context($context);
 
         // Only the owner can submit.
-        if ((int) $USER->id !== (int) $student_exam->userid) {
+        if ((int) $USER->id !== (int) $studentexam->userid) {
             throw new \moodle_exception('nopermissions', 'error', '', 'submit_exam');
         }
         require_capability('local/evalia:take', $context);
 
         // Idempotent guard — already submitted or graded.
-        if (in_array($student_exam->status, ['submitted', 'graded'])) {
+        if (in_array($studentexam->status, ['submitted', 'graded'])) {
             return [
                 'success' => true,
                 'message' => 'El examen ya fue enviado anteriormente.',
@@ -82,7 +89,7 @@ class submit_exam extends external_api {
 
         $now = time();
         $DB->update_record('evalia_student_exams', (object) [
-            'id'            => $student_exam->id,
+            'id'            => $studentexam->id,
             'answers'       => $params['answers'],
             'status'        => 'submitted',
             'timesubmitted' => $now,
@@ -91,28 +98,28 @@ class submit_exam extends external_api {
 
         // ── Notify course teachers via Telegram (non-blocking, best-effort) ──
         try {
-            $student  = $DB->get_record('user',   ['id' => $student_exam->userid], 'id, firstname, lastname');
-            $course   = $DB->get_record('course', ['id' => $exam->courseid],        'id, fullname');
-            $student_name = $student ? fullname($student) : 'Un alumno';
-            $course_name  = $course  ? format_string($course->fullname) : '';
-            $exam_name    = format_string($exam->name);
-            $time_str     = userdate($now, get_string('strftimedatetime', 'core_langconfig'));
+            $student  = $DB->get_record('user', ['id' => $studentexam->userid], 'id, firstname, lastname');
+            $course   = $DB->get_record('course', ['id' => $exam->courseid], 'id, fullname');
+            $studentname = $student ? fullname($student) : 'Un alumno';
+            $coursename  = $course ? format_string($course->fullname) : '';
+            $examname    = format_string($exam->name);
+            $timestr     = userdate($now, get_string('strftimedatetime', 'core_langconfig'));
 
             $msg = "<b>📝 EVAL-IA — Examen enviado</b>\n\n" .
-                   "<b>Alumno:</b> {$student_name}\n" .
-                   "<b>Curso:</b> {$course_name}\n" .
-                   "<b>Examen:</b> {$exam_name}\n" .
-                   "<b>Hora:</b> {$time_str}\n\n" .
+                   "<b>Alumno:</b> {$studentname}\n" .
+                   "<b>Curso:</b> {$coursename}\n" .
+                   "<b>Examen:</b> {$examname}\n" .
+                   "<b>Hora:</b> {$timestr}\n\n" .
                    "Ingresá al panel docente para calificarlo con IA.";
 
             // Find all users with manage capability in this course.
-            $teacher_ids = array_keys(get_users_by_capability($context, 'local/evalia:manage', 'u.id'));
+            $teacherids = array_keys(get_users_by_capability($context, 'local/evalia:manage', 'u.id'));
 
-            foreach ($teacher_ids as $tid) {
-                $tg_link = $DB->get_record('saipa_telegram_links', ['userid' => $tid], 'telegram_id');
-                if ($tg_link && !empty($tg_link->telegram_id)) {
+            foreach ($teacherids as $tid) {
+                $tglink = $DB->get_record('saipa_telegram_links', ['userid' => $tid], 'telegram_id');
+                if ($tglink && !empty($tglink->telegram_id)) {
                     local_evalia_engine_request('/notify', [
-                        'telegram_id' => (int) $tg_link->telegram_id,
+                        'telegram_id' => (int) $tglink->telegram_id,
                         'message'     => $msg,
                         'parse_mode'  => 'HTML',
                     ], 5);
@@ -120,6 +127,7 @@ class submit_exam extends external_api {
             }
         } catch (\Throwable $e) {
             // Never block the student's submission over a notification failure.
+            debugging("submit_exam notification error: " . $e->getMessage(), DEBUG_DEVELOPER);
         }
 
         return [
@@ -128,10 +136,13 @@ class submit_exam extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success flag'),
-            'message' => new external_value(PARAM_TEXT, 'Confirmation or error message'),
+            'message' => new external_value(PARAM_TEXT, 'Confirmation || error message'),
         ]);
     }
 }

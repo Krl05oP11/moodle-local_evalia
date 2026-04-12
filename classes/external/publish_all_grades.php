@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * WS: publish_all_grades — batch-publish all graded student exams for an exam.
  *
  * Efficiently pushes all grades to Moodle gradebook in a single batch call,
- * then marks every qualifying student_exam as published and updates portfolios.
+ * then marks every qualifying student_exam as published && updates portfolios.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -32,19 +32,27 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Publish_all_grades.
+ */
 class publish_all_grades extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'examid' => new external_value(PARAM_INT, 'Exam ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB, $CFG;
 
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
@@ -56,7 +64,8 @@ class publish_all_grades extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // Load all graded student exams for this exam.
-        $graded = $DB->get_records('evalia_student_exams',
+        $graded = $DB->get_records(
+            'evalia_student_exams',
             ['examid' => $exam->id, 'status' => 'graded'],
             '',
             'id, userid, score'
@@ -71,7 +80,9 @@ class publish_all_grades extends external_api {
         // then updates the individual student grade via update_raw_grade().
         foreach ($graded as $se) {
             local_evalia_grade_item_update(
-                $exam->id, $exam->courseid, $exam->name,
+                $exam->id,
+                $exam->courseid,
+                $exam->name,
                 (int) $se->userid,
                 (float) max(0, min(10, $se->score ?? 0))
             );
@@ -79,16 +90,16 @@ class publish_all_grades extends external_api {
 
         // Batch-update student_exam status to published.
         $ids = array_keys($graded);
-        [$in_sql, $in_params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'seid');
+        [$insql, $inparams] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'seid');
         $DB->execute(
-            "UPDATE {evalia_student_exams} SET status = 'published', timemodified = :now WHERE id $in_sql",
-            array_merge(['now' => time()], $in_params)
+            "UPDATE {evalia_student_exams} SET status = 'published', timemodified = :now WHERE id $insql",
+            array_merge(['now' => time()], $inparams)
         );
 
         // Recalculate portfolio for each affected student.
         $now = time();
-        $affected_users = array_unique(array_column((array) $graded, 'userid'));
-        foreach ($affected_users as $uid) {
+        $affectedusers = array_unique(array_column((array) $graded, 'userid'));
+        foreach ($affectedusers as $uid) {
             publish_grade::recalculate_portfolio((int) $uid, (int) $exam->courseid, $now, $DB);
         }
 
@@ -105,11 +116,14 @@ class publish_all_grades extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success'   => new external_value(PARAM_BOOL, 'Whether publish succeeded'),
-            'published' => new external_value(PARAM_INT,  'Number of grades published'),
-            'message'   => new external_value(PARAM_TEXT, 'Status or error message'),
+            'published' => new external_value(PARAM_INT, 'Number of grades published'),
+            'message'   => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

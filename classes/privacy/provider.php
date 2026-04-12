@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@
 
 namespace local_evalia\privacy;
 
-defined('MOODLE_INTERNAL') || die();
 
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
@@ -48,11 +47,7 @@ use core_privacy\local\request\helper;
 /**
  * Privacy provider for local_evalia.
  */
-class provider implements
-    \core_privacy\local\metadata\provider,
-    \core_privacy\local\request\plugin\provider,
-    \core_privacy\local\request\core_userlist_provider {
-
+class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider {
     // ──────────────────────────────────────────────────────────────────────
     // 1. Metadata declaration
     // ──────────────────────────────────────────────────────────────────────
@@ -62,7 +57,7 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
 
-        // Teacher-authored data: rubrics and exams store created_by (teacher user ID).
+        // Teacher-authored data: rubrics && exams store created_by (teacher user ID).
         // Not personal data in the GDPR sense, but declared for Moodle table-coverage compliance.
         $collection->add_database_table('evalia_rubrics', [
             'created_by' => 'privacy:metadata:evalia_rubrics:created_by',
@@ -227,9 +222,9 @@ class provider implements
                   ORDER BY se.timecreated';
             $records = $DB->get_records_sql($sql, ['courseid' => $courseid, 'userid' => $userid]);
 
-            $exams_export = [];
+            $examsexport = [];
             foreach ($records as $r) {
-                $exams_export[] = [
+                $examsexport[] = [
                     'exam_name'     => $r->exam_name,
                     'score'         => $r->score . ' / ' . $r->max_score,
                     'status'        => $r->status,
@@ -237,16 +232,18 @@ class provider implements
                     'timesubmitted' => $r->timesubmitted ? userdate($r->timesubmitted) : '-',
                 ];
             }
-            if (!empty($exams_export)) {
+            if (!empty($examsexport)) {
                 writer::with_context($context)->export_data(
                     [get_string('pluginname', 'local_evalia'), get_string('tab_exams', 'local_evalia')],
-                    (object) ['exams' => $exams_export]
+                    (object) ['exams' => $examsexport]
                 );
             }
 
             // ── Portfolio ─────────────────────────────────────────────────
-            $portfolio = $DB->get_record('evalia_portfolio',
-                ['userid' => $userid, 'courseid' => $courseid]);
+            $portfolio = $DB->get_record(
+                'evalia_portfolio',
+                ['userid' => $userid, 'courseid' => $courseid]
+            );
             if ($portfolio) {
                 writer::with_context($context)->export_data(
                     [get_string('pluginname', 'local_evalia'), get_string('tab_portfolio', 'local_evalia')],
@@ -260,19 +257,22 @@ class provider implements
             }
 
             // ── Portfolio notes about this student ────────────────────────
-            $notes = $DB->get_records('evalia_portfolio_notes',
-                ['userid' => $userid, 'courseid' => $courseid], 'timecreated ASC');
+            $notes = $DB->get_records(
+                'evalia_portfolio_notes',
+                ['userid' => $userid, 'courseid' => $courseid],
+                'timecreated ASC'
+            );
             if (!empty($notes)) {
-                $notes_export = [];
+                $notesexport = [];
                 foreach ($notes as $n) {
-                    $notes_export[] = [
+                    $notesexport[] = [
                         'note_text'   => $n->note_text,
                         'timecreated' => userdate($n->timecreated),
                     ];
                 }
                 writer::with_context($context)->export_data(
                     [get_string('pluginname', 'local_evalia'), get_string('portfolio_observations', 'local_evalia')],
-                    (object) ['notes' => $notes_export]
+                    (object) ['notes' => $notesexport]
                 );
             }
 
@@ -285,9 +285,9 @@ class provider implements
             $logs = $DB->get_records_sql($sql, ['courseid' => $courseid, 'userid' => $userid]);
 
             if (!empty($logs)) {
-                $log_export = [];
+                $logexport = [];
                 foreach ($logs as $l) {
-                    $log_export[] = [
+                    $logexport[] = [
                         'channel'      => $l->channel,
                         'message_text' => $l->message_text,
                         'timesent'     => userdate($l->timesent),
@@ -296,7 +296,7 @@ class provider implements
                 }
                 writer::with_context($context)->export_data(
                     [get_string('pluginname', 'local_evalia'), 'Feedback Log'],
-                    (object) ['log' => $log_export]
+                    (object) ['log' => $logexport]
                 );
             }
         }
@@ -319,20 +319,20 @@ class provider implements
         $courseid = $context->instanceid;
 
         // Student exams: collect IDs first, then delete answers.
-        $exam_ids = $DB->get_fieldset_select('evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]);
+        $examids = $DB->get_fieldset_select('evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]);
 
-        if (!empty($exam_ids)) {
-            [$in_sql, $in_params] = $DB->get_in_or_equal($exam_ids, SQL_PARAMS_NAMED, 'eid');
+        if (!empty($examids)) {
+            [$insql, $inparams] = $DB->get_in_or_equal($examids, SQL_PARAMS_NAMED, 'eid');
 
             // Delete feedback logs for these exams.
-            $DB->delete_records_select('evalia_feedback_log', "examid $in_sql", $in_params);
+            $DB->delete_records_select('evalia_feedback_log', "examid $insql", $inparams);
 
             // Delete student exam instances.
-            $DB->delete_records_select('evalia_student_exams', "examid $in_sql", $in_params);
+            $DB->delete_records_select('evalia_student_exams', "examid $insql", $inparams);
         }
 
-        // Portfolio and notes are keyed by courseid directly.
-        $DB->delete_records('evalia_portfolio',       ['courseid' => $courseid]);
+        // Portfolio && notes are keyed by courseid directly.
+        $DB->delete_records('evalia_portfolio', ['courseid' => $courseid]);
         $DB->delete_records('evalia_portfolio_notes', ['courseid' => $courseid]);
     }
 
@@ -360,28 +360,39 @@ class provider implements
             $courseid = $context->instanceid;
 
             // Student exams.
-            $exam_ids = $DB->get_fieldset_select(
-                'evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]
+            $examids = $DB->get_fieldset_select(
+                'evalia_exams',
+                'id',
+                'courseid = :cid',
+                ['cid' => $courseid]
             );
-            if (!empty($exam_ids)) {
-                [$in_sql, $in_params] = $DB->get_in_or_equal($exam_ids, SQL_PARAMS_NAMED, 'eid');
-                $in_params['uid'] = $userid;
+            if (!empty($examids)) {
+                [$insql, $inparams] = $DB->get_in_or_equal($examids, SQL_PARAMS_NAMED, 'eid');
+                $inparams['uid'] = $userid;
 
                 $DB->delete_records_select(
-                    'evalia_feedback_log', "examid $in_sql AND userid = :uid", $in_params
+                    'evalia_feedback_log',
+                    "examid $insql AND userid = :uid",
+                    $inparams
                 );
                 $DB->delete_records_select(
-                    'evalia_student_exams', "examid $in_sql AND userid = :uid", $in_params
+                    'evalia_student_exams',
+                    "examid $insql AND userid = :uid",
+                    $inparams
                 );
             }
 
             // Portfolio.
-            $DB->delete_records('evalia_portfolio',
-                ['userid' => $userid, 'courseid' => $courseid]);
+            $DB->delete_records(
+                'evalia_portfolio',
+                ['userid' => $userid, 'courseid' => $courseid]
+            );
 
             // Portfolio notes where this user is the SUBJECT.
-            $DB->delete_records('evalia_portfolio_notes',
-                ['userid' => $userid, 'courseid' => $courseid]);
+            $DB->delete_records(
+                'evalia_portfolio_notes',
+                ['userid' => $userid, 'courseid' => $courseid]
+            );
         }
     }
 
@@ -407,36 +418,45 @@ class provider implements
             return;
         }
 
-        [$uid_sql, $uid_params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'uid');
+        [$uidsql, $uidparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'uid');
 
         // Exams in this course.
-        $exam_ids = $DB->get_fieldset_select(
-            'evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]
+        $examids = $DB->get_fieldset_select(
+            'evalia_exams',
+            'id',
+            'courseid = :cid',
+            ['cid' => $courseid]
         );
 
-        if (!empty($exam_ids)) {
-            [$eid_sql, $eid_params] = $DB->get_in_or_equal($exam_ids, SQL_PARAMS_NAMED, 'eid');
+        if (!empty($examids)) {
+            [$eidsql, $eidparams] = $DB->get_in_or_equal($examids, SQL_PARAMS_NAMED, 'eid');
 
-            $params = array_merge($uid_params, $eid_params);
+            $params = array_merge($uidparams, $eidparams);
 
             $DB->delete_records_select(
-                'evalia_feedback_log', "examid $eid_sql AND userid $uid_sql", $params
+                'evalia_feedback_log',
+                "examid $eidsql AND userid $uidsql",
+                $params
             );
             $DB->delete_records_select(
-                'evalia_student_exams', "examid $eid_sql AND userid $uid_sql", $params
+                'evalia_student_exams',
+                "examid $eidsql AND userid $uidsql",
+                $params
             );
         }
 
         // Portfolio.
         $DB->delete_records_select(
-            'evalia_portfolio', "courseid = :cid AND userid $uid_sql",
-            array_merge(['cid' => $courseid], $uid_params)
+            'evalia_portfolio',
+            "courseid = :cid AND userid $uidsql",
+            array_merge(['cid' => $courseid], $uidparams)
         );
 
         // Portfolio notes (student is subject).
         $DB->delete_records_select(
-            'evalia_portfolio_notes', "courseid = :cid AND userid $uid_sql",
-            array_merge(['cid' => $courseid], $uid_params)
+            'evalia_portfolio_notes',
+            "courseid = :cid AND userid $uidsql",
+            array_merge(['cid' => $courseid], $uidparams)
         );
     }
 }

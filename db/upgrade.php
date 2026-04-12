@@ -24,6 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Upgrade steps for local_evalia.
+ *
+ * @param int $oldversion The previous version of the plugin.
+ * @return bool True on success.
+ */
 function xmldb_local_evalia_upgrade(int $oldversion): bool {
     global $DB;
     $dbman = $DB->get_manager();
@@ -31,7 +37,6 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     // Fase 1 initial install — all tables are created via install.xml on first install.
     // This block runs only when upgrading from a pre-2026032901 installation.
     if ($oldversion < 2026032901) {
-
         // evalia_rubrics
         if (!$dbman->table_exists('evalia_rubrics')) {
             $table = new xmldb_table('evalia_rubrics');
@@ -186,7 +191,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     if ($oldversion < 2026040101) {
         // Phase 2A: Portfolio Tab — 4 new WS, Tab 4 UI.
         // No DB schema changes: evalia_portfolio, evalia_portfolio_notes,
-        // and evalia_feedback_log were already created in 2026032901.
+        // && evalia_feedback_log were already created in 2026032901.
         upgrade_plugin_savepoint(true, 2026040101, 'local', 'evalia');
     }
 
@@ -212,19 +217,19 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         // Add timeopen, timeclose, grade_itemid to evalia_exams.
         $table = new xmldb_table('evalia_exams');
 
-        $field_timeopen = new xmldb_field('timeopen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'time_limit_min');
-        if (!$dbman->field_exists($table, $field_timeopen)) {
-            $dbman->add_field($table, $field_timeopen);
+        $fieldtimeopen = new xmldb_field('timeopen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'time_limit_min');
+        if (!$dbman->field_exists($table, $fieldtimeopen)) {
+            $dbman->add_field($table, $fieldtimeopen);
         }
 
-        $field_timeclose = new xmldb_field('timeclose', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeopen');
-        if (!$dbman->field_exists($table, $field_timeclose)) {
-            $dbman->add_field($table, $field_timeclose);
+        $fieldtimeclose = new xmldb_field('timeclose', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeopen');
+        if (!$dbman->field_exists($table, $fieldtimeclose)) {
+            $dbman->add_field($table, $fieldtimeclose);
         }
 
-        $field_grade_itemid = new xmldb_field('grade_itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeclose');
-        if (!$dbman->field_exists($table, $field_grade_itemid)) {
-            $dbman->add_field($table, $field_grade_itemid);
+        $fieldgradeitemid = new xmldb_field('grade_itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timeclose');
+        if (!$dbman->field_exists($table, $fieldgradeitemid)) {
+            $dbman->add_field($table, $fieldgradeitemid);
         }
 
         upgrade_plugin_savepoint(true, 2026040901, 'local', 'evalia');

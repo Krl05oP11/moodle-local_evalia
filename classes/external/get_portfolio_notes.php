@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,10 +30,14 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_portfolio_notes.
+ */
 class get_portfolio_notes extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'userid'   => new external_value(PARAM_INT, 'Student user ID'),
@@ -41,6 +45,9 @@ class get_portfolio_notes extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $userid, int $courseid): array {
         global $DB;
 
@@ -63,8 +70,8 @@ class get_portfolio_notes extends external_api {
         }
 
         // Load author display names in one query.
-        $author_ids = array_unique(array_column((array) $notes, 'created_by'));
-        $authors    = $DB->get_records_list('user', 'id', $author_ids, '', 'id, firstname, lastname');
+        $authorids = array_unique(array_column((array) $notes, 'created_by'));
+        $authors    = $DB->get_records_list('user', 'id', $authorids, '', 'id, firstname, lastname');
 
         $result = [];
         foreach ($notes as $n) {
@@ -80,17 +87,22 @@ class get_portfolio_notes extends external_api {
         return ['total' => count($result), 'notes' => $result];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'total' => new external_value(PARAM_INT, 'Total notes'),
             'notes' => new external_multiple_structure(
                 new external_single_structure([
-                    'id'          => new external_value(PARAM_INT,  'Note ID'),
+                    'id'          => new external_value(PARAM_INT, 'Note ID'),
                     'note_text'   => new external_value(PARAM_TEXT, 'Note text'),
                     'author_name' => new external_value(PARAM_TEXT, 'Author full name'),
-                    'timecreated' => new external_value(PARAM_INT,  'Creation timestamp'),
+                    'timecreated' => new external_value(PARAM_INT, 'Creation timestamp'),
                 ]),
-                'Notes', VALUE_DEFAULT, []
+                'Notes',
+                VALUE_DEFAULT,
+                []
             ),
         ]);
     }

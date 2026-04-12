@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,13 +29,14 @@ if ($hassiteconfig) {
     $ADMIN->add('localplugins', $settings);
 
     // ── Setup Wizard link ────────────────────────────────────────────────────
-    $setup_url = new moodle_url('/local/evalia/setup.php');
+    $setupurl = new moodle_url('/local/evalia/setup.php');
     $settings->add(new admin_setting_heading(
         'local_evalia_wizard_heading',
         '🚀 Setup Wizard',
-        html_writer::tag('p',
+        html_writer::tag(
+            'p',
             'Use the wizard to configure the AI engine step by step, with a real-time connection test. ' .
-            html_writer::link($setup_url, '▶ Launch Setup Wizard', ['class' => 'btn btn-sm btn-primary ms-2']),
+            html_writer::link($setupurl, '▶ Launch Setup Wizard', ['class' => 'btn btn-sm btn-primary ms-2']),
             ['style' => 'margin-top:6px;']
         )
     ));

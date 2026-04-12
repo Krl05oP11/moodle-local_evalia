@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
  * PHPUnit tests for local_evalia web services (engine-free operations).
  *
  * Tests cover: rubric CRUD, exam creation, portfolio notes,
- * student exam listing, and capability enforcement.
+ * student exam listing, && capability enforcement.
  *
  * Engine-dependent WS (generate_rubric, generate_questions, grade_exam,
  * publish_grade, index_course) are excluded — they require a live AI
- * engine and are covered by integration tests.
+ * engine && are covered by integration tests.
  *
  * @package    local_evalia
  * @category   test
@@ -40,8 +40,7 @@ require_once($CFG->dirroot . '/local/evalia/lib.php');
 /**
  * Tests for local_evalia external web services.
  */
-class externallib_test extends \advanced_testcase {
-
+final class externallib_test extends \advanced_testcase {
     /** @var \stdClass Course used in tests. */
     private \stdClass $course;
 
@@ -51,6 +50,9 @@ class externallib_test extends \advanced_testcase {
     /** @var \stdClass Student user enrolled in $course. */
     private \stdClass $student;
 
+    /**
+     * Set up test fixtures.
+     */
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
@@ -68,7 +70,7 @@ class externallib_test extends \advanced_testcase {
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Insert a rubric row directly and return its ID.
+     * Insert a rubric row directly && return its ID.
      */
     private function create_rubric(string $name = 'Test Rubric', string $status = 'draft'): int {
         global $DB;
@@ -99,7 +101,7 @@ class externallib_test extends \advanced_testcase {
     }
 
     /**
-     * get_rubric returns the rubric and its items.
+     * get_rubric returns the rubric && its items.
      *
      * @covers \local_evalia\external\get_rubric::execute
      */
@@ -140,7 +142,7 @@ class externallib_test extends \advanced_testcase {
     // ── save_rubric ───────────────────────────────────────────────────────────
 
     /**
-     * save_rubric updates the rubric name and inserts new items.
+     * save_rubric updates the rubric name && inserts new items.
      *
      * @covers \local_evalia\external\save_rubric::execute
      */
@@ -155,7 +157,7 @@ class externallib_test extends \advanced_testcase {
             'New Name',
             false,
             [
-                ['id' => 0, 'topic' => 'Topic A', 'description' => '', 'difficulty_weight' => 'low',    'sortorder' => 1],
+                ['id' => 0, 'topic' => 'Topic A', 'description' => '', 'difficulty_weight' => 'low', 'sortorder' => 1],
                 ['id' => 0, 'topic' => 'Topic B', 'description' => '', 'difficulty_weight' => 'medium', 'sortorder' => 2],
             ]
         );
@@ -206,7 +208,7 @@ class externallib_test extends \advanced_testcase {
     // ── create_exam ───────────────────────────────────────────────────────────
 
     /**
-     * create_exam inserts a row in evalia_exams and creates a grade item.
+     * create_exam inserts a row in evalia_exams && creates a grade item.
      *
      * @covers \local_evalia\external\create_exam::execute
      */
@@ -217,7 +219,14 @@ class externallib_test extends \advanced_testcase {
         $rubricid = $this->create_rubric('Test Rubric', 'active');
 
         $result = \local_evalia\external\create_exam::execute(
-            $this->course->id, $rubricid, 'Midterm', '', 3, 4, 2, 60
+            $this->course->id,
+            $rubricid,
+            'Midterm',
+            '',
+            3,
+            4,
+            2,
+            60
         );
 
         $this->assertTrue($result['success']);
@@ -240,7 +249,14 @@ class externallib_test extends \advanced_testcase {
         $rubricid = $this->create_rubric();
 
         $result = \local_evalia\external\create_exam::execute(
-            $this->course->id, $rubricid, 'Empty Exam', '', 0, 0, 0, 60
+            $this->course->id,
+            $rubricid,
+            'Empty Exam',
+            '',
+            0,
+            0,
+            0,
+            60
         );
 
         $this->assertFalse($result['success']);
@@ -259,14 +275,21 @@ class externallib_test extends \advanced_testcase {
         $this->setUser($this->student);
         $this->expectException(\required_capability_exception::class);
         \local_evalia\external\create_exam::execute(
-            $this->course->id, $rubricid, 'Hack', '', 1, 1, 1, 60
+            $this->course->id,
+            $rubricid,
+            'Hack',
+            '',
+            1,
+            1,
+            1,
+            60
         );
     }
 
     // ── add_portfolio_note ────────────────────────────────────────────────────
 
     /**
-     * add_portfolio_note inserts a note and returns its ID.
+     * add_portfolio_note inserts a note && returns its ID.
      *
      * @covers \local_evalia\external\add_portfolio_note::execute
      */
@@ -276,7 +299,9 @@ class externallib_test extends \advanced_testcase {
         $this->setUser($this->teacher);
 
         $result = \local_evalia\external\add_portfolio_note::execute(
-            $this->student->id, $this->course->id, 'Student shows great progress.'
+            $this->student->id,
+            $this->course->id,
+            'Student shows great progress.'
         );
 
         $this->assertTrue($result['success']);
@@ -298,7 +323,9 @@ class externallib_test extends \advanced_testcase {
         $this->setUser($this->teacher);
 
         $result = \local_evalia\external\add_portfolio_note::execute(
-            $this->student->id, $this->course->id, '   '
+            $this->student->id,
+            $this->course->id,
+            '   '
         );
 
         $this->assertFalse($result['success']);
@@ -314,7 +341,9 @@ class externallib_test extends \advanced_testcase {
         $this->setUser($this->student);
         $this->expectException(\required_capability_exception::class);
         \local_evalia\external\add_portfolio_note::execute(
-            $this->student->id, $this->course->id, 'Should fail'
+            $this->student->id,
+            $this->course->id,
+            'Should fail'
         );
     }
 
@@ -330,7 +359,14 @@ class externallib_test extends \advanced_testcase {
         $rubricid = $this->create_rubric('Rubric', 'active');
 
         $exam = \local_evalia\external\create_exam::execute(
-            $this->course->id, $rubricid, 'Test Exam', '', 1, 1, 1, 60
+            $this->course->id,
+            $rubricid,
+            'Test Exam',
+            '',
+            1,
+            1,
+            1,
+            60
         );
         $this->assertTrue($exam['success']);
 
@@ -360,7 +396,14 @@ class externallib_test extends \advanced_testcase {
         $this->setUser($this->teacher);
         $rubricid = $this->create_rubric();
         $exam = \local_evalia\external\create_exam::execute(
-            $this->course->id, $rubricid, 'Restricted Exam', '', 1, 1, 1, 60
+            $this->course->id,
+            $rubricid,
+            'Restricted Exam',
+            '',
+            1,
+            1,
+            1,
+            60
         );
 
         $this->setUser($this->student);

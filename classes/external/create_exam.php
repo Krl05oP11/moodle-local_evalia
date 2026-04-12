@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,41 +32,57 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Create_exam.
+ */
 class create_exam extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'courseid'       => new external_value(PARAM_INT,  'Course ID'),
-            'rubricid'       => new external_value(PARAM_INT,  'Rubric ID'),
+            'courseid'       => new external_value(PARAM_INT, 'Course ID'),
+            'rubricid'       => new external_value(PARAM_INT, 'Rubric ID'),
             'name'           => new external_value(PARAM_TEXT, 'Exam name'),
             'instructions'   => new external_value(PARAM_TEXT, 'Instructions for students', VALUE_DEFAULT, ''),
-            'basic_count'    => new external_value(PARAM_INT,  'Number of basic questions',    VALUE_DEFAULT, 3),
-            'medium_count'   => new external_value(PARAM_INT,  'Number of medium questions',   VALUE_DEFAULT, 4),
-            'advanced_count' => new external_value(PARAM_INT,  'Number of advanced questions', VALUE_DEFAULT, 2),
-            'time_limit_min' => new external_value(PARAM_INT,  'Time limit in minutes',        VALUE_DEFAULT, 60),
-            'timeopen'       => new external_value(PARAM_INT,  'Unix timestamp when exam opens (0=always)', VALUE_DEFAULT, 0),
-            'timeclose'      => new external_value(PARAM_INT,  'Unix timestamp when exam closes (0=never)', VALUE_DEFAULT, 0),
+            'basic_count'    => new external_value(PARAM_INT, 'Number of basic questions', VALUE_DEFAULT, 3),
+            'medium_count'   => new external_value(PARAM_INT, 'Number of medium questions', VALUE_DEFAULT, 4),
+            'advanced_count' => new external_value(PARAM_INT, 'Number of advanced questions', VALUE_DEFAULT, 2),
+            'time_limit_min' => new external_value(PARAM_INT, 'Time limit in minutes', VALUE_DEFAULT, 60),
+            'timeopen'       => new external_value(PARAM_INT, 'Unix timestamp when exam opens (0=always)', VALUE_DEFAULT, 0),
+            'timeclose'      => new external_value(PARAM_INT, 'Unix timestamp when exam closes (0=never)', VALUE_DEFAULT, 0),
         ]);
     }
 
-    public static function execute(int $courseid, int $rubricid, string $name, string $instructions,
-                                   int $basic_count, int $medium_count, int $advanced_count,
-                                   int $time_limit_min, int $timeopen = 0, int $timeclose = 0): array {
+    /**
+     * Execute the web service.
+     */
+    public static function execute(
+        int $courseid,
+        int $rubricid,
+        string $name,
+        string $instructions,
+        int $basiccount,
+        int $mediumcount,
+        int $advancedcount,
+        int $timelimitmin,
+        int $timeopen = 0,
+        int $timeclose = 0
+    ): array {
         global $CFG, $DB, $USER;
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid'       => $courseid,
             'rubricid'       => $rubricid,
             'name'           => $name,
             'instructions'   => $instructions,
-            'basic_count'    => $basic_count,
-            'medium_count'   => $medium_count,
-            'advanced_count' => $advanced_count,
-            'time_limit_min' => $time_limit_min,
+            'basic_count'    => $basiccount,
+            'medium_count'   => $mediumcount,
+            'advanced_count' => $advancedcount,
+            'time_limit_min' => $timelimitmin,
             'timeopen'       => $timeopen,
             'timeclose'      => $timeclose,
         ]);
@@ -75,9 +91,13 @@ class create_exam extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        // Verify rubric exists and belongs to this course.
-        $DB->get_record('evalia_rubrics',
-            ['id' => $params['rubricid'], 'courseid' => $params['courseid']], 'id', MUST_EXIST);
+        // Verify rubric exists && belongs to this course.
+        $DB->get_record(
+            'evalia_rubrics',
+            ['id' => $params['rubricid'], 'courseid' => $params['courseid']],
+            'id',
+            MUST_EXIST
+        );
 
         // Validate counts.
         $total = $params['basic_count'] + $params['medium_count'] + $params['advanced_count'];
@@ -106,19 +126,22 @@ class create_exam extends external_api {
         ]);
 
         // Register a grade item in the Moodle gradebook for this exam.
-        $grade_itemid = local_evalia_grade_item_update($examid, $params['courseid'], $params['name']);
-        if ($grade_itemid > 0) {
-            $DB->set_field('evalia_exams', 'grade_itemid', $grade_itemid, ['id' => $examid]);
+        $gradeitemid = local_evalia_grade_item_update($examid, $params['courseid'], $params['name']);
+        if ($gradeitemid > 0) {
+            $DB->set_field('evalia_exams', 'grade_itemid', $gradeitemid, ['id' => $examid]);
         }
 
         return ['success' => true, 'examid' => $examid, 'message' => 'Examen creado correctamente.'];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether creation succeeded'),
-            'examid'  => new external_value(PARAM_INT,  'New exam ID (0 on failure)'),
-            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
+            'examid'  => new external_value(PARAM_INT, 'New exam ID (0 on failure)'),
+            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

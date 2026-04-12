@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,19 +30,27 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Get_course_sources.
+ */
 class get_course_sources extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $courseid): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB;
 
         $params  = self::validate_parameters(self::execute_parameters(), ['courseid' => $courseid]);
@@ -57,8 +65,8 @@ class get_course_sources extends external_api {
         }
 
         $sources = [];
-        foreach ($resp['sources'] as $raw_source) {
-            $sources[] = self::parse_source($raw_source, $params['courseid'], $DB);
+        foreach ($resp['sources'] as $rawsource) {
+            $sources[] = self::parse_source($rawsource, $params['courseid'], $DB);
         }
 
         // Sort: pages first, then by label
@@ -85,9 +93,9 @@ class get_course_sources extends external_api {
         $type  = $parts[0] ?? 'unknown';
 
         if ($type === 'page' && isset($parts[1])) {
-            $page_id = (int) $parts[1];
-            $page    = $DB->get_record('page', ['id' => $page_id], 'name', IGNORE_MISSING);
-            $label   = $page ? format_string($page->name) : "Página $page_id";
+            $pageid = (int) $parts[1];
+            $page    = $DB->get_record('page', ['id' => $pageid], 'name', IGNORE_MISSING);
+            $label   = $page ? format_string($page->name) : "Página $pageid";
             return ['id' => $raw, 'label' => $label, 'type' => 'page'];
         }
 
@@ -95,7 +103,7 @@ class get_course_sources extends external_api {
             // parts[3] = chapter label (optional), parts[2] = filename
             if (!empty($parts[3])) {
                 $label = $parts[3];   // "Cap5-Grafos"
-            } elseif (!empty($parts[2])) {
+            } else if (!empty($parts[2])) {
                 $label = pathinfo($parts[2], PATHINFO_FILENAME);  // strip extension
             } else {
                 $label = $raw;
@@ -106,6 +114,9 @@ class get_course_sources extends external_api {
         return ['id' => $raw, 'label' => $raw, 'type' => 'unknown'];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'sources' => new external_multiple_structure(
@@ -114,7 +125,9 @@ class get_course_sources extends external_api {
                     'label' => new external_value(PARAM_TEXT, 'Human-readable label'),
                     'type'  => new external_value(PARAM_TEXT, 'page | resource | unknown'),
                 ]),
-                'Indexed sources', VALUE_DEFAULT, []
+                'Indexed sources',
+                VALUE_DEFAULT,
+                []
             ),
         ]);
     }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 /**
  * WS: generate_questions — calls /eval/questions/generate for a rubric item
- * and saves results to evalia_question_bank + evalia_question_options.
+ * && saves results to evalia_question_bank + evalia_question_options.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -31,17 +31,19 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/saipa/lib.php');
-require_once($CFG->dirroot . '/local/evalia/lib.php');
 
+/**
+ * Generate_questions.
+ */
 class generate_questions extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'courseid'       => new external_value(PARAM_INT,  'Course ID'),
-            'rubric_item_id' => new external_value(PARAM_INT,  'Rubric item ID'),
+            'courseid'       => new external_value(PARAM_INT, 'Course ID'),
+            'rubric_item_id' => new external_value(PARAM_INT, 'Rubric item ID'),
             'difficulty'     => new external_value(PARAM_TEXT, 'basic|medium|advanced'),
             'question_types' => new external_multiple_structure(
                 new external_value(PARAM_TEXT, 'Question type'),
@@ -51,15 +53,26 @@ class generate_questions extends external_api {
         ]);
     }
 
-    public static function execute(int $courseid, int $rubric_item_id, string $difficulty,
-                                   array $question_types, int $count): array {
+    /**
+     * Execute the web service.
+     */
+    public static function execute(
+        int $courseid,
+        int $rubricitemid,
+        string $difficulty,
+        array $questiontypes,
+        int $count
+    ): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/local/saipa/lib.php');
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid'       => $courseid,
-            'rubric_item_id' => $rubric_item_id,
+            'rubric_item_id' => $rubricitemid,
             'difficulty'     => $difficulty,
-            'question_types' => $question_types,
+            'question_types' => $questiontypes,
             'count'          => $count,
         ]);
 
@@ -71,8 +84,12 @@ class generate_questions extends external_api {
         $item = $DB->get_record('evalia_rubric_items', ['id' => $params['rubric_item_id']], '*', MUST_EXIST);
 
         // Verify item belongs to a rubric for this course.
-        $rubric = $DB->get_record('evalia_rubrics',
-            ['id' => $item->rubricid, 'courseid' => $params['courseid']], 'id', MUST_EXIST);
+        $rubric = $DB->get_record(
+            'evalia_rubrics',
+            ['id' => $item->rubricid, 'courseid' => $params['courseid']],
+            'id',
+            MUST_EXIST
+        );
 
         // Call the AI engine.
         $payload = [
@@ -90,15 +107,15 @@ class generate_questions extends external_api {
             return ['success' => false, 'generated' => 0, 'message' => $response['error']];
         }
 
-        $raw_questions = $response['questions'] ?? [];
+        $rawquestions = $response['questions'] ?? [];
         $now           = time();
         $saved          = 0;
 
-        $valid_types = ['multichoice', 'truefalse', 'numerical', 'shortanswer', 'essay'];
+        $validtypes = ['multichoice', 'truefalse', 'numerical', 'shortanswer', 'essay'];
 
-        foreach ($raw_questions as $q) {
+        foreach ($rawquestions as $q) {
             $qtype = $q['type'] ?? 'multichoice';
-            if (!in_array($qtype, $valid_types)) {
+            if (!in_array($qtype, $validtypes)) {
                 $qtype = 'multichoice';
             }
 
@@ -109,7 +126,7 @@ class generate_questions extends external_api {
                 'question_type'  => $qtype,
                 'stem'           => $q['stem'] ?? '',
                 'difficulty'     => $q['difficulty'] ?? $params['difficulty'],
-                'topic'          => $item->topic,   // always use rubric item topic for exact-match filtering
+                'topic'          => $item->topic, // always use rubric item topic for exact-match filtering
                 'correct_answer' => $q['correct_answer'] ?? '',
                 'tolerance'      => (float) ($q['tolerance'] ?? 0),
                 'source_chunks'  => null,
@@ -118,16 +135,16 @@ class generate_questions extends external_api {
                 'timemodified'   => $now,
             ]);
 
-            // Insert options for multichoice and truefalse.
+            // Insert options for multichoice && truefalse.
             if (in_array($qtype, ['multichoice', 'truefalse'])) {
                 $options = $q['options'] ?? [];
-                foreach ($options as $opt_idx => $opt) {
+                foreach ($options as $optidx => $opt) {
                     $DB->insert_record('evalia_question_options', (object) [
                         'questionid'  => $questionid,
                         'option_text' => $opt['text'] ?? '',
                         'is_correct'  => empty($opt['correct']) ? 0 : 1,
                         'feedback'    => $opt['feedback'] ?? '',
-                        'sortorder'   => $opt_idx + 1,
+                        'sortorder'   => $optidx + 1,
                     ]);
                 }
             }
@@ -142,11 +159,14 @@ class generate_questions extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success'   => new external_value(PARAM_BOOL, 'Whether generation succeeded'),
-            'generated' => new external_value(PARAM_INT,  'Number of questions saved'),
-            'message'   => new external_value(PARAM_TEXT, 'Status or error message'),
+            'generated' => new external_value(PARAM_INT, 'Number of questions saved'),
+            'message'   => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

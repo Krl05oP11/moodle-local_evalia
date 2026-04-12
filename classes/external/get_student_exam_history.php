@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,10 +32,14 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_student_exam_history.
+ */
 class get_student_exam_history extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'userid'   => new external_value(PARAM_INT, 'Student user ID'),
@@ -43,6 +47,9 @@ class get_student_exam_history extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $userid, int $courseid): array {
         global $DB;
 
@@ -70,7 +77,7 @@ class get_student_exam_history extends external_api {
             'courseid' => $params['courseid'],
         ]);
 
-        $status_labels = [
+        $statuslabels = [
             'assigned'  => 'Asignado',
             'started'   => 'En progreso',
             'submitted' => 'Enviado',
@@ -91,7 +98,7 @@ class get_student_exam_history extends external_api {
                 'score'           => $score,
                 'max_score'       => (float) ($row->max_score > 0 ? $row->max_score : 10.0),
                 'status'          => (string) $row->status,
-                'status_label'    => $status_labels[$row->status] ?? $row->status,
+                'status_label'    => $statuslabels[$row->status] ?? $row->status,
                 'total_questions' => count($qids),
                 'timesubmitted'   => (int) ($row->timesubmitted ?? 0),
                 'timegraded'      => ($row->status === 'graded') ? (int) $row->timemodified : 0,
@@ -101,21 +108,24 @@ class get_student_exam_history extends external_api {
         return ['exams' => $exams, 'total' => count($exams)];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'total' => new external_value(PARAM_INT, 'Number of exams'),
             'exams' => new external_multiple_structure(
                 new external_single_structure([
-                    'student_examid'  => new external_value(PARAM_INT,   'Student exam record ID'),
-                    'examid'          => new external_value(PARAM_INT,   'Exam ID'),
-                    'exam_name'       => new external_value(PARAM_TEXT,  'Exam name'),
+                    'student_examid'  => new external_value(PARAM_INT, 'Student exam record ID'),
+                    'examid'          => new external_value(PARAM_INT, 'Exam ID'),
+                    'exam_name'       => new external_value(PARAM_TEXT, 'Exam name'),
                     'score'           => new external_value(PARAM_FLOAT, 'Score 0-10, -1 if not graded'),
                     'max_score'       => new external_value(PARAM_FLOAT, 'Max score (10.0)'),
-                    'status'          => new external_value(PARAM_TEXT,  'Status key'),
-                    'status_label'    => new external_value(PARAM_TEXT,  'Status in Spanish'),
-                    'total_questions' => new external_value(PARAM_INT,   'Number of questions'),
-                    'timesubmitted'   => new external_value(PARAM_INT,   'Unix timestamp of submission'),
-                    'timegraded'      => new external_value(PARAM_INT,   'Unix timestamp of grading, 0 if not graded'),
+                    'status'          => new external_value(PARAM_TEXT, 'Status key'),
+                    'status_label'    => new external_value(PARAM_TEXT, 'Status in Spanish'),
+                    'total_questions' => new external_value(PARAM_INT, 'Number of questions'),
+                    'timesubmitted'   => new external_value(PARAM_INT, 'Unix timestamp of submission'),
+                    'timegraded'      => new external_value(PARAM_INT, 'Unix timestamp of grading, 0 if not graded'),
                 ])
             ),
         ]);

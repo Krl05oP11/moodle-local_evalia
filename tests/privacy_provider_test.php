@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
  * PHPUnit tests for the local_evalia Privacy API provider.
  *
  * Verifies GDPR compliance: metadata declaration, context discovery,
- * user listing, data export, and data deletion (single user, all users,
- * and bulk user deletion).
+ * user listing, data export, && data deletion (single user, all users,
+ * && bulk user deletion).
  *
  * @package    local_evalia
  * @category   test
@@ -41,8 +41,7 @@ use local_evalia\privacy\provider;
 /**
  * Privacy provider tests for local_evalia.
  */
-class privacy_provider_test extends \advanced_testcase {
-
+final class privacy_provider_test extends \advanced_testcase {
     /** @var \stdClass */
     private \stdClass $course;
 
@@ -61,6 +60,9 @@ class privacy_provider_test extends \advanced_testcase {
     /** @var int Exam ID. */
     private int $examid;
 
+    /**
+     * Set up test fixtures.
+     */
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest(true);
@@ -72,8 +74,8 @@ class privacy_provider_test extends \advanced_testcase {
         $this->student  = $gen->create_user();
         $this->student2 = $gen->create_user();
 
-        $gen->enrol_user($this->teacher->id,  $this->course->id, 'editingteacher');
-        $gen->enrol_user($this->student->id,  $this->course->id, 'student');
+        $gen->enrol_user($this->teacher->id, $this->course->id, 'editingteacher');
+        $gen->enrol_user($this->student->id, $this->course->id, 'student');
         $gen->enrol_user($this->student2->id, $this->course->id, 'student');
 
         $this->create_base_records();
@@ -170,7 +172,7 @@ class privacy_provider_test extends \advanced_testcase {
     // ── Metadata ──────────────────────────────────────────────────────────────
 
     /**
-     * Metadata declares 4 database tables and 1 external location.
+     * Metadata declares 4 database tables && 1 external location.
      *
      * @covers \local_evalia\privacy\provider::get_metadata
      */
@@ -268,32 +270,44 @@ class privacy_provider_test extends \advanced_testcase {
         provider::delete_data_for_user($approved);
 
         // Student 1 data is gone.
-        $se = $DB->get_records_select('evalia_student_exams',
+        $se = $DB->get_records_select(
+            'evalia_student_exams',
             'examid = :eid AND userid = :uid',
-            ['eid' => $this->examid, 'uid' => $this->student->id]);
+            ['eid' => $this->examid, 'uid' => $this->student->id]
+        );
         $this->assertEmpty($se);
 
-        $p = $DB->get_record('evalia_portfolio',
-            ['userid' => $this->student->id, 'courseid' => $this->course->id]);
+        $p = $DB->get_record(
+            'evalia_portfolio',
+            ['userid' => $this->student->id, 'courseid' => $this->course->id]
+        );
         $this->assertFalse($p);
 
-        $pn = $DB->get_records('evalia_portfolio_notes',
-            ['userid' => $this->student->id, 'courseid' => $this->course->id]);
+        $pn = $DB->get_records(
+            'evalia_portfolio_notes',
+            ['userid' => $this->student->id, 'courseid' => $this->course->id]
+        );
         $this->assertEmpty($pn);
 
-        $fl = $DB->get_records_select('evalia_feedback_log',
+        $fl = $DB->get_records_select(
+            'evalia_feedback_log',
             'examid = :eid AND userid = :uid',
-            ['eid' => $this->examid, 'uid' => $this->student->id]);
+            ['eid' => $this->examid, 'uid' => $this->student->id]
+        );
         $this->assertEmpty($fl);
 
         // Student 2 data is untouched.
-        $se2 = $DB->get_records_select('evalia_student_exams',
+        $se2 = $DB->get_records_select(
+            'evalia_student_exams',
             'examid = :eid AND userid = :uid',
-            ['eid' => $this->examid, 'uid' => $this->student2->id]);
+            ['eid' => $this->examid, 'uid' => $this->student2->id]
+        );
         $this->assertCount(1, $se2);
 
-        $p2 = $DB->get_record('evalia_portfolio',
-            ['userid' => $this->student2->id, 'courseid' => $this->course->id]);
+        $p2 = $DB->get_record(
+            'evalia_portfolio',
+            ['userid' => $this->student2->id, 'courseid' => $this->course->id]
+        );
         $this->assertNotFalse($p2);
     }
 
@@ -311,8 +325,11 @@ class privacy_provider_test extends \advanced_testcase {
         provider::delete_data_for_all_users_in_context($context);
 
         // Both students' data is gone.
-        $se = $DB->count_records_select('evalia_student_exams',
-            'examid = :eid', ['eid' => $this->examid]);
+        $se = $DB->count_records_select(
+            'evalia_student_exams',
+            'examid = :eid',
+            ['eid' => $this->examid]
+        );
         $this->assertSame(0, $se);
 
         $p = $DB->count_records('evalia_portfolio', ['courseid' => $this->course->id]);
@@ -321,8 +338,11 @@ class privacy_provider_test extends \advanced_testcase {
         $pn = $DB->count_records('evalia_portfolio_notes', ['courseid' => $this->course->id]);
         $this->assertSame(0, $pn);
 
-        $fl = $DB->count_records_select('evalia_feedback_log',
-            'examid = :eid', ['eid' => $this->examid]);
+        $fl = $DB->count_records_select(
+            'evalia_feedback_log',
+            'examid = :eid',
+            ['eid' => $this->examid]
+        );
         $this->assertSame(0, $fl);
     }
 
@@ -343,15 +363,19 @@ class privacy_provider_test extends \advanced_testcase {
         provider::delete_data_for_users($approved);
 
         // Student 1 gone.
-        $se1 = $DB->count_records_select('evalia_student_exams',
+        $se1 = $DB->count_records_select(
+            'evalia_student_exams',
             'examid = :eid AND userid = :uid',
-            ['eid' => $this->examid, 'uid' => $this->student->id]);
+            ['eid' => $this->examid, 'uid' => $this->student->id]
+        );
         $this->assertSame(0, $se1);
 
         // Student 2 still there.
-        $se2 = $DB->count_records_select('evalia_student_exams',
+        $se2 = $DB->count_records_select(
+            'evalia_student_exams',
             'examid = :eid AND userid = :uid',
-            ['eid' => $this->examid, 'uid' => $this->student2->id]);
+            ['eid' => $this->examid, 'uid' => $this->student2->id]
+        );
         $this->assertSame(1, $se2);
     }
 

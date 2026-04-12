@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: get_rubric — returns the active (or draft) rubric and its items for a course.
+ * WS: get_rubric — returns the active (or draft) rubric && its items for a course.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -30,16 +30,23 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_rubric.
+ */
 class get_rubric extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $courseid): array {
         global $DB;
 
@@ -61,7 +68,7 @@ class get_rubric extends external_api {
             ];
         }
 
-        $raw_items = $DB->get_records(
+        $rawitems = $DB->get_records(
             'evalia_rubric_items',
             ['rubricid' => $rubric->id],
             'sortorder ASC, id ASC',
@@ -69,7 +76,7 @@ class get_rubric extends external_api {
         );
 
         $items = [];
-        foreach ($raw_items as $it) {
+        foreach ($rawitems as $it) {
             $items[] = [
                 'id'                => (int) $it->id,
                 'topic'             => $it->topic,
@@ -89,22 +96,27 @@ class get_rubric extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'rubricid'     => new external_value(PARAM_INT,  'Rubric ID (0 if none)'),
+            'rubricid'     => new external_value(PARAM_INT, 'Rubric ID (0 if none)'),
             'name'         => new external_value(PARAM_TEXT, 'Rubric name'),
             'status'       => new external_value(PARAM_TEXT, 'draft|active|archived'),
-            'timecreated'  => new external_value(PARAM_INT,  'Creation timestamp'),
-            'timemodified' => new external_value(PARAM_INT,  'Last modified timestamp'),
+            'timecreated'  => new external_value(PARAM_INT, 'Creation timestamp'),
+            'timemodified' => new external_value(PARAM_INT, 'Last modified timestamp'),
             'items'        => new external_multiple_structure(
                 new external_single_structure([
-                    'id'                => new external_value(PARAM_INT,  'Item ID'),
+                    'id'                => new external_value(PARAM_INT, 'Item ID'),
                     'topic'             => new external_value(PARAM_TEXT, 'Topic name'),
                     'description'       => new external_value(PARAM_TEXT, 'Topic description'),
                     'difficulty_weight' => new external_value(PARAM_TEXT, 'low|medium|high'),
-                    'sortorder'         => new external_value(PARAM_INT,  'Display order'),
+                    'sortorder'         => new external_value(PARAM_INT, 'Display order'),
                 ]),
-                'Rubric items', VALUE_DEFAULT, []
+                'Rubric items',
+                VALUE_DEFAULT,
+                []
             ),
         ]);
     }

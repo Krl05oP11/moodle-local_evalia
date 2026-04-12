@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: save_rubric — persists manual edits to a rubric and optionally activates it.
+ * WS: save_rubric — persists manual edits to a rubric && optionally activates it.
  *
  * Items with id > 0 are updated; items with id = 0 are inserted as new.
  * Activating a rubric sets its status to 'active' (prerequisite for question generation).
@@ -33,28 +33,35 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Save_rubric.
+ */
 class save_rubric extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'rubricid' => new external_value(PARAM_INT,  'Rubric ID to update'),
+            'rubricid' => new external_value(PARAM_INT, 'Rubric ID to update'),
             'name'     => new external_value(PARAM_TEXT, 'Rubric name'),
             'activate' => new external_value(PARAM_BOOL, 'Set status to active', VALUE_DEFAULT, false),
             'items'    => new external_multiple_structure(
                 new external_single_structure([
-                    'id'                => new external_value(PARAM_INT,  'Item ID (0 for new items)'),
+                    'id'                => new external_value(PARAM_INT, 'Item ID (0 for new items)'),
                     'topic'             => new external_value(PARAM_TEXT, 'Topic name'),
                     'description'       => new external_value(PARAM_TEXT, 'Description', VALUE_OPTIONAL),
                     'difficulty_weight' => new external_value(PARAM_TEXT, 'low|medium|high'),
-                    'sortorder'         => new external_value(PARAM_INT,  'Display order', VALUE_DEFAULT, 5),
+                    'sortorder'         => new external_value(PARAM_INT, 'Display order', VALUE_DEFAULT, 5),
                 ]),
                 'Items to save'
             ),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $rubricid, string $name, bool $activate, array $items): array {
         global $DB, $USER;
 
@@ -89,8 +96,10 @@ class save_rubric extends external_api {
 
             if ($it['id'] > 0) {
                 // Verify item belongs to this rubric before updating.
-                $existing = $DB->get_record('evalia_rubric_items',
-                    ['id' => $it['id'], 'rubricid' => $rubric->id]);
+                $existing = $DB->get_record(
+                    'evalia_rubric_items',
+                    ['id' => $it['id'], 'rubricid' => $rubric->id]
+                );
                 if ($existing) {
                     $DB->update_record('evalia_rubric_items', (object) [
                         'id'                => $it['id'],
@@ -119,10 +128,13 @@ class save_rubric extends external_api {
         return ['success' => true, 'message' => $msg];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether save succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
         ]);
     }
 }

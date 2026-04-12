@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,25 +29,32 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Add_portfolio_note.
+ */
 class add_portfolio_note extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'userid'    => new external_value(PARAM_INT,  'Target student user ID'),
-            'courseid'  => new external_value(PARAM_INT,  'Course ID'),
+            'userid'    => new external_value(PARAM_INT, 'Target student user ID'),
+            'courseid'  => new external_value(PARAM_INT, 'Course ID'),
             'note_text' => new external_value(PARAM_TEXT, 'Note text'),
         ]);
     }
 
-    public static function execute(int $userid, int $courseid, string $note_text): array {
+    /**
+     * Execute the web service.
+     */
+    public static function execute(int $userid, int $courseid, string $notetext): array {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'userid'    => $userid,
             'courseid'  => $courseid,
-            'note_text' => $note_text,
+            'note_text' => $notetext,
         ]);
 
         $context = \context_course::instance($params['courseid']);
@@ -90,12 +97,15 @@ class add_portfolio_note extends external_api {
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'success'     => new external_value(PARAM_BOOL,  'Success flag'),
-            'noteid'      => new external_value(PARAM_INT,   'New note record ID'),
-            'timecreated' => new external_value(PARAM_INT,   'Creation timestamp'),
-            'message'     => new external_value(PARAM_TEXT,  'Result message'),
+            'success'     => new external_value(PARAM_BOOL, 'Success flag'),
+            'noteid'      => new external_value(PARAM_INT, 'New note record ID'),
+            'timecreated' => new external_value(PARAM_INT, 'Creation timestamp'),
+            'message'     => new external_value(PARAM_TEXT, 'Result message'),
         ]);
     }
 }

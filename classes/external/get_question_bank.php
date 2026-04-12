@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,19 +30,26 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_question_bank.
+ */
 class get_question_bank extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'courseid'   => new external_value(PARAM_INT,  'Course ID'),
-            'topic'      => new external_value(PARAM_TEXT, 'Filter by topic (empty = all)',      VALUE_DEFAULT, ''),
+            'courseid'   => new external_value(PARAM_INT, 'Course ID'),
+            'topic'      => new external_value(PARAM_TEXT, 'Filter by topic (empty = all)', VALUE_DEFAULT, ''),
             'difficulty' => new external_value(PARAM_TEXT, 'Filter by difficulty (empty = all)', VALUE_DEFAULT, ''),
-            'status'     => new external_value(PARAM_TEXT, 'Filter by status (empty = all)',     VALUE_DEFAULT, ''),
+            'status'     => new external_value(PARAM_TEXT, 'Filter by status (empty = all)', VALUE_DEFAULT, ''),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $courseid, string $topic, string $difficulty, string $status): array {
         global $DB;
 
@@ -88,19 +95,19 @@ class get_question_bank extends external_api {
 
         // Load options for all questions in one query.
         $qids = array_keys($questions);
-        [$in_sql, $in_params] = $DB->get_in_or_equal($qids, SQL_PARAMS_NAMED, 'qid');
-        $all_options = $DB->get_records_select(
+        [$insql, $inparams] = $DB->get_in_or_equal($qids, SQL_PARAMS_NAMED, 'qid');
+        $alloptions = $DB->get_records_select(
             'evalia_question_options',
-            "questionid $in_sql",
-            $in_params,
+            "questionid $insql",
+            $inparams,
             'questionid ASC, sortorder ASC',
             'id, questionid, option_text, is_correct, feedback, sortorder'
         );
 
         // Group options by questionid.
-        $options_by_q = [];
-        foreach ($all_options as $opt) {
-            $options_by_q[$opt->questionid][] = [
+        $optionsbyq = [];
+        foreach ($alloptions as $opt) {
+            $optionsbyq[$opt->questionid][] = [
                 'id'          => (int) $opt->id,
                 'option_text' => $opt->option_text,
                 'is_correct'  => (bool) $opt->is_correct,
@@ -119,19 +126,22 @@ class get_question_bank extends external_api {
                 'topic'          => $q->topic,
                 'status'         => $q->status,
                 'correct_answer' => $q->correct_answer ?? '',
-                'options'        => $options_by_q[$q->id] ?? [],
+                'options'        => $optionsbyq[$q->id] ?? [],
             ];
         }
 
         return ['total' => count($result), 'questions' => $result];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'total'     => new external_value(PARAM_INT, 'Total questions matching filters'),
             'questions' => new external_multiple_structure(
                 new external_single_structure([
-                    'id'             => new external_value(PARAM_INT,  'Question ID'),
+                    'id'             => new external_value(PARAM_INT, 'Question ID'),
                     'question_type'  => new external_value(PARAM_TEXT, 'Type'),
                     'stem'           => new external_value(PARAM_TEXT, 'Question text'),
                     'difficulty'     => new external_value(PARAM_TEXT, 'basic|medium|advanced'),
@@ -140,16 +150,20 @@ class get_question_bank extends external_api {
                     'correct_answer' => new external_value(PARAM_TEXT, 'Correct answer (plain text)', VALUE_OPTIONAL),
                     'options'        => new external_multiple_structure(
                         new external_single_structure([
-                            'id'          => new external_value(PARAM_INT,  'Option ID'),
+                            'id'          => new external_value(PARAM_INT, 'Option ID'),
                             'option_text' => new external_value(PARAM_TEXT, 'Option text'),
                             'is_correct'  => new external_value(PARAM_BOOL, 'Is correct answer'),
                             'feedback'    => new external_value(PARAM_TEXT, 'Feedback text', VALUE_OPTIONAL),
-                            'sortorder'   => new external_value(PARAM_INT,  'Display order'),
+                            'sortorder'   => new external_value(PARAM_INT, 'Display order'),
                         ]),
-                        'Answer options', VALUE_DEFAULT, []
+                        'Answer options',
+                        VALUE_DEFAULT,
+                        []
                     ),
                 ]),
-                'Questions', VALUE_DEFAULT, []
+                'Questions',
+                VALUE_DEFAULT,
+                []
             ),
         ]);
     }

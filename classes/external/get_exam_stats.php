@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,16 +36,23 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Get_exam_stats.
+ */
 class get_exam_stats extends external_api {
-
+    /**
+     * Define the parameters for this web service.
+     */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'examid' => new external_value(PARAM_INT, 'evalia_exams ID'),
         ]);
     }
 
+    /**
+     * Execute the web service.
+     */
     public static function execute(int $examid): array {
         global $DB;
 
@@ -61,7 +68,7 @@ class get_exam_stats extends external_api {
         $all = $DB->get_records('evalia_student_exams', ['examid' => $examid], '', 'id, status, score, answers, question_ids');
 
         $counts = ['assigned' => 0, 'started' => 0, 'submitted' => 0, 'graded' => 0];
-        $graded_scores = [];
+        $gradedscores = [];
 
         foreach ($all as $row) {
             $status = $row->status ?? 'assigned';
@@ -69,20 +76,20 @@ class get_exam_stats extends external_api {
                 $counts[$status]++;
             }
             if ($status === 'graded' && $row->score !== null) {
-                $graded_scores[] = (float) $row->score;
+                $gradedscores[] = (float) $row->score;
             }
         }
 
         // ── 2. Score distribution (5 bands: 0-2, 2-4, 4-6, 6-8, 8-10) ───────
         $bands = [
-            ['label' => '0–2',  'min' => 0.0,  'max' => 2.0,  'count' => 0],
-            ['label' => '2–4',  'min' => 2.0,  'max' => 4.0,  'count' => 0],
-            ['label' => '4–6',  'min' => 4.0,  'max' => 6.0,  'count' => 0],
-            ['label' => '6–8',  'min' => 6.0,  'max' => 8.0,  'count' => 0],
-            ['label' => '8–10', 'min' => 8.0,  'max' => 10.01,'count' => 0],
+            ['label' => '0–2', 'min' => 0.0, 'max' => 2.0, 'count' => 0],
+            ['label' => '2–4', 'min' => 2.0, 'max' => 4.0, 'count' => 0],
+            ['label' => '4–6', 'min' => 4.0, 'max' => 6.0, 'count' => 0],
+            ['label' => '6–8', 'min' => 6.0, 'max' => 8.0, 'count' => 0],
+            ['label' => '8–10', 'min' => 8.0, 'max' => 10.01, 'count' => 0],
         ];
 
-        foreach ($graded_scores as $s) {
+        foreach ($gradedscores as $s) {
             foreach ($bands as &$band) {
                 if ($s >= $band['min'] && $s < $band['max']) {
                     $band['count']++;
@@ -92,148 +99,155 @@ class get_exam_stats extends external_api {
             unset($band);
         }
 
-        $avg_score = count($graded_scores) > 0
-            ? round(array_sum($graded_scores) / count($graded_scores), 2)
+        $avgscore = count($gradedscores) > 0
+            ? round(array_sum($gradedscores) / count($gradedscores), 2)
             : 0.0;
-        $min_score = count($graded_scores) > 0 ? (float) min($graded_scores) : 0.0;
-        $max_score = count($graded_scores) > 0 ? (float) max($graded_scores) : 0.0;
-        $pass_count = count(array_filter($graded_scores, fn($s) => $s >= 6.0));
+        $minscore = count($gradedscores) > 0 ? (float) min($gradedscores) : 0.0;
+        $maxscore = count($gradedscores) > 0 ? (float) max($gradedscores) : 0.0;
+        $passcount = count(array_filter($gradedscores, fn($s) => $s >= 6.0));
 
         // ── 3. Most-failed questions ──────────────────────────────────────────
-        // Scan all graded exams' answers and compare to correct answers.
-        $fail_counts = [];   // question_id → fail count
+        // Scan all graded exams' answers && compare to correct answers.
+        $failcounts = [];   // question_id → fail count
 
-        $graded_rows = array_filter((array) $all, fn($r) => $r->status === 'graded');
+        $gradedrows = array_filter((array) $all, fn($r) => $r->status === 'graded');
 
-        foreach ($graded_rows as $row) {
+        foreach ($gradedrows as $row) {
             $answers = json_decode($row->answers ?? '{}', true);
-            $q_ids   = json_decode($row->question_ids ?? '[]', true);
-            if (empty($q_ids) || empty($answers)) {
+            $qids   = json_decode($row->question_ids ?? '[]', true);
+            if (empty($qids) || empty($answers)) {
                 continue;
             }
-            foreach ($q_ids as $qid) {
-                $qid_str = (string) $qid;
-                if (!isset($fail_counts[$qid])) {
-                    $fail_counts[$qid] = 0;
+            foreach ($qids as $qid) {
+                $qidstr = (string) $qid;
+                if (!isset($failcounts[$qid])) {
+                    $failcounts[$qid] = 0;
                 }
             }
         }
 
         // Load correct answers for all questions that appeared in this exam.
-        $all_qids = [];
+        $allqids = [];
         foreach ($all as $row) {
             $ids = json_decode($row->question_ids ?? '[]', true);
             foreach ($ids as $id) {
-                $all_qids[(int)$id] = true;
+                $allqids[(int)$id] = true;
             }
         }
 
-        $question_data   = [];
-        $correct_options = [];
-        if (!empty($all_qids)) {
-            [$in_sql, $in_params] = $DB->get_in_or_equal(array_keys($all_qids), SQL_PARAMS_NAMED, 'q');
-            $qs = $DB->get_records_select('evalia_question_bank', "id $in_sql", $in_params, '', 'id, stem, question_type, correct_answer, topic, difficulty');
+        $questiondata   = [];
+        $correctoptions = [];
+        if (!empty($allqids)) {
+            [$insql, $inparams] = $DB->get_in_or_equal(array_keys($allqids), SQL_PARAMS_NAMED, 'q');
+            $qs = $DB->get_records_select('evalia_question_bank', "id $insql", $inparams, '', 'id, stem, question_type, correct_answer, topic, difficulty');
             foreach ($qs as $q) {
-                $question_data[$q->id] = $q;
+                $questiondata[$q->id] = $q;
             }
             // Load correct option texts for multichoice/truefalse.
-            [$oin_sql, $oin_params] = $DB->get_in_or_equal(array_keys($all_qids), SQL_PARAMS_NAMED, 'oq');
-            $opts = $DB->get_records_select('evalia_question_options', "questionid $oin_sql AND is_correct = 1", $oin_params, '', 'questionid, option_text');
+            [$oinsql, $oinparams] = $DB->get_in_or_equal(array_keys($allqids), SQL_PARAMS_NAMED, 'oq');
+            $opts = $DB->get_records_select('evalia_question_options', "questionid $oinsql AND is_correct = 1", $oinparams, '', 'questionid, option_text');
             foreach ($opts as $opt) {
-                $correct_options[$opt->questionid] = $opt->option_text;
+                $correctoptions[$opt->questionid] = $opt->option_text;
             }
         }
 
         // Count failures per question.
-        $fail_map = [];   // question_id → fail_count
-        foreach ($graded_rows as $row) {
+        $failmap = [];   // question_id → fail_count
+        foreach ($gradedrows as $row) {
             $answers = json_decode($row->answers ?? '{}', true);
-            $q_ids   = json_decode($row->question_ids ?? '[]', true);
-            if (empty($q_ids)) { continue; }
+            $qids   = json_decode($row->question_ids ?? '[]', true);
+            if (empty($qids)) {
+                continue;
+            }
 
-            foreach ($q_ids as $qid) {
-                $qid_int = (int) $qid;
-                $q = $question_data[$qid_int] ?? null;
-                if (!$q) { continue; }
+            foreach ($qids as $qid) {
+                $qidint = (int) $qid;
+                $q = $questiondata[$qidint] ?? null;
+                if (!$q) {
+                    continue;
+                }
 
-                $student_ans = strtolower(trim($answers[(string)$qid] ?? ''));
+                $studentans = strtolower(trim($answers[(string)$qid] ?? ''));
                 if (in_array($q->question_type, ['multichoice', 'truefalse'])) {
-                    $correct = strtolower(trim($correct_options[$qid_int] ?? ''));
-                    $wrong = ($student_ans !== $correct);
-                } elseif ($q->question_type === 'numerical') {
-                    $val   = (float) $student_ans;
+                    $correct = strtolower(trim($correctoptions[$qidint] ?? ''));
+                    $wrong = ($studentans !== $correct);
+                } else if ($q->question_type === 'numerical') {
+                    $val   = (float) $studentans;
                     $wrong = abs($val - (float)$q->correct_answer) > 0.01;
                 } else {
                     $correct = strtolower(trim($q->correct_answer ?? ''));
-                    $wrong = ($student_ans !== $correct);
+                    $wrong = ($studentans !== $correct);
                 }
                 if ($wrong) {
-                    $fail_map[$qid_int] = ($fail_map[$qid_int] ?? 0) + 1;
+                    $failmap[$qidint] = ($failmap[$qidint] ?? 0) + 1;
                 }
             }
         }
 
-        $difficulty_labels = [
+        $difficultylabels = [
             'basic'    => 'Básica',
             'medium'   => 'Media',
             'advanced' => 'Avanzada',
         ];
 
-        arsort($fail_map);
-        $top_failed = [];
-        foreach (array_slice($fail_map, 0, 5, true) as $qid => $fc) {
-            $q = $question_data[$qid] ?? null;
-            $top_failed[] = [
+        arsort($failmap);
+        $topfailed = [];
+        foreach (array_slice($failmap, 0, 5, true) as $qid => $fc) {
+            $q = $questiondata[$qid] ?? null;
+            $topfailed[] = [
                 'question_id' => $qid,
                 'stem'        => $q ? format_text($q->stem, FORMAT_PLAIN) : '(pregunta eliminada)',
-                'topic'       => $q ? ($q->topic      ?? '') : '',
-                'difficulty'  => $q ? ($difficulty_labels[$q->difficulty ?? ''] ?? ucfirst($q->difficulty ?? '')) : '',
+                'topic'       => $q ? ($q->topic ?? '') : '',
+                'difficulty'  => $q ? ($difficultylabels[$q->difficulty ?? ''] ?? ucfirst($q->difficulty ?? '')) : '',
                 'fail_count'  => $fc,
-                'total'       => count($graded_rows),
+                'total'       => count($gradedrows),
             ];
         }
 
         return [
             'examid'      => $examid,
             'counts'      => $counts,
-            'graded'      => count($graded_scores),
-            'avg_score'   => $avg_score,
-            'min_score'   => $min_score,
-            'max_score'   => $max_score,
-            'pass_count'  => $pass_count,
+            'graded'      => count($gradedscores),
+            'avg_score'   => $avgscore,
+            'min_score'   => $minscore,
+            'max_score'   => $maxscore,
+            'pass_count'  => $passcount,
             'bands'       => array_values($bands),
-            'top_failed'  => $top_failed,
+            'top_failed'  => $topfailed,
         ];
     }
 
+    /**
+     * Define the return structure for this web service.
+     */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'examid'     => new external_value(PARAM_INT,   'Exam ID'),
+            'examid'     => new external_value(PARAM_INT, 'Exam ID'),
             'counts'     => new external_single_structure([
                 'assigned'  => new external_value(PARAM_INT, 'Assigned'),
                 'started'   => new external_value(PARAM_INT, 'Started'),
                 'submitted' => new external_value(PARAM_INT, 'Submitted'),
                 'graded'    => new external_value(PARAM_INT, 'Graded'),
             ]),
-            'graded'     => new external_value(PARAM_INT,   'Total graded exams'),
+            'graded'     => new external_value(PARAM_INT, 'Total graded exams'),
             'avg_score'  => new external_value(PARAM_FLOAT, 'Average score (0-10)'),
             'min_score'  => new external_value(PARAM_FLOAT, 'Minimum score'),
             'max_score'  => new external_value(PARAM_FLOAT, 'Maximum score'),
-            'pass_count' => new external_value(PARAM_INT,   'Count with score >= 6'),
+            'pass_count' => new external_value(PARAM_INT, 'Count with score >= 6'),
             'bands'      => new external_multiple_structure(
                 new external_single_structure([
                     'label' => new external_value(PARAM_TEXT, 'Band label e.g. 0–2'),
-                    'count' => new external_value(PARAM_INT,  'Students in this band'),
+                    'count' => new external_value(PARAM_INT, 'Students in this band'),
                 ])
             ),
             'top_failed' => new external_multiple_structure(
                 new external_single_structure([
-                    'question_id' => new external_value(PARAM_INT,          'Question ID'),
-                    'stem'        => new external_value(PARAM_TEXT,          'Question text'),
-                    'topic'       => new external_value(PARAM_TEXT,          'Rubric topic / theme'),
-                    'difficulty'  => new external_value(PARAM_TEXT,          'Difficulty label'),
-                    'fail_count'  => new external_value(PARAM_INT,           'Times answered wrong'),
-                    'total'       => new external_value(PARAM_INT,           'Total graded exams'),
+                    'question_id' => new external_value(PARAM_INT, 'Question ID'),
+                    'stem'        => new external_value(PARAM_TEXT, 'Question text'),
+                    'topic'       => new external_value(PARAM_TEXT, 'Rubric topic / theme'),
+                    'difficulty'  => new external_value(PARAM_TEXT, 'Difficulty label'),
+                    'fail_count'  => new external_value(PARAM_INT, 'Times answered wrong'),
+                    'total'       => new external_value(PARAM_INT, 'Total graded exams'),
                 ])
             ),
         ]);
