@@ -307,52 +307,51 @@ echo $OUTPUT->header();
       <div class="d-flex align-items-center gap-3 mb-3">
         <div style="font-size:2.8rem;line-height:1">🧠</div>
         <div>
-          <h3 class="mb-1">Welcome to EVAL-IA</h3>
-          <p class="text-muted mb-0">This wizard will configure the AI engine connection in a few steps.</p>
+          <h3 class="mb-1"><?= get_string('wizard_welcome_title', 'local_evalia') ?></h3>
+          <p class="text-muted mb-0"><?= get_string('wizard_welcome_subtitle', 'local_evalia') ?></p>
         </div>
       </div>
       <hr class="my-3">
 
       <p class="mb-3" style="font-size:.9rem;">
-        EVAL-IA automates your evaluation workflow using AI && Retrieval-Augmented Generation (RAG)
-        over your own course materials:
+        <?= get_string('wizard_welcome_intro', 'local_evalia') ?>
       </p>
 
       <div class="feature-grid mb-4">
         <div class="feature-item">
           <div class="fi-icon">📋</div>
-          <div><h6>AI Rubric Generation</h6>
-            <p>Generates structured evaluation rubrics from indexed course materials in seconds.</p></div>
+          <div><h6><?= get_string('wizard_feat_rubric_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_rubric_desc', 'local_evalia') ?></p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">❓</div>
-          <div><h6>Question Bank</h6>
-            <p>Creates multiple-choice, true/false, numerical, short-answer && essay questions per topic.</p></div>
+          <div><h6><?= get_string('wizard_feat_qbank_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_qbank_desc', 'local_evalia') ?></p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">📝</div>
-          <div><h6>Unique Per-Student Exams</h6>
-            <p>Each student receives a different question set, reducing collusion risk.</p></div>
+          <div><h6><?= get_string('wizard_feat_unique_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_unique_desc', 'local_evalia') ?></p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">🤖</div>
-          <div><h6>AI Grading</h6>
-            <p>Objective questions graded instantly. Essays evaluated by the LLM with RAG context.</p></div>
+          <div><h6><?= get_string('wizard_feat_grading_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_grading_desc', 'local_evalia') ?></p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">📊</div>
-          <div><h6>Gradebook Integration</h6>
-            <p>Results published directly to Moodle's native gradebook.</p></div>
+          <div><h6><?= get_string('wizard_feat_gradebook_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_gradebook_desc', 'local_evalia') ?></p></div>
         </div>
         <div class="feature-item">
           <div class="fi-icon">💬</div>
-          <div><h6>Telegram Feedback</h6>
-            <p>Students receive AI-generated pedagogical feedback via Telegram after grading.</p></div>
+          <div><h6><?= get_string('wizard_feat_telegram_title', 'local_evalia') ?></h6>
+            <p><?= get_string('wizard_feat_telegram_desc', 'local_evalia') ?></p></div>
         </div>
       </div>
 
       <div class="d-flex justify-content-end">
-        <button class="btn btn-primary px-5" onclick="evwizGoto(2)">Next →</button>
+        <button class="btn btn-primary px-5" onclick="evwizGoto(2)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 1 -->
 
@@ -362,24 +361,23 @@ echo $OUTPUT->header();
          ══════════════════════════════════════════ -->
     <div class="evwiz-step" id="evwiz-step-2">
 
-      <h4 class="mb-1">Minimum requirements</h4>
+      <h4 class="mb-1"><?= get_string('wizard_req_title', 'local_evalia') ?></h4>
       <p class="text-muted mb-4" style="font-size:.88rem;">
-        Please verify that your environment meets all requirements before continuing.
-        <strong>EVAL-IA will not work without an active AI service.</strong>
+        <?= get_string('wizard_req_intro', 'local_evalia') ?>
       </p>
 
       <!-- ─── Platform requirements ─── -->
       <div class="req-section">
         <div class="req-section-header" style="background:#f8f9fa;">
-          🖥️ Platform
+          <?= get_string('wizard_req_platform_header', 'local_evalia') ?>
         </div>
         <div class="req-section-body">
 
           <div class="req-row">
             <div class="req-status"><?= $moodleverok ? '✅' : '❌' ?></div>
             <div class="req-label">
-              <strong>Moodle 4.4 || 4.5</strong>
-              <span>Older versions are not supported.</span>
+              <strong><?= get_string('wizard_req_moodle_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_moodle_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value"><?= s($moodleverstr) ?></div>
           </div>
@@ -387,8 +385,8 @@ echo $OUTPUT->header();
           <div class="req-row">
             <div class="req-status"><?= $phpverok ? '✅' : '❌' ?></div>
             <div class="req-label">
-              <strong>PHP 8.1+</strong>
-              <span>PHP 7.x is not supported.</span>
+              <strong><?= get_string('wizard_req_php_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_php_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value"><?= s($phpverstr) ?></div>
           </div>
@@ -396,17 +394,19 @@ echo $OUTPUT->header();
           <div class="req-row">
             <div class="req-status"><?= $curlok ? '✅' : '❌' ?></div>
             <div class="req-label">
-              <strong>PHP cURL extension</strong>
-              <span>Required to communicate with the AI engine.</span>
+              <strong><?= get_string('wizard_req_curl_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_curl_desc', 'local_evalia') ?></span>
             </div>
-            <div class="req-value"><?= $curlok ? 'Enabled' : '<span class="text-danger">Missing</span>' ?></div>
+            <div class="req-value"><?= $curlok
+                ? get_string('wizard_req_curl_enabled', 'local_evalia')
+                : '<span class="text-danger">' . get_string('wizard_req_curl_missing', 'local_evalia') . '</span>' ?></div>
           </div>
 
           <div class="req-row">
             <div class="req-status">ℹ️</div>
             <div class="req-label">
-              <strong>Database</strong>
-              <span>MySQL 8+ / MariaDB 10.6+ / PostgreSQL 13+</span>
+              <strong><?= get_string('wizard_req_db_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_db_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value"><?= s($CFG->dbtype) ?></div>
           </div>
@@ -417,46 +417,42 @@ echo $OUTPUT->header();
       <!-- ─── AI Engine requirement ─── -->
       <div class="req-section" style="border-color:#f0ad4e;">
         <div class="req-section-header" style="background:#fff8e1; color:#856404; border-bottom:1px solid #f0e0a0;">
-          ⚠️ AI Engine — <em>Required. EVAL-IA will not function without this.</em>
+          <?= get_string('wizard_req_engine_header', 'local_evalia') ?>
         </div>
         <div class="req-section-body">
 
           <p style="font-size:.87rem; margin-bottom:14px;">
-            EVAL-IA uses a companion Python service called <strong>saipa-engine</strong> to run all
-            AI operations: rubric generation, question creation, exam grading, && feedback delivery.
-            This service must be running && reachable from this Moodle server before you can use
-            any EVAL-IA feature.
+            <?= get_string('wizard_req_engine_intro', 'local_evalia') ?>
           </p>
 
           <div class="req-row">
             <div class="req-status">🐍</div>
             <div class="req-label">
-              <strong>saipa-engine (Python 3.11+ / FastAPI)</strong>
-              <span>Handles all LLM inference, vector search (ChromaDB), && RAG retrieval.</span>
+              <strong><?= get_string('wizard_req_engine_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_engine_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
-              <span class="badge bg-warning text-dark" style="font-size:.72rem;">Must be deployed separately</span>
+              <span class="badge bg-warning text-dark" style="font-size:.72rem;"><?= get_string('wizard_req_engine_badge', 'local_evalia') ?></span>
             </div>
           </div>
 
           <div class="req-row">
             <div class="req-status">🗄️</div>
             <div class="req-label">
-              <strong>ChromaDB (embedded in saipa-engine)</strong>
-              <span>Vector database that stores indexed course materials.</span>
+              <strong><?= get_string('wizard_req_chroma_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_chroma_desc', 'local_evalia') ?></span>
             </div>
-            <div class="req-value">Included in engine</div>
+            <div class="req-value"><?= get_string('wizard_req_chroma_value', 'local_evalia') ?></div>
           </div>
 
           <div class="req-row">
             <div class="req-status">🔤</div>
             <div class="req-label">
-              <strong>Large Language Model (LLM)</strong>
-              <span>Generates rubrics, questions, grades essays, && writes feedback.
-                See provisioning options below.</span>
+              <strong><?= get_string('wizard_req_llm_label', 'local_evalia') ?></strong>
+              <span><?= get_string('wizard_req_llm_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
-              <span class="badge bg-danger" style="font-size:.72rem;">AI service required</span>
+              <span class="badge bg-danger" style="font-size:.72rem;"><?= get_string('wizard_req_llm_badge', 'local_evalia') ?></span>
             </div>
           </div>
 
@@ -466,13 +462,12 @@ echo $OUTPUT->header();
       <!-- ─── AI Provisioning options ─── -->
       <div class="req-section" style="border-color:#0d6efd;">
         <div class="req-section-header" style="background:#e7f1ff; color:#084298; border-bottom:1px solid #b6d4fe;">
-          🤖 AI service provisioning — choose one option
+          <?= get_string('wizard_prov_header', 'local_evalia') ?>
         </div>
         <div class="req-section-body">
 
           <p style="font-size:.85rem;margin-bottom:14px;color:#495057;">
-            The LLM that powers EVAL-IA can come from three sources.
-            You must have at least one option ready before proceeding.
+            <?= get_string('wizard_prov_intro', 'local_evalia') ?>
           </p>
 
           <div class="ai-provision-cards">
@@ -480,64 +475,57 @@ echo $OUTPUT->header();
             <div class="ai-pcard pc-local">
               <div class="pc-head">
                 <div class="pc-icon">🖥️</div>
-                <h6>Local — Ollama <span class="mode-badge badge-local">SELF-HOSTED</span></h6>
+                <h6><?= get_string('wizard_prov_local_title', 'local_evalia') ?> <span class="mode-badge badge-local">SELF-HOSTED</span></h6>
               </div>
-              <p>Run the LLM on your own server using <a href="https://ollama.com" target="_blank">Ollama</a>.
-                 Full privacy — no data leaves your infrastructure.</p>
+              <p><?= get_string('wizard_prov_local_desc', 'local_evalia') ?></p>
               <ul>
-                <li>Recommended model: <code>qwen2.5:14b</code> (requires ≥16 GB RAM)</li>
-                <li>Minimum: any 7B model with ≥8 GB RAM</li>
-                <li>saipa-engine must run on the same host || have network access to Ollama</li>
+                <li><?= get_string('wizard_prov_local_li1', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_local_li2', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_local_li3', 'local_evalia') ?></li>
               </ul>
             </div>
 
             <div class="ai-pcard pc-cloud">
               <div class="pc-head">
                 <div class="pc-icon">☁️</div>
-                <h6>Cloud API <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h6>
+                <h6><?= get_string('wizard_prov_cloud_title', 'local_evalia') ?> <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h6>
               </div>
-              <p>Use any OpenAI-compatible API provider (OpenAI, Azure OpenAI, Groq, Mistral, etc.)
-                 with your own API key.</p>
+              <p><?= get_string('wizard_prov_cloud_desc', 'local_evalia') ?></p>
               <ul>
-                <li>No local GPU required</li>
-                <li>API key cost depends on usage && provider</li>
-                <li>Configure <code>OPENAI_API_KEY</code> in saipa-engine's <code>.env</code></li>
+                <li><?= get_string('wizard_prov_cloud_li1', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_cloud_li2', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_cloud_li3', 'local_evalia') ?></li>
               </ul>
             </div>
 
             <div class="ai-pcard pc-saipa">
               <div class="pc-head">
                 <div class="pc-icon">🌐</div>
-                <h6>SAIPA Cloud <span class="mode-badge badge-soon">COMING SOON</span></h6>
+                <h6><?= get_string('wizard_prov_saipa_title', 'local_evalia') ?> <span class="mode-badge badge-soon">COMING SOON</span></h6>
               </div>
-              <p>Fully managed engine hosted by Schaller &amp; Ponce. No Ollama, no ChromaDB installation.
-                 Subscribe && connect with a single API key.</p>
+              <p><?= get_string('wizard_prov_saipa_desc', 'local_evalia') ?></p>
               <ul>
-                <li>Zero infrastructure to manage</li>
-                <li>Join the waitlist at <code>cloud.saipa.online</code></li>
+                <li><?= get_string('wizard_prov_saipa_li1', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_saipa_li2', 'local_evalia') ?></li>
               </ul>
             </div>
 
             <div class="ai-pcard pc-custom">
               <div class="pc-head">
                 <div class="pc-icon">⚙️</div>
-                <h6>Custom / Enterprise <span class="mode-badge badge-custom">ADVANCED</span></h6>
+                <h6><?= get_string('wizard_prov_custom_title', 'local_evalia') ?> <span class="mode-badge badge-custom">ADVANCED</span></h6>
               </div>
-              <p>Point EVAL-IA at any engine URL that exposes a compatible REST API
-                 (e.g. your own FastAPI fork, on-premise deployment, || private cloud).</p>
+              <p><?= get_string('wizard_prov_custom_desc', 'local_evalia') ?></p>
               <ul>
-                <li>Must implement <code>GET /health</code> returning <code>{"status":"ok"}</code></li>
-                <li>Must implement <code>POST /eval/rubric/generate</code> && related endpoints</li>
+                <li><?= get_string('wizard_prov_custom_li1', 'local_evalia') ?></li>
+                <li><?= get_string('wizard_prov_custom_li2', 'local_evalia') ?></li>
               </ul>
             </div>
 
           </div><!-- /ai-provision-cards -->
 
           <div class="alert alert-danger mt-3 mb-0 py-2 px-3" style="font-size:.84rem;">
-            <strong>⛔ Without an active AI service, EVAL-IA will not be able to:</strong>
-            index course materials, generate rubrics, create questions, grade exams, || deliver feedback.
-            All these functions depend exclusively on the AI engine. <strong>Do not continue</strong> unless
-            you have one of the options above deployed && ready.
+            <?= get_string('wizard_prov_warning', 'local_evalia') ?>
           </div>
 
         </div>
@@ -547,14 +535,14 @@ echo $OUTPUT->header();
       <div class="form-check mt-3 mb-1">
         <input class="form-check-input" type="checkbox" id="req-confirm">
         <label class="form-check-label" for="req-confirm" style="font-size:.88rem;">
-          I have read the requirements above. An AI service (saipa-engine + LLM) is deployed && reachable from this server.
+          <?= get_string('wizard_req_confirm', 'local_evalia') ?>
         </label>
       </div>
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(1)">← Back</button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(1)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
         <button class="btn btn-primary px-5" id="req-next-btn" disabled
-                onclick="evwizGoto(3)">Next →</button>
+                onclick="evwizGoto(3)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 2 -->
 
@@ -564,9 +552,9 @@ echo $OUTPUT->header();
          ══════════════════════════════════════════ -->
     <div class="evwiz-step" id="evwiz-step-3">
 
-      <h4 class="mb-1">Choose your AI provisioning mode</h4>
+      <h4 class="mb-1"><?= get_string('wizard_mode_title', 'local_evalia') ?></h4>
       <p class="text-muted mb-4" style="font-size:.88rem;">
-        Select the option that matches your deployed AI infrastructure.
+        <?= get_string('wizard_mode_intro', 'local_evalia') ?>
       </p>
 
       <div class="mode-cards">
@@ -575,39 +563,39 @@ echo $OUTPUT->header();
           <input type="radio" name="engine_mode" id="mode-local" value="local_ollama"
                  <?= ($cfgmode === 'local_ollama') ? 'checked' : '' ?>>
           <div class="mc-icon">🖥️</div>
-          <h5>Local — Ollama <span class="mode-badge badge-local">SELF-HOSTED</span></h5>
-          <p>saipa-engine running on your server with Ollama as the LLM backend. Full data privacy.</p>
+          <h5><?= get_string('wizard_mode_local_title', 'local_evalia') ?> <span class="mode-badge badge-local">SELF-HOSTED</span></h5>
+          <p><?= get_string('wizard_mode_local_desc', 'local_evalia') ?></p>
         </label>
 
         <label class="mode-card <?= ($cfgmode === 'cloud_api') ? 'selected' : '' ?>" for="mode-cloud">
           <input type="radio" name="engine_mode" id="mode-cloud" value="cloud_api"
                  <?= ($cfgmode === 'cloud_api') ? 'checked' : '' ?>>
           <div class="mc-icon">☁️</div>
-          <h5>Cloud API <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5>
-          <p>saipa-engine configured with an OpenAI-compatible API key. No local GPU required.</p>
+          <h5><?= get_string('wizard_mode_cloud_title', 'local_evalia') ?> <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5>
+          <p><?= get_string('wizard_mode_cloud_desc', 'local_evalia') ?></p>
         </label>
 
         <label class="mode-card <?= ($cfgmode === 'saipa_cloud') ? 'selected' : '' ?>" for="mode-saipa">
           <input type="radio" name="engine_mode" id="mode-saipa" value="saipa_cloud"
                  <?= ($cfgmode === 'saipa_cloud') ? 'checked' : '' ?>>
           <div class="mc-icon">🌐</div>
-          <h5>SAIPA Cloud <span class="mode-badge badge-soon">COMING SOON</span></h5>
-          <p>Fully managed engine by Schaller &amp; Ponce. Subscribe && connect with a single API key.</p>
+          <h5><?= get_string('wizard_mode_saipa_title', 'local_evalia') ?> <span class="mode-badge badge-soon">COMING SOON</span></h5>
+          <p><?= get_string('wizard_mode_saipa_desc', 'local_evalia') ?></p>
         </label>
 
         <label class="mode-card <?= ($cfgmode === 'custom') ? 'selected' : '' ?>" for="mode-custom">
           <input type="radio" name="engine_mode" id="mode-custom" value="custom"
                  <?= ($cfgmode === 'custom') ? 'checked' : '' ?>>
           <div class="mc-icon">⚙️</div>
-          <h5>Custom / Enterprise <span class="mode-badge badge-custom">ADVANCED</span></h5>
-          <p>Any compatible engine at a custom URL. Full control for advanced deployments.</p>
+          <h5><?= get_string('wizard_mode_custom_title', 'local_evalia') ?> <span class="mode-badge badge-custom">ADVANCED</span></h5>
+          <p><?= get_string('wizard_mode_custom_desc', 'local_evalia') ?></p>
         </label>
 
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(2)">← Back</button>
-        <button class="btn btn-primary px-5" onclick="evwizGoto(4)">Next →</button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(2)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-primary px-5" onclick="evwizGoto(4)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 3 -->
 
