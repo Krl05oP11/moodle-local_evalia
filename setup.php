@@ -667,7 +667,7 @@ echo $OUTPUT->header();
 
       <div class="d-flex justify-content-between mt-4">
         <button class="btn btn-outline-secondary" onclick="evwizGoto(3)">← Back</button>
-        <button class="btn btn-primary px-5" onclick="evwizRunTest()">Test Connection →</button>
+        <button class="btn btn-primary px-5" onclick="evwizGoto(5)">Test Connection →</button>
       </div>
     </div><!-- /step 4 -->
 

@@ -111,7 +111,7 @@ if ($studentexam->status === 'assigned' && $isowner) {
     $studentexam->status = 'started';
 }
 
-$alreadysubmitted = in_array($studentexam->status, ['submitted', 'graded']);
+$alreadysubmitted = in_array($studentexam->status, ['submitted', 'graded', 'published']);
 $previewmode      = $isteacher && !$isowner;  // teacher viewing someone else's exam
 
 // Pre-load stored answers (needed for correctness maps && later rendering).
@@ -124,7 +124,7 @@ if ($previewmode && $alreadysubmitted) {
 $correctoptionmap = [];   // qid → correct option_text (multichoice / truefalse)
 $correctnessmap    = [];   // qid → bool
 $essayevals        = [];   // qid → ['score' => float, 'feedback' => string]
-if ($previewmode && $studentexam->status === 'graded') {
+if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     // Extract essay AI evals persisted in the answers JSON.
     $essayevals = (array) ($storedanswers['__essay_eval__'] ?? []);
 
@@ -170,7 +170,8 @@ if (!$previewmode) {
 
 // Fetch the student's name for the teacher preview banner.
 $studentuser = $previewmode
-    ? $DB->get_record('user', ['id' => $studentexam->userid], 'id, firstname, lastname')
+    ? $DB->get_record('user', ['id' => $studentexam->userid],
+        'id,' . implode(',', \core_user\fields::get_name_fields()))
     : null;
 
 echo $OUTPUT->header();
@@ -198,7 +199,7 @@ if ($previewmode) {
 if ($alreadysubmitted && !$previewmode) {
     echo '<div class="alert alert-success mt-3">';
     echo '<h4>✅ Examen enviado</h4>';
-    if ($studentexam->status === 'graded') {
+    if (in_array($studentexam->status, ['graded', 'published'])) {
         $score = number_format((float) $studentexam->score, 1);
         echo '<p class="mb-0">Tu nota: <strong>' . $score . ' / 10.0</strong>. El docente ya calificó tu examen.</p>';
     } else {
@@ -210,7 +211,7 @@ if ($alreadysubmitted && !$previewmode) {
 }
 
 // ── Teacher preview of graded exam: show score banner then fall through to questions ──
-if ($previewmode && $studentexam->status === 'graded') {
+if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     $score = number_format((float) $studentexam->score, 1);
     echo '<div class="alert alert-success mt-3 mb-2">';
     echo '✅ <strong>Calificado:</strong> ' . $score . ' / 10.0';
@@ -250,7 +251,7 @@ foreach ($questionsdata as $q) {
     $qweight   = $diffweights[$q['difficulty']] ?? 1;
 
     $cardborder = '';
-    if ($previewmode && $studentexam->status === 'graded') {
+    if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
         $cardborder = ($correctnessmap[$q['id']] ?? false) ? ' border-success' : ' border-danger';
     }
     echo '<div class="card mb-3' . $cardborder . '" id="evalia-q-' . $q['id'] . '">';
@@ -260,7 +261,7 @@ foreach ($questionsdata as $q) {
     // Difficulty badge.
     echo '<span class="badge bg-' . $diffclass . '">' . htmlspecialchars($q['difficulty']) . '</span>';
     // Points badge: plain in active exam; score obtained in graded preview.
-    if ($previewmode && $studentexam->status === 'graded') {
+    if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
         if ($q['question_type'] === 'essay') {
             $evalscore = (float) ($essayevals[(string)$q['id']]['score'] ?? 0.0);
             $obtained   = number_format($evalscore * $qweight, 1);
@@ -282,7 +283,7 @@ foreach ($questionsdata as $q) {
     // Stored answer for this question (used in teacher preview of submitted/graded exams).
     $storedanswer = $storedanswers[(string)$q['id']] ?? null;
 
-    $gradedpreview = ($previewmode && $studentexam->status === 'graded');
+    $gradedpreview = ($previewmode && in_array($studentexam->status, ['graded', 'published']));
 
     if ($q['question_type'] === 'multichoice' || $q['question_type'] === 'truefalse') {
         foreach ($q['options'] as $opt) {

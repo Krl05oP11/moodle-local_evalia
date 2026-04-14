@@ -55,11 +55,12 @@ class get_student_portfolio extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
+        $namefields = 'u.' . implode(', u.', \core_user\fields::get_name_fields());
         $students = get_enrolled_users(
             $context,
             'local/evalia:take',
             0,
-            'u.id, u.firstname, u.lastname, u.email'
+            'u.id, u.email, ' . $namefields
         );
 
         if (empty($students)) {

@@ -209,7 +209,8 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
         $tgid   = ($tglink && !empty($tglink->telegram_id)) ? (int) $tglink->telegram_id : 0;
 
         $course  = $DB->get_record('course', ['id' => $exam->courseid], 'fullname');
-        $student = $DB->get_record('user', ['id' => $se->userid], 'id, firstname, lastname');
+        $student = $DB->get_record('user', ['id' => $se->userid],
+            'id,' . implode(',', \core_user\fields::get_name_fields()));
 
         // ── Reconstruct per-question feedback data from stored answers ────────
         $questionids = json_decode($se->question_ids ?? '[]', true);
