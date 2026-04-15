@@ -39,8 +39,8 @@ require_capability('moodle/site:config', context_system::instance());
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/evalia/setup.php'));
 $PAGE->set_pagelayout('admin');
-$PAGE->set_title('EVAL-IA — Setup Wizard');
-$PAGE->set_heading('EVAL-IA Setup Wizard');
+$PAGE->set_title(get_string('wizard_page_title', 'local_evalia'));
+$PAGE->set_heading(get_string('wizard_page_heading', 'local_evalia'));
 
 $action = optional_param('action', '', PARAM_ALPHA);
 
@@ -54,7 +54,7 @@ if ($action === 'health') {
     $enginetoken = optional_param('engine_token', '', PARAM_RAW);
 
     if (empty($engineurl)) {
-        echo json_encode(['error' => 'Engine URL is required.']);
+        echo json_encode(['error' => get_string('wizard_err_url_required', 'local_evalia')]);
         die();
     }
 
@@ -78,16 +78,16 @@ if ($action === 'health') {
     curl_close($ch);
 
     if ($errno) {
-        echo json_encode(['error' => 'Connection failed: ' . $err]);
+        echo json_encode(['error' => get_string('wizard_err_connection', 'local_evalia', $err)]);
         die();
     }
     if ($http !== 200) {
-        echo json_encode(['error' => "Engine returned HTTP $http. Check the URL && token."]);
+        echo json_encode(['error' => get_string('wizard_err_http_status', 'local_evalia', $http)]);
         die();
     }
     $decoded = json_decode($resp, true);
     if (!$decoded || ($decoded['status'] ?? '') !== 'ok') {
-        echo json_encode(['error' => 'Unexpected engine response: ' . substr($resp, 0, 200)]);
+        echo json_encode(['error' => get_string('wizard_err_unexpected', 'local_evalia', substr($resp, 0, 200))]);
         die();
     }
     echo json_encode([
@@ -121,7 +121,7 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     redirect(
         new moodle_url('/local/evalia/setup.php', ['done' => 1]),
-        'Configuration saved successfully.',
+        get_string('wizard_save_success', 'local_evalia'),
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );
@@ -271,15 +271,14 @@ echo $OUTPUT->header();
   <div class="card shadow-sm">
     <div class="card-body done-card">
       <div class="done-icon">🎉</div>
-      <h3>EVAL-IA is ready!</h3>
-      <p>The AI engine has been configured. You can now generate rubrics,<br>
-         create question banks, && assign exams to your students.</p>
+      <h3><?= get_string('wizard_completion_title', 'local_evalia') ?></h3>
+      <p><?= get_string('wizard_completion_body', 'local_evalia') ?></p>
       <div class="d-flex gap-3 justify-content-center flex-wrap">
         <a href="<?= s($settingsurl) ?>" class="btn btn-outline-secondary">
-          ⚙️ Admin Settings
+          <?= get_string('wizard_done_admin_btn', 'local_evalia') ?>
         </a>
         <a href="<?= (new moodle_url('/course/index.php'))->out() ?>" class="btn btn-primary btn-lg px-5">
-          Go to My Courses →
+          <?= get_string('wizard_done_courses_btn', 'local_evalia') ?>
         </a>
       </div>
     </div>
@@ -288,12 +287,12 @@ echo $OUTPUT->header();
 <?php else : /* ─── Wizard ─── */ ?>
   <!-- Progress bar -->
   <div class="evwiz-progress" id="evwiz-progress">
-    <div class="step active" data-step="1"><div class="step-circle">1</div><div class="step-label">Welcome</div></div>
-    <div class="step"        data-step="2"><div class="step-circle">2</div><div class="step-label">Requirements</div></div>
-    <div class="step"        data-step="3"><div class="step-circle">3</div><div class="step-label">AI Mode</div></div>
-    <div class="step"        data-step="4"><div class="step-circle">4</div><div class="step-label">Connect</div></div>
-    <div class="step"        data-step="5"><div class="step-circle">5</div><div class="step-label">Test</div></div>
-    <div class="step"        data-step="6"><div class="step-circle">6</div><div class="step-label">Done</div></div>
+    <div class="step active" data-step="1"><div class="step-circle">1</div><div class="step-label"><?= get_string('wizard_step_welcome', 'local_evalia') ?></div></div>
+    <div class="step"        data-step="2"><div class="step-circle">2</div><div class="step-label"><?= get_string('wizard_step_requirements', 'local_evalia') ?></div></div>
+    <div class="step"        data-step="3"><div class="step-circle">3</div><div class="step-label"><?= get_string('wizard_step_ai_mode', 'local_evalia') ?></div></div>
+    <div class="step"        data-step="4"><div class="step-circle">4</div><div class="step-label"><?= get_string('wizard_step_connect', 'local_evalia') ?></div></div>
+    <div class="step"        data-step="5"><div class="step-circle">5</div><div class="step-label"><?= get_string('wizard_step_test', 'local_evalia') ?></div></div>
+    <div class="step"        data-step="6"><div class="step-circle">6</div><div class="step-label"><?= get_string('wizard_step_done', 'local_evalia') ?></div></div>
   </div>
 
   <div class="card shadow-sm">
@@ -605,57 +604,52 @@ echo $OUTPUT->header();
          ══════════════════════════════════════════ -->
     <div class="evwiz-step" id="evwiz-step-4">
 
-      <h4 class="mb-1">Connection details</h4>
+      <h4 class="mb-1"><?= get_string('wizard_step4_title', 'local_evalia') ?></h4>
       <p class="text-muted mb-4" style="font-size:.88rem;">
-        Enter the URL && authentication token for the saipa-engine.
+        <?= get_string('wizard_step4_intro', 'local_evalia') ?>
       </p>
 
       <!-- Mode-specific hints (shown/hidden by JS) -->
       <div id="hint-local_ollama" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;">
-        <strong>🖥️ Local / Ollama:</strong>
-        The default port for saipa-engine is <code>8052</code>.
-        If you are running it via Docker on the same host, use <code>http://localhost:8052</code>.
-        Token is optional unless you configured <code>ENGINE_SECRET</code> in <code>.env</code>.
+        <strong><?= get_string('wizard_hint_local_title', 'local_evalia') ?></strong>
+        <?= get_string('wizard_hint_local_body', 'local_evalia') ?>
       </div>
-      <div id="hint-cloud_api" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;" style="display:none">
-        <strong>☁️ Cloud API:</strong>
-        Enter the URL where saipa-engine is deployed (with Cloud API configured), && the
-        <code>ENGINE_SECRET</code> token. The engine will use your cloud API key internally.
+      <div id="hint-cloud_api" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
+        <strong><?= get_string('wizard_hint_cloud_title', 'local_evalia') ?></strong>
+        <?= get_string('wizard_hint_cloud_body', 'local_evalia') ?>
       </div>
-      <div id="hint-saipa_cloud" class="alert alert-warning mb-3 py-2 px-3" style="font-size:.82rem;">
-        <strong>🌐 SAIPA Cloud is not yet available.</strong>
-        When launched, the engine URL will be <code>https://engine.saipa.online</code> && the token will be your subscription API key. For now, select another mode to continue.
+      <div id="hint-saipa_cloud" class="alert alert-warning mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
+        <strong><?= get_string('wizard_hint_saipa_title', 'local_evalia') ?></strong>
+        <?= get_string('wizard_hint_saipa_body', 'local_evalia') ?>
       </div>
-      <div id="hint-custom" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;">
-        <strong>⚙️ Custom / Enterprise:</strong>
-        Enter the base URL of your engine. The wizard will test <code>{url}/health</code>.
-        Authentication uses a standard Bearer token.
+      <div id="hint-custom" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
+        <strong><?= get_string('wizard_hint_custom_title', 'local_evalia') ?></strong>
+        <?= get_string('wizard_hint_custom_body', 'local_evalia') ?>
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold" for="evwiz-url">
-          Engine URL <span class="text-danger">*</span>
+          <?= get_string('wizard_url_label', 'local_evalia') ?> <span class="text-danger">*</span>
         </label>
         <input type="url" class="form-control" id="evwiz-url"
                placeholder="http://localhost:8052"
                value="<?= s($cfgurl) ?>">
-        <div class="form-text">Base URL of the saipa-engine — without trailing slash.</div>
+        <div class="form-text"><?= get_string('wizard_url_help', 'local_evalia') ?></div>
       </div>
 
       <div class="mb-3">
-        <label class="form-label fw-semibold" for="evwiz-token">Engine Token</label>
+        <label class="form-label fw-semibold" for="evwiz-token"><?= get_string('wizard_token_label', 'local_evalia') ?></label>
         <input type="password" class="form-control" id="evwiz-token"
-               placeholder="Leave blank if not configured"
+               placeholder="<?= s(get_string('wizard_token_placeholder', 'local_evalia')) ?>"
                value="<?= s($cfgtoken) ?>">
         <div class="form-text">
-          Value of <code>ENGINE_SECRET</code> in the engine's <code>.env</code> file.
-          Leave blank if you did not configure a secret.
+          <?= get_string('wizard_token_help', 'local_evalia') ?>
         </div>
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(3)">← Back</button>
-        <button class="btn btn-primary px-5" onclick="evwizGoto(5)">Test Connection →</button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(3)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-primary px-5" onclick="evwizGoto(5)"><?= get_string('wizard_btn_test', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 4 -->
 
@@ -665,25 +659,25 @@ echo $OUTPUT->header();
          ══════════════════════════════════════════ -->
     <div class="evwiz-step" id="evwiz-step-5">
 
-      <h4 class="mb-1">Connection test</h4>
+      <h4 class="mb-1"><?= get_string('wizard_step5_title', 'local_evalia') ?></h4>
       <p class="text-muted mb-4" style="font-size:.88rem;">
-        Verifying connectivity with the SAIPA Engine…
+        <?= get_string('wizard_step5_intro', 'local_evalia') ?>
       </p>
 
       <div id="evwiz-health-result" class="mb-3">
         <div class="d-flex align-items-center gap-2 text-muted py-2">
           <div class="spinner-border spinner-border-sm" role="status"></div>
-          <span>Connecting…</span>
+          <span><?= get_string('wizard_connecting', 'local_evalia') ?></span>
         </div>
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(4)">← Back</button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(4)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-secondary" id="evwiz-retry-btn" style="display:none"
-                  onclick="evwizRunTest()">↻ Retry</button>
+                  onclick="evwizRunTest()"><?= get_string('wizard_btn_retry', 'local_evalia') ?></button>
           <button class="btn btn-success px-5" id="evwiz-save-btn" style="display:none"
-                  onclick="evwizSave()">✅ Save & Finish</button>
+                  onclick="evwizSave()"><?= get_string('wizard_btn_save_finish', 'local_evalia') ?></button>
         </div>
       </div>
     </div><!-- /step 5 -->
@@ -695,15 +689,14 @@ echo $OUTPUT->header();
     <div class="evwiz-step" id="evwiz-step-6">
       <div class="done-card">
         <div class="done-icon">✅</div>
-        <h3>Configuration saved!</h3>
-        <p>EVAL-IA is connected to the AI engine && ready to use.<br>
-           Open any course && navigate to <strong>EVAL-IA → Teacher Panel</strong> to start.</p>
+        <h3><?= get_string('wizard_done_title', 'local_evalia') ?></h3>
+        <p><?= get_string('wizard_done_body', 'local_evalia') ?></p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <a href="<?= s($settingsurl) ?>" class="btn btn-outline-secondary">
-            ⚙️ Admin Settings
+            <?= get_string('wizard_done_admin_btn', 'local_evalia') ?>
           </a>
           <a href="<?= (new moodle_url('/course/index.php'))->out() ?>" class="btn btn-primary btn-lg px-5">
-            Go to My Courses →
+            <?= get_string('wizard_done_courses_btn', 'local_evalia') ?>
           </a>
         </div>
       </div>
@@ -728,6 +721,26 @@ echo $OUTPUT->header();
 <script>
 (function () {
     'use strict';
+
+    // Localized runtime strings injected from Moodle lang files.
+    var L = <?= json_encode([
+        'connecting_engine'   => get_string('wizard_js_connecting_engine', 'local_evalia'),
+        'url_empty'           => get_string('wizard_js_url_empty', 'local_evalia'),
+        'engine_reachable'    => get_string('wizard_js_engine_reachable', 'local_evalia'),
+        'engine_version'      => get_string('wizard_js_engine_version', 'local_evalia'),
+        'uptime'              => get_string('wizard_js_uptime', 'local_evalia'),
+        'success_msg'         => get_string('wizard_js_success_msg', 'local_evalia'),
+        'connection_failed'   => get_string('wizard_js_connection_failed', 'local_evalia'),
+        'error_label'         => get_string('wizard_js_error_label', 'local_evalia'),
+        'unknown_error'       => get_string('wizard_js_unknown_error', 'local_evalia'),
+        'network_error'       => get_string('wizard_js_network_error', 'local_evalia'),
+        'troubleshoot_header' => get_string('wizard_js_troubleshoot_header', 'local_evalia'),
+        'troubleshoot_li1'    => get_string('wizard_js_troubleshoot_li1', 'local_evalia'),
+        'troubleshoot_li2'    => get_string('wizard_js_troubleshoot_li2', 'local_evalia'),
+        'troubleshoot_li3'    => get_string('wizard_js_troubleshoot_li3', 'local_evalia'),
+        'troubleshoot_li4'    => get_string('wizard_js_troubleshoot_li4', 'local_evalia'),
+        'troubleshoot_li5'    => get_string('wizard_js_troubleshoot_li5', 'local_evalia'),
+    ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
     var currentStep = 1;
     var healthOk    = false;
@@ -813,14 +826,14 @@ echo $OUTPUT->header();
         resultEl.innerHTML =
             '<div class="d-flex align-items-center gap-2 text-muted py-2">' +
             '<div class="spinner-border spinner-border-sm" role="status"></div>' +
-            '<span>Connecting to engine…</span></div>';
+            '<span>' + he(L.connecting_engine) + '</span></div>';
 
         var url   = (document.getElementById('evwiz-url')   || {}).value || '';
         var token = (document.getElementById('evwiz-token') || {}).value || '';
         url = url.trim();
 
         if (!url) {
-            renderHealthError('Engine URL is empty. Go back && enter a URL.', url);
+            renderHealthError(L.url_empty, url);
             return;
         }
 
@@ -841,25 +854,24 @@ echo $OUTPUT->header();
                 resultEl.innerHTML =
                     '<div class="health-row">' +
                     '<div class="health-icon">✅</div>' +
-                    '<div class="health-label"><strong>Engine reachable</strong></div>' +
+                    '<div class="health-label"><strong>' + he(L.engine_reachable) + '</strong></div>' +
                     '<div class="health-value">' + he(url) + '</div></div>' +
                     '<div class="health-row">' +
                     '<div class="health-icon">🔢</div>' +
-                    '<div class="health-label">Engine version</div>' +
+                    '<div class="health-label">' + he(L.engine_version) + '</div>' +
                     '<div class="health-value">' + he(data.version) + '</div></div>' +
                     '<div class="health-row">' +
                     '<div class="health-icon">⏱️</div>' +
-                    '<div class="health-label">Uptime</div>' +
+                    '<div class="health-label">' + he(L.uptime) + '</div>' +
                     '<div class="health-value">' + he(data.uptime) + '</div></div>' +
                     '<div class="alert alert-success py-2 px-3 mt-3 mb-0" style="font-size:.85rem;">' +
-                    '🎉 <strong>Connection successful!</strong> ' +
-                    'Click <em>Save &amp; Finish</em> to store the configuration.</div>';
+                    L.success_msg + '</div>';
                 saveBtn.style.display = '';
             } else {
-                renderHealthError(data.error || 'Unknown error', url);
+                renderHealthError(data.error || L.unknown_error, url);
             }
         })
-        .catch(function (e) { renderHealthError(e.message || 'Network error', url); });
+        .catch(function (e) { renderHealthError(e.message || L.network_error, url); });
     }
     window.evwizRunTest = evwizRunTest;
 
@@ -870,17 +882,17 @@ echo $OUTPUT->header();
         document.getElementById('evwiz-health-result').innerHTML =
             '<div class="health-row">' +
             '<div class="health-icon">❌</div>' +
-            '<div class="health-label"><strong>Connection failed</strong></div>' +
+            '<div class="health-label"><strong>' + he(L.connection_failed) + '</strong></div>' +
             '<div class="health-value">' + he(url || '—') + '</div></div>' +
             '<div class="alert alert-danger py-2 px-3 mt-3 mb-0" style="font-size:.84rem;">' +
-            '<strong>Error:</strong> ' + he(msg) + '<br><br>' +
-            '<strong>Troubleshooting checklist:</strong>' +
+            '<strong>' + he(L.error_label) + '</strong> ' + he(msg) + '<br><br>' +
+            '<strong>' + he(L.troubleshoot_header) + '</strong>' +
             '<ul class="mb-0 mt-1">' +
-            '<li>Is saipa-engine running? Run: <code>docker compose ps</code></li>' +
-            '<li>Is the URL correct? (default: <code>http://localhost:8052</code>)</li>' +
-            '<li>If using a token, does it match <code>ENGINE_SECRET</code> in <code>.env</code>?</li>' +
-            '<li>Is there a firewall || reverse proxy blocking port 8052?</li>' +
-            '<li>If Moodle runs inside Docker, use the container hostname, not <code>localhost</code>.</li>' +
+            '<li>' + L.troubleshoot_li1 + '</li>' +
+            '<li>' + L.troubleshoot_li2 + '</li>' +
+            '<li>' + L.troubleshoot_li3 + '</li>' +
+            '<li>' + L.troubleshoot_li4 + '</li>' +
+            '<li>' + L.troubleshoot_li5 + '</li>' +
             '</ul></div>';
         document.getElementById('evwiz-retry-btn').style.display = '';
     }
