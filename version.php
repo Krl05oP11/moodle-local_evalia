@@ -26,10 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component  = 'local_evalia';
 $plugin->version    = 2026041001;
-$plugin->requires   = 2024042200;   // Moodle 4.4 minimum
+$plugin->requires   = 2025041400;   // Moodle 5.0 minimum
 $plugin->maturity   = MATURITY_BETA;
 $plugin->release    = '0.4.8';
-$plugin->supported  = [404, 405];
+$plugin->supported  = [500];
 // No hard dependencies — EVAL-IA ships as a standalone plugin.
 // local_saipa engine settings are used as fallback when local_saipa is co-installed.
 $plugin->dependencies = [];
