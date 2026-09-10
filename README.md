@@ -106,6 +106,25 @@ Go to *Site administration → Plugins → Local plugins → EVAL-IA*:
 | **Engine URL** | Base URL of the SAIPA Engine, e.g. `http://localhost:8052`. Leave blank to inherit from the SAIPA plugin. |
 | **Engine token** | Bearer token. Leave blank to inherit from the SAIPA plugin. |
 
+### AI Model
+
+The language model is chosen **on the engine side**, not in this plugin: the
+SAIPA Engine uses a configurable provider (`LLM_PROVIDER` + `<PROVIDER>_MODEL`
+environment variables) and ships with **no default model** — the site
+administrator selects and pays for the model their institution contracts.
+
+**Recommended model for EVAL-IA: Claude Sonnet or higher (not Haiku).**
+EVAL-IA grades free-text (essay) answers against a rubric and writes the
+pedagogical feedback students receive. This is exactly the task where a weaker
+model produces scores and justifications that *look* defensible but are wrong.
+A Sonnet-class (or stronger) model is strongly recommended for the grading and
+feedback endpoints. Objective questions (multiple-choice, true/false,
+numerical, short-answer) are graded deterministically and do not use the LLM.
+
+> The companion **SAIPA** plugin (course chat / RAG / alerts) has lighter
+> requirements — Haiku is sufficient there. If you run both plugins against the
+> same engine, size the model for EVAL-IA's grading.
+
 ### Exam Defaults
 | Setting | Default | Description |
 |---------|---------|-------------|

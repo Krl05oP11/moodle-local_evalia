@@ -8,6 +8,12 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 - Engine connection language strings renamed `ENGINE_SECRET` → `SAIPA_API_TOKEN`
   (`en`, `es`, `pt_br`) to match the engine, which now requires the token.
 
+### Documentation
+- README now records the recommended LLM: **Claude Sonnet or higher** for
+  EVAL-IA (essay grading + feedback), vs. Haiku being sufficient for the
+  companion SAIPA plugin. The model is selected engine-side; the plugin ships
+  no default.
+
 ### Fixed
 - `assign_exam` no longer calls the engine once per student against a downed
   engine, and no longer reports every student as "already had an exam" when the
