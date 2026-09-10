@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/evalia/db" VERSION="20260329" COMMENT="XMLDB file for Moodle local/evalia"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="evalia_rubrics" COMMENT="One evaluation rubric per course">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" SEQUENCE="false" COMMENT="draft|active|archived"/>
+        <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_createdby" TYPE="foreign" FIELDS="created_by" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="uq_courseid" TYPE="unique" FIELDS="courseid"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="evalia_rubric_items" COMMENT="Rubric topics/competencies within a rubric">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="rubricid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="topic" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="difficulty_weight" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="medium" SEQUENCE="false" COMMENT="low|medium|high"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_rubricid" TYPE="foreign" FIELDS="rubricid" REFTABLE="evalia_rubrics" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_rubricid_sort" UNIQUE="false" FIELDS="rubricid, sortorder"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_question_bank" COMMENT="AI-generated question pool per course rubric item">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="rubricid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="rubric_item_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="question_type" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="multichoice|truefalse|numerical|shortanswer"/>
+        <FIELD NAME="stem" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="difficulty" TYPE="char" LENGTH="15" NOTNULL="true" DEFAULT="medium" SEQUENCE="false" COMMENT="basic|medium|advanced"/>
+        <FIELD NAME="topic" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="correct_answer" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Plain text for shortanswer/numerical"/>
+        <FIELD NAME="tolerance" TYPE="number" LENGTH="8" NOTNULL="false" DEFAULT="0" SEQUENCE="false" DECIMALS="4" COMMENT="For numerical questions"/>
+        <FIELD NAME="source_chunks" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of RAG chunk IDs used"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="15" NOTNULL="true" DEFAULT="draft" SEQUENCE="false" COMMENT="draft|approved|rejected"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_rubricid" TYPE="foreign" FIELDS="rubricid" REFTABLE="evalia_rubrics" REFFIELDS="id"/>
+        <KEY NAME="fk_rubric_item" TYPE="foreign" FIELDS="rubric_item_id" REFTABLE="evalia_rubric_items" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_courseid_difficulty_status" UNIQUE="false" FIELDS="courseid, difficulty, status"/>
+        <INDEX NAME="idx_item_difficulty" UNIQUE="false" FIELDS="rubric_item_id, difficulty"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_question_options" COMMENT="Answer options for multichoice and truefalse questions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="option_text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="is_correct" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="evalia_question_bank" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_questionid_sort" UNIQUE="false" FIELDS="questionid, sortorder"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_exams" COMMENT="Exam template defining structure and difficulty distribution">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="rubricid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="instructions" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="basic_count" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="3" SEQUENCE="false"/>
+        <FIELD NAME="medium_count" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="4" SEQUENCE="false"/>
+        <FIELD NAME="advanced_count" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="2" SEQUENCE="false"/>
+        <FIELD NAME="topic_coverage" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: {topic: min_count}"/>
+        <FIELD NAME="time_limit_min" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="60" SEQUENCE="false"/>
+        <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unix timestamp; 0=always available"/>
+        <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unix timestamp; 0=no closing time"/>
+        <FIELD NAME="grade_itemid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="mdl_grade_items.id; 0=not registered"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="15" NOTNULL="true" DEFAULT="draft" SEQUENCE="false" COMMENT="draft|active|closed"/>
+        <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="feedback_prompt" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_rubricid" TYPE="foreign" FIELDS="rubricid" REFTABLE="evalia_rubrics" REFFIELDS="id"/>
+        <KEY NAME="fk_createdby" TYPE="foreign" FIELDS="created_by" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_courseid_status" UNIQUE="false" FIELDS="courseid, status"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_student_exams" COMMENT="Individual student exam instance (sampled questions + answers)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="examid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="question_ids" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array of question IDs assigned"/>
+        <FIELD NAME="answers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON object: {question_id: student_answer}"/>
+        <FIELD NAME="score" TYPE="number" LENGTH="5" NOTNULL="false" DEFAULT="0" SEQUENCE="false" DECIMALS="2"/>
+        <FIELD NAME="max_score" TYPE="number" LENGTH="5" NOTNULL="true" DEFAULT="10" SEQUENCE="false" DECIMALS="2"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="15" NOTNULL="true" DEFAULT="assigned" SEQUENCE="false" COMMENT="assigned|started|submitted|graded"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_examid" TYPE="foreign" FIELDS="examid" REFTABLE="evalia_exams" REFFIELDS="id"/>
+        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="uq_exam_user" TYPE="unique" FIELDS="examid, userid"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_userid_status" UNIQUE="false" FIELDS="userid, status"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_portfolio" COMMENT="Exam performance summary per student per course (Fase 2)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="total_exams" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="avg_grade" TYPE="number" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="2"/>
+        <FIELD NAME="last_activity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="uq_user_course" TYPE="unique" FIELDS="userid, courseid"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="evalia_portfolio_notes" COMMENT="Teacher observations on a student portfolio (Fase 2)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Student"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="note_text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Teacher"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_createdby" TYPE="foreign" FIELDS="created_by" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_userid_course" UNIQUE="false" FIELDS="userid, courseid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="evalia_feedback_log" COMMENT="Log of feedback messages sent to students (Fase 2)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="examid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="channel" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="telegram|moodle"/>
+        <FIELD NAME="message_text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="sent" SEQUENCE="false" COMMENT="sent|failed"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_examid" TYPE="foreign" FIELDS="examid" REFTABLE="evalia_exams" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_userid_timesent" UNIQUE="false" FIELDS="userid, timesent"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
