@@ -32,105 +32,101 @@ if ($hassiteconfig) {
     $setupurl = new moodle_url('/local/evalia/setup.php');
     $settings->add(new admin_setting_heading(
         'local_evalia_wizard_heading',
-        '🚀 Setup Wizard',
+        get_string('settings:heading_wizard', 'local_evalia'),
         html_writer::tag(
             'p',
-            'Use the wizard to configure the AI engine step by step, with a real-time connection test. ' .
-            html_writer::link($setupurl, '▶ Launch Setup Wizard', ['class' => 'btn btn-sm btn-primary ms-2']),
+            get_string('settings:heading_wizard_desc', 'local_evalia') . ' '
+            . html_writer::link($setupurl, get_string('settings:launch_wizard', 'local_evalia'), ['class' => 'btn btn-sm btn-primary ms-2']),
             ['style' => 'margin-top:6px;']
         )
     ));
 
-    // ── Motor de IA ──────────────────────────────────────────────────────────
+    // ── AI Engine ────────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_engine_heading',
-        '🤖 Motor de IA (SAIPA Engine)',
-        'URL y token del motor de IA. Si se dejan en blanco, EVAL-IA utiliza la configuración '
-        . 'del plugin SAIPA (si está instalado). Configúrelos aquí para despliegues independientes '
-        . 'donde SAIPA no está instalado.'
+        get_string('settings:heading_engine', 'local_evalia'),
+        get_string('settings:heading_engine_desc', 'local_evalia')
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/engine_url',
-        'URL del motor de IA',
-        'URL base del engine, por ejemplo: <code>http://localhost:8052</code> o '
-        . '<code>https://engine.saipa.online</code>. Dejar en blanco para heredar la configuración de SAIPA.',
+        get_string('settings:engine_url', 'local_evalia'),
+        get_string('settings:engine_url_desc', 'local_evalia'),
         '',
         PARAM_URL
     ));
 
     $settings->add(new admin_setting_configpasswordunmask(
         'local_evalia/engine_token',
-        'Token de autenticación del motor',
-        'Bearer token configurado en el engine. Dejar en blanco para heredar el token de SAIPA.',
+        get_string('settings:engine_token', 'local_evalia'),
+        get_string('settings:engine_token_desc', 'local_evalia'),
         ''
     ));
 
-    // ── Rúbricas ─────────────────────────────────────────────────────────────
+    // ── Rubrics ──────────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_rubric_heading',
-        '📋 Rúbricas',
+        get_string('settings:heading_rubric', 'local_evalia'),
         ''
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/rubric_default_items',
-        'Cantidad de ítems por defecto',
-        'Valor inicial del campo al abrir el formulario de generación (rango: 5–40).',
+        get_string('settings:rubric_default_items', 'local_evalia'),
+        get_string('settings:rubric_default_items_desc', 'local_evalia'),
         18,
         PARAM_INT
     ));
 
-    // ── Exámenes ──────────────────────────────────────────────────────────────
+    // ── Exams ────────────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_exam_heading',
-        '📝 Exámenes',
+        get_string('settings:heading_exam', 'local_evalia'),
         ''
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/exam_default_basic',
-        'Preguntas básicas por defecto',
-        'Cantidad inicial de preguntas básicas al crear un examen.',
+        get_string('settings:exam_default_basic', 'local_evalia'),
+        get_string('settings:exam_default_basic_desc', 'local_evalia'),
         3,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/exam_default_medium',
-        'Preguntas medias por defecto',
-        'Cantidad inicial de preguntas medias al crear un examen.',
+        get_string('settings:exam_default_medium', 'local_evalia'),
+        get_string('settings:exam_default_medium_desc', 'local_evalia'),
         4,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/exam_default_advanced',
-        'Preguntas avanzadas por defecto',
-        'Cantidad inicial de preguntas avanzadas al crear un examen.',
+        get_string('settings:exam_default_advanced', 'local_evalia'),
+        get_string('settings:exam_default_advanced_desc', 'local_evalia'),
         2,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/exam_default_time_limit',
-        'Tiempo límite por defecto (minutos)',
-        'Valor inicial del campo tiempo límite. Usar 0 para sin límite.',
+        get_string('settings:exam_default_time_limit', 'local_evalia'),
+        get_string('settings:exam_default_time_limit_desc', 'local_evalia'),
         60,
         PARAM_INT
     ));
 
-    // ── Ponderación por dificultad ────────────────────────────────────────────
+    // ── Difficulty weighting ─────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_weights_heading',
-        '⚖️ Ponderación por dificultad',
-        'Puntos asignados a cada pregunta según su dificultad. ' .
-        'La nota final se calcula como (pesos correctos / total pesos) × 10.'
+        get_string('settings:heading_weights', 'local_evalia'),
+        get_string('settings:heading_weights_desc', 'local_evalia')
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_basic',
-        'Peso — preguntas básicas',
+        get_string('settings:weight_basic', 'local_evalia'),
         '',
         '1',
         PARAM_FLOAT
@@ -138,7 +134,7 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_medium',
-        'Peso — preguntas medias',
+        get_string('settings:weight_medium', 'local_evalia'),
         '',
         '2',
         PARAM_FLOAT
@@ -146,56 +142,53 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_advanced',
-        'Peso — preguntas avanzadas',
+        get_string('settings:weight_advanced', 'local_evalia'),
         '',
         '3',
         PARAM_FLOAT
     ));
 
-    // ── Generación de preguntas ───────────────────────────────────────────────
+    // ── Question generation ──────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_questions_heading',
-        '❓ Generación de preguntas',
+        get_string('settings:heading_questions', 'local_evalia'),
         ''
     ));
 
     $settings->add(new admin_setting_configtext(
         'local_evalia/questions_default_count',
-        'Preguntas por ítem de rúbrica (por defecto)',
-        'Cantidad inicial en el diálogo "Generar preguntas" por cada ítem. Rango recomendado: 3–10.',
+        get_string('settings:questions_default_count', 'local_evalia'),
+        get_string('settings:questions_default_count_desc', 'local_evalia'),
         5,
         PARAM_INT
     ));
 
-    // ── Indexado de PDFs ──────────────────────────────────────────────────────
+    // ── PDF indexing ─────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_pdf_heading',
-        '📄 Indexado de PDFs',
+        get_string('settings:heading_pdf', 'local_evalia'),
         ''
     ));
 
     $settings->add(new admin_setting_configtextarea(
         'local_evalia/pdf_page_ranges',
-        'Rangos de páginas por archivo PDF',
-        'JSON que mapea nombres de archivo a capítulos. Permite indexar cada capítulo como fuente independiente.<br>' .
-        'Formato: <code>{"archivo.pdf": [{"from": 1, "to": 50, "label": "Cap1-Tema"}, ...]}</code><br>' .
-        'Dejar vacío para indexar el PDF completo sin dividir.',
+        get_string('settings:pdf_page_ranges', 'local_evalia'),
+        get_string('settings:pdf_page_ranges_desc', 'local_evalia'),
         '',
         PARAM_RAW
     ));
 
-    // ── Feedback ──────────────────────────────────────────────────────────────
+    // ── Feedback ─────────────────────────────────────────────────────────────
     $settings->add(new admin_setting_heading(
         'local_evalia_feedback_heading',
-        '💬 Feedback',
+        get_string('settings:heading_feedback', 'local_evalia'),
         ''
     ));
 
     $settings->add(new admin_setting_configcheckbox(
         'local_evalia/feedback_telegram',
-        'Enviar feedback por Telegram',
-        'Al calificar un examen, envía al alumno su resultado y análisis pedagógico vía Telegram. ' .
-        'Requiere que el alumno tenga vinculada su cuenta de Telegram en SAIPA.',
+        get_string('settings:feedback_telegram', 'local_evalia'),
+        get_string('settings:feedback_telegram_desc', 'local_evalia'),
         1
     ));
 }

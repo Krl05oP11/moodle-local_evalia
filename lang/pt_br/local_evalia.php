@@ -280,3 +280,49 @@ $string['wizard_step_done']             = 'Pronto';
 $string['wizard_step_requirements']     = 'Requisitos';
 $string['wizard_step_test']             = 'Teste';
 $string['wizard_step_welcome']          = 'Boas-vindas';
+
+// Admin settings.
+$string['settings:engine_token']               = 'Token de autenticação do motor';
+$string['settings:engine_token_desc']          = 'Bearer token configurado no engine. Deixe em branco para herdar o token do SAIPA.';
+$string['settings:engine_url']                 = 'URL do motor de IA';
+$string['settings:engine_url_desc']            = 'URL base do engine, por exemplo: <code>http://localhost:8052</code> ou '
+    . '<code>https://engine.saipa.online</code>. Deixe em branco para herdar a configuração do SAIPA.';
+$string['settings:exam_default_advanced']      = 'Questões avançadas padrão';
+$string['settings:exam_default_advanced_desc'] = 'Quantidade inicial de questões avançadas ao criar uma prova.';
+$string['settings:exam_default_basic']         = 'Questões básicas padrão';
+$string['settings:exam_default_basic_desc']    = 'Quantidade inicial de questões básicas ao criar uma prova.';
+$string['settings:exam_default_medium']        = 'Questões médias padrão';
+$string['settings:exam_default_medium_desc']   = 'Quantidade inicial de questões médias ao criar uma prova.';
+$string['settings:exam_default_time_limit']      = 'Tempo limite padrão (minutos)';
+$string['settings:exam_default_time_limit_desc'] = 'Valor inicial do campo de tempo limite. Use 0 para sem limite.';
+$string['settings:feedback_telegram']          = 'Enviar feedback via Telegram';
+$string['settings:feedback_telegram_desc']     = 'Ao corrigir uma prova, envia ao aluno seu resultado e análise '
+    . 'pedagógica via Telegram. Requer que o aluno tenha vinculado sua conta do Telegram no SAIPA.';
+$string['settings:heading_engine']             = '🤖 Motor de IA (SAIPA Engine)';
+$string['settings:heading_engine_desc']        = 'URL e token do motor de IA. Se deixados em branco, o EVAL-IA usa a '
+    . 'configuração do plugin SAIPA (se instalado). Configure aqui para implantações independentes onde o SAIPA não '
+    . 'está instalado.';
+$string['settings:heading_exam']               = '📝 Provas';
+$string['settings:heading_feedback']           = '💬 Feedback';
+$string['settings:heading_pdf']                = '📄 Indexação de PDFs';
+$string['settings:heading_questions']          = '❓ Geração de questões';
+$string['settings:heading_rubric']             = '📋 Rubricas';
+$string['settings:heading_weights']            = '⚖️ Ponderação por dificuldade';
+$string['settings:heading_weights_desc']       = 'Pontos atribuídos a cada questão de acordo com sua dificuldade. A '
+    . 'nota final é calculada como (pesos corretos / total de pesos) × 10.';
+$string['settings:heading_wizard']             = '🚀 Assistente de configuração';
+$string['settings:heading_wizard_desc']        = 'Use o assistente para configurar o motor de IA passo a passo, com '
+    . 'um teste de conexão em tempo real.';
+$string['settings:launch_wizard']              = '▶ Iniciar assistente de configuração';
+$string['settings:pdf_page_ranges']            = 'Intervalos de páginas por arquivo PDF';
+$string['settings:pdf_page_ranges_desc']       = 'JSON que mapeia nomes de arquivo para capítulos. Permite indexar '
+    . 'cada capítulo como fonte independente.<br>Formato: <code>{"arquivo.pdf": [{"from": 1, "to": 50, "label": '
+    . '"Cap1-Tema"}, ...]}</code><br>Deixe vazio para indexar o PDF completo sem dividir.';
+$string['settings:questions_default_count']      = 'Questões por item da rubrica (padrão)';
+$string['settings:questions_default_count_desc'] = 'Valor inicial na caixa de diálogo "Gerar questões" por item da '
+    . 'rubrica. Intervalo recomendado: 3–10.';
+$string['settings:rubric_default_items']       = 'Quantidade de itens padrão';
+$string['settings:rubric_default_items_desc']  = 'Valor inicial do campo ao abrir o formulário de geração (intervalo: 5–40).';
+$string['settings:weight_advanced']            = 'Peso — questões avançadas';
+$string['settings:weight_basic']               = 'Peso — questões básicas';
+$string['settings:weight_medium']              = 'Peso — questões médias';

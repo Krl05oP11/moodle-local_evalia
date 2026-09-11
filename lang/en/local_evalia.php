@@ -278,3 +278,48 @@ $string['wizard_step_done']             = 'Done';
 $string['wizard_step_requirements']     = 'Requirements';
 $string['wizard_step_test']             = 'Test';
 $string['wizard_step_welcome']          = 'Welcome';
+
+// Admin settings.
+$string['settings:engine_token']               = 'Engine authentication token';
+$string['settings:engine_token_desc']          = 'Bearer token configured on the engine. Leave blank to inherit SAIPA\'s token.';
+$string['settings:engine_url']                 = 'AI Engine URL';
+$string['settings:engine_url_desc']            = 'Base URL of the engine, e.g. <code>http://localhost:8052</code> or '
+    . '<code>https://engine.saipa.online</code>. Leave blank to inherit SAIPA\'s configuration.';
+$string['settings:exam_default_advanced']      = 'Default advanced questions';
+$string['settings:exam_default_advanced_desc'] = 'Initial number of advanced questions when creating an exam.';
+$string['settings:exam_default_basic']         = 'Default basic questions';
+$string['settings:exam_default_basic_desc']    = 'Initial number of basic questions when creating an exam.';
+$string['settings:exam_default_medium']        = 'Default medium questions';
+$string['settings:exam_default_medium_desc']   = 'Initial number of medium questions when creating an exam.';
+$string['settings:exam_default_time_limit']      = 'Default time limit (minutes)';
+$string['settings:exam_default_time_limit_desc'] = 'Initial value of the time-limit field. Use 0 for no limit.';
+$string['settings:feedback_telegram']          = 'Send feedback via Telegram';
+$string['settings:feedback_telegram_desc']     = 'When grading an exam, sends the student their result and pedagogical '
+    . 'analysis via Telegram. Requires the student to have linked their Telegram account in SAIPA.';
+$string['settings:heading_engine']             = '🤖 AI Engine (SAIPA Engine)';
+$string['settings:heading_engine_desc']        = 'URL and token for the AI engine. If left blank, EVAL-IA uses the SAIPA '
+    . 'plugin\'s configuration (if installed). Set these for standalone deployments where SAIPA is not installed.';
+$string['settings:heading_exam']               = '📝 Exams';
+$string['settings:heading_feedback']           = '💬 Feedback';
+$string['settings:heading_pdf']                = '📄 PDF indexing';
+$string['settings:heading_questions']          = '❓ Question generation';
+$string['settings:heading_rubric']             = '📋 Rubrics';
+$string['settings:heading_weights']            = '⚖️ Difficulty weighting';
+$string['settings:heading_weights_desc']       = 'Points assigned to each question according to its difficulty. The '
+    . 'final grade is calculated as (correct weights / total weights) × 10.';
+$string['settings:heading_wizard']             = '🚀 Setup Wizard';
+$string['settings:heading_wizard_desc']        = 'Use the wizard to configure the AI engine step by step, with a '
+    . 'real-time connection test.';
+$string['settings:launch_wizard']              = '▶ Launch Setup Wizard';
+$string['settings:pdf_page_ranges']            = 'Page ranges per PDF file';
+$string['settings:pdf_page_ranges_desc']       = 'JSON mapping filenames to chapters. Allows indexing each chapter as '
+    . 'an independent source.<br>Format: <code>{"file.pdf": [{"from": 1, "to": 50, "label": "Ch1-Topic"}, ...]}</code>'
+    . '<br>Leave empty to index the whole PDF without splitting.';
+$string['settings:questions_default_count']      = 'Questions per rubric item (default)';
+$string['settings:questions_default_count_desc'] = 'Initial value in the "Generate questions" dialog per rubric item. '
+    . 'Recommended range: 3–10.';
+$string['settings:rubric_default_items']       = 'Default number of items';
+$string['settings:rubric_default_items_desc']  = 'Initial value of the field when opening the generation form (range: 5–40).';
+$string['settings:weight_advanced']            = 'Weight — advanced questions';
+$string['settings:weight_basic']               = 'Weight — basic questions';
+$string['settings:weight_medium']              = 'Weight — medium questions';

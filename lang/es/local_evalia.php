@@ -280,3 +280,49 @@ $string['wizard_step_done']             = 'Listo';
 $string['wizard_step_requirements']     = 'Requisitos';
 $string['wizard_step_test']             = 'Prueba';
 $string['wizard_step_welcome']          = 'Bienvenida';
+
+// Admin settings.
+$string['settings:engine_token']               = 'Token de autenticación del motor';
+$string['settings:engine_token_desc']          = 'Bearer token configurado en el engine. Dejar en blanco para heredar el token de SAIPA.';
+$string['settings:engine_url']                 = 'URL del motor de IA';
+$string['settings:engine_url_desc']            = 'URL base del engine, por ejemplo: <code>http://localhost:8052</code> o '
+    . '<code>https://engine.saipa.online</code>. Dejar en blanco para heredar la configuración de SAIPA.';
+$string['settings:exam_default_advanced']      = 'Preguntas avanzadas por defecto';
+$string['settings:exam_default_advanced_desc'] = 'Cantidad inicial de preguntas avanzadas al crear un examen.';
+$string['settings:exam_default_basic']         = 'Preguntas básicas por defecto';
+$string['settings:exam_default_basic_desc']    = 'Cantidad inicial de preguntas básicas al crear un examen.';
+$string['settings:exam_default_medium']        = 'Preguntas medias por defecto';
+$string['settings:exam_default_medium_desc']   = 'Cantidad inicial de preguntas medias al crear un examen.';
+$string['settings:exam_default_time_limit']      = 'Tiempo límite por defecto (minutos)';
+$string['settings:exam_default_time_limit_desc'] = 'Valor inicial del campo tiempo límite. Usar 0 para sin límite.';
+$string['settings:feedback_telegram']          = 'Enviar feedback por Telegram';
+$string['settings:feedback_telegram_desc']     = 'Al calificar un examen, envía al alumno su resultado y análisis '
+    . 'pedagógico vía Telegram. Requiere que el alumno tenga vinculada su cuenta de Telegram en SAIPA.';
+$string['settings:heading_engine']             = '🤖 Motor de IA (SAIPA Engine)';
+$string['settings:heading_engine_desc']        = 'URL y token del motor de IA. Si se dejan en blanco, EVAL-IA utiliza '
+    . 'la configuración del plugin SAIPA (si está instalado). Configúrelos aquí para despliegues independientes '
+    . 'donde SAIPA no está instalado.';
+$string['settings:heading_exam']               = '📝 Exámenes';
+$string['settings:heading_feedback']           = '💬 Feedback';
+$string['settings:heading_pdf']                = '📄 Indexado de PDFs';
+$string['settings:heading_questions']          = '❓ Generación de preguntas';
+$string['settings:heading_rubric']             = '📋 Rúbricas';
+$string['settings:heading_weights']            = '⚖️ Ponderación por dificultad';
+$string['settings:heading_weights_desc']       = 'Puntos asignados a cada pregunta según su dificultad. La nota final '
+    . 'se calcula como (pesos correctos / total pesos) × 10.';
+$string['settings:heading_wizard']             = '🚀 Setup Wizard';
+$string['settings:heading_wizard_desc']        = 'Use the wizard to configure the AI engine step by step, with a '
+    . 'real-time connection test.';
+$string['settings:launch_wizard']              = '▶ Launch Setup Wizard';
+$string['settings:pdf_page_ranges']            = 'Rangos de páginas por archivo PDF';
+$string['settings:pdf_page_ranges_desc']       = 'JSON que mapea nombres de archivo a capítulos. Permite indexar cada '
+    . 'capítulo como fuente independiente.<br>Formato: <code>{"archivo.pdf": [{"from": 1, "to": 50, "label": '
+    . '"Cap1-Tema"}, ...]}</code><br>Dejar vacío para indexar el PDF completo sin dividir.';
+$string['settings:questions_default_count']      = 'Preguntas por ítem de rúbrica (por defecto)';
+$string['settings:questions_default_count_desc'] = 'Cantidad inicial en el diálogo "Generar preguntas" por cada ítem. '
+    . 'Rango recomendado: 3–10.';
+$string['settings:rubric_default_items']       = 'Cantidad de ítems por defecto';
+$string['settings:rubric_default_items_desc']  = 'Valor inicial del campo al abrir el formulario de generación (rango: 5–40).';
+$string['settings:weight_advanced']            = 'Peso — preguntas avanzadas';
+$string['settings:weight_basic']               = 'Peso — preguntas básicas';
+$string['settings:weight_medium']              = 'Peso — preguntas medias';

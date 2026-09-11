@@ -13,6 +13,14 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   honour the site's proxy and HTTP-security settings. Transport errors now have
   a stable `Engine request failed: …` prefix; non-2xx responses are reported as
   errors instead of being parsed as a body.
+- **`settings.php` i18n (first of the page files).** Every setting/heading
+  (33 strings) was hardcoded Spanish with zero `get_string()` calls. Now uses
+  `settings:*` lang keys (matching `local_saipa`'s convention) in `en`
+  (authored fresh, the base pack), `es` (mirrors the original hardcoded text
+  verbatim — including the 3 wizard-heading strings that were already in
+  English in the source), and `pt_br` (translated). Verified: all 33 keys
+  resolve in all 3 languages; `settings.php` executes without a fatal or a
+  missing-string error against the real Moodle install.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for
