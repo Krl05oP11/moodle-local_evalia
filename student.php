@@ -37,7 +37,7 @@ require_capability('local/evalia:take', $context);
 $PAGE->set_context($context);
 $PAGE->set_url('/local/evalia/student.php', ['courseid' => $courseid]);
 $PAGE->set_pagelayout('incourse');
-$PAGE->set_title('Mis Exámenes — EVAL-IA');
+$PAGE->set_title(get_string('student:page_title', 'local_evalia'));
 $PAGE->set_heading(format_string($course->fullname));
 
 $now = time();
@@ -81,13 +81,12 @@ function evalia_window_open(object $ex, int $now): bool {
  * Returns a human-readable window note, or '' if within (or without) window.
  */
 function evalia_window_note(object $ex, int $now): string {
+    $dateformat = get_string('strftimedatetimeshort', 'langconfig');
     if ($ex->timeopen > 0 && $now < $ex->timeopen) {
-        return '🕐 Disponible a partir del ' .
-            userdate($ex->timeopen, get_string('strftimedatetimeshort', 'langconfig'));
+        return get_string('student:window_opens', 'local_evalia', userdate($ex->timeopen, $dateformat));
     }
     if ($ex->timeclose > 0 && $now > $ex->timeclose) {
-        return '🔒 El período de entrega cerró el ' .
-            userdate($ex->timeclose, get_string('strftimedatetimeshort', 'langconfig'));
+        return get_string('student:window_closed', 'local_evalia', userdate($ex->timeclose, $dateformat));
     }
     return '';
 }
@@ -104,7 +103,7 @@ echo $OUTPUT->header();
 <div class="container-fluid mt-4" style="max-width:800px;">
 
     <div class="d-flex align-items-baseline gap-3 mb-4">
-        <h2 class="mb-0">📝 Mis Exámenes</h2>
+        <h2 class="mb-0"><?php echo get_string('student:heading', 'local_evalia'); ?></h2>
         <span class="text-muted"><?php echo format_string($course->fullname); ?></span>
     </div>
 
@@ -112,8 +111,8 @@ echo $OUTPUT->header();
     <div class="alert alert-info d-flex align-items-center gap-3">
         <span style="font-size:1.6rem;">📭</span>
         <div>
-            <strong>No tenés exámenes asignados todavía.</strong><br>
-            <small>El docente te notificará cuando haya un examen disponible para este curso.</small>
+            <strong><?php echo get_string('student:none_assigned', 'local_evalia'); ?></strong><br>
+            <small><?php echo get_string('student:none_assigned_desc', 'local_evalia'); ?></small>
         </div>
     </div>
 
@@ -137,39 +136,43 @@ echo $OUTPUT->header();
     switch ($ex->status) {
         case 'assigned':
             $bordercls  = $windowopen ? 'border-primary' : 'border-secondary';
-            $statushtml = '<span class="badge bg-primary">Pendiente</span>';
+            $statushtml = '<span class="badge bg-primary">' . get_string('student:status_assigned', 'local_evalia') . '</span>';
             $showbtn    = $windowopen;
-            $btnlabel   = '📝 Rendir →';
+            $btnlabel   = get_string('student:btn_take', 'local_evalia');
             $btncls     = 'btn-primary';
             break;
         case 'started':
             $bordercls  = $windowopen ? 'border-warning' : 'border-secondary';
-            $statushtml = '<span class="badge bg-warning text-dark">En progreso</span>';
+            $statushtml = '<span class="badge bg-warning text-dark">'
+                . get_string('student:status_started', 'local_evalia') . '</span>';
             $showbtn    = $windowopen;
-            $btnlabel   = '▶️ Continuar →';
+            $btnlabel   = get_string('student:btn_continue', 'local_evalia');
             $btncls     = 'btn-warning text-dark';
             break;
         case 'submitted':
             $bordercls    = 'border-secondary';
-            $statushtml   = '<span class="badge bg-secondary">Enviado</span>';
+            $statushtml   = '<span class="badge bg-secondary">'
+                . get_string('student:status_submitted', 'local_evalia') . '</span>';
             $submittedon  = $ex->timesubmitted
                 ? userdate($ex->timesubmitted, get_string('strftimedatetimeshort', 'langconfig'))
                 : '—';
-            $statecontent = '<p class="text-muted small mb-0">Examen enviado el ' . $submittedon
-                . '. El docente lo revisará pronto.</p>';
+            $statecontent = '<p class="text-muted small mb-0">'
+                . get_string('student:msg_submitted_on', 'local_evalia', $submittedon) . '</p>';
             break;
         case 'graded':
             $bordercls    = 'border-info';
-            $statushtml   = '<span class="badge bg-info text-dark">Calificado</span>';
-            $statecontent = '<p class="text-muted small mb-0">Tu examen ya fue calificado. '
-                . 'La nota estará disponible en cuanto el docente la publique.</p>';
+            $statushtml   = '<span class="badge bg-info text-dark">'
+                . get_string('student:status_graded', 'local_evalia') . '</span>';
+            $statecontent = '<p class="text-muted small mb-0">'
+                . get_string('student:msg_graded', 'local_evalia') . '</p>';
             break;
         case 'published':
             $bordercls    = 'border-success';
-            $statushtml   = '<span class="badge bg-success">✅ Publicado</span>';
+            $statushtml   = '<span class="badge bg-success">' . get_string('student:status_published', 'local_evalia') . '</span>';
             $statecontent = '<div class="d-flex align-items-center gap-3 mt-1">'
                 . '<span class="fs-3 fw-bold text-success">' . number_format((float) $ex->score, 1) . ' / 10.0</span>'
-                . '<a href="' . $detailurl . '" class="btn btn-sm btn-outline-success">Ver detalle →</a></div>';
+                . '<a href="' . $detailurl . '" class="btn btn-sm btn-outline-success">'
+                . get_string('student:btn_detail', 'local_evalia') . '</a></div>';
             break;
         default:
             $bordercls  = '';
@@ -191,13 +194,15 @@ echo $OUTPUT->header();
             <?php // ── Meta info row ────────────────────────────────────── ?>
             <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
                 <?php if ($ex->time_limit_min > 0) : ?>
-                    <span>⏱ Tiempo límite: <strong><?php echo (int) $ex->time_limit_min; ?> min</strong></span>
+                    <span><?php echo get_string('student:meta_timelimit', 'local_evalia', (int) $ex->time_limit_min); ?></span>
                 <?php endif; ?>
                 <?php if ($ex->timeopen > 0) : ?>
-                    <span>📅 Desde: <?php echo userdate($ex->timeopen, get_string('strftimedatetimeshort', 'langconfig')); ?></span>
+                    <?php $fromdate = userdate($ex->timeopen, get_string('strftimedatetimeshort', 'langconfig')); ?>
+                    <span><?php echo get_string('student:meta_from', 'local_evalia', $fromdate); ?></span>
                 <?php endif; ?>
                 <?php if ($ex->timeclose > 0) : ?>
-                    <span>⏰ Hasta: <?php echo userdate($ex->timeclose, get_string('strftimedatetimeshort', 'langconfig')); ?></span>
+                    <?php $untildate = userdate($ex->timeclose, get_string('strftimedatetimeshort', 'langconfig')); ?>
+                    <span><?php echo get_string('student:meta_until', 'local_evalia', $untildate); ?></span>
                 <?php endif; ?>
             </div>
 

@@ -323,3 +323,24 @@ $string['settings:rubric_default_items_desc']  = 'Initial value of the field whe
 $string['settings:weight_advanced']            = 'Weight — advanced questions';
 $string['settings:weight_basic']               = 'Weight — basic questions';
 $string['settings:weight_medium']              = 'Weight — medium questions';
+
+// Student panel (student.php).
+$string['student:btn_continue']         = '▶️ Continue →';
+$string['student:btn_detail']           = 'View detail →';
+$string['student:btn_take']             = '📝 Take exam →';
+$string['student:heading']              = '📝 My Exams';
+$string['student:meta_from']            = '📅 From: {$a}';
+$string['student:meta_timelimit']       = '⏱ Time limit: <strong>{$a} min</strong>';
+$string['student:meta_until']           = '⏰ Until: {$a}';
+$string['student:msg_graded']           = 'Your exam has already been graded. The grade will be available once the teacher publishes it.';
+$string['student:msg_submitted_on']     = 'Exam submitted on {$a}. The teacher will review it soon.';
+$string['student:none_assigned']        = 'You don\'t have any exams assigned yet.';
+$string['student:none_assigned_desc']   = 'Your teacher will notify you when an exam becomes available for this course.';
+$string['student:page_title']           = 'My Exams — EVAL-IA';
+$string['student:status_assigned']      = 'Pending';
+$string['student:status_graded']        = 'Graded';
+$string['student:status_published']     = '✅ Published';
+$string['student:status_started']       = 'In progress';
+$string['student:status_submitted']     = 'Submitted';
+$string['student:window_closed']        = '🔒 The submission period closed on {$a}';
+$string['student:window_opens']         = '🕐 Available from {$a}';

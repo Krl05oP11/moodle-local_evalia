@@ -326,3 +326,24 @@ $string['settings:rubric_default_items_desc']  = 'Valor inicial del campo al abr
 $string['settings:weight_advanced']            = 'Peso — preguntas avanzadas';
 $string['settings:weight_basic']               = 'Peso — preguntas básicas';
 $string['settings:weight_medium']              = 'Peso — preguntas medias';
+
+// Student panel (student.php).
+$string['student:btn_continue']         = '▶️ Continuar →';
+$string['student:btn_detail']           = 'Ver detalle →';
+$string['student:btn_take']             = '📝 Rendir →';
+$string['student:heading']              = '📝 Mis Exámenes';
+$string['student:meta_from']            = '📅 Desde: {$a}';
+$string['student:meta_timelimit']       = '⏱ Tiempo límite: <strong>{$a} min</strong>';
+$string['student:meta_until']           = '⏰ Hasta: {$a}';
+$string['student:msg_graded']           = 'Tu examen ya fue calificado. La nota estará disponible en cuanto el docente la publique.';
+$string['student:msg_submitted_on']     = 'Examen enviado el {$a}. El docente lo revisará pronto.';
+$string['student:none_assigned']        = 'No tenés exámenes asignados todavía.';
+$string['student:none_assigned_desc']   = 'El docente te notificará cuando haya un examen disponible para este curso.';
+$string['student:page_title']           = 'Mis Exámenes — EVAL-IA';
+$string['student:status_assigned']      = 'Pendiente';
+$string['student:status_graded']        = 'Calificado';
+$string['student:status_published']     = '✅ Publicado';
+$string['student:status_started']       = 'En progreso';
+$string['student:status_submitted']     = 'Enviado';
+$string['student:window_closed']        = '🔒 El período de entrega cerró el {$a}';
+$string['student:window_opens']         = '🕐 Disponible a partir del {$a}';

@@ -326,3 +326,24 @@ $string['settings:rubric_default_items_desc']  = 'Valor inicial do campo ao abri
 $string['settings:weight_advanced']            = 'Peso — questões avançadas';
 $string['settings:weight_basic']               = 'Peso — questões básicas';
 $string['settings:weight_medium']              = 'Peso — questões médias';
+
+// Student panel (student.php).
+$string['student:btn_continue']         = '▶️ Continuar →';
+$string['student:btn_detail']           = 'Ver detalhe →';
+$string['student:btn_take']             = '📝 Fazer prova →';
+$string['student:heading']              = '📝 Minhas Provas';
+$string['student:meta_from']            = '📅 De: {$a}';
+$string['student:meta_timelimit']       = '⏱ Tempo limite: <strong>{$a} min</strong>';
+$string['student:meta_until']           = '⏰ Até: {$a}';
+$string['student:msg_graded']           = 'Sua prova já foi corrigida. A nota estará disponível assim que o docente a publicar.';
+$string['student:msg_submitted_on']     = 'Prova enviada em {$a}. O docente vai revisá-la em breve.';
+$string['student:none_assigned']        = 'Você ainda não tem provas atribuídas.';
+$string['student:none_assigned_desc']   = 'O docente vai te avisar quando houver uma prova disponível para este curso.';
+$string['student:page_title']           = 'Minhas Provas — EVAL-IA';
+$string['student:status_assigned']      = 'Pendente';
+$string['student:status_graded']        = 'Corrigida';
+$string['student:status_published']     = '✅ Publicada';
+$string['student:status_started']       = 'Em andamento';
+$string['student:status_submitted']     = 'Enviada';
+$string['student:window_closed']        = '🔒 O período de entrega encerrou em {$a}';
+$string['student:window_opens']         = '🕐 Disponível a partir de {$a}';

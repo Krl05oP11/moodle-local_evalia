@@ -21,6 +21,13 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   English in the source), and `pt_br` (translated). Verified: all 33 keys
   resolve in all 3 languages; `settings.php` executes without a fatal or a
   missing-string error against the real Moodle install.
+- **`student.php` i18n.** 19 more hardcoded Spanish strings (headings, status
+  badges, button labels, window-open/closed notes, the meta-info row, and the
+  page `<title>`) moved to `student:*` lang keys, same three-language
+  treatment as `settings.php`. Rendered text is unchanged (verified by calling
+  `get_string()` with real arguments against the live install and comparing
+  byte-for-byte to the original literals). `local_evalia_testsuite` still
+  23/23 green.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for
