@@ -71,8 +71,13 @@ class get_portfolio_notes extends external_api {
 
         // Load author display names in one query.
         $authorids = array_unique(array_column((array) $notes, 'created_by'));
-        $authors    = $DB->get_records_list('user', 'id', $authorids, '',
-            'id,' . implode(',', \core_user\fields::get_name_fields()));
+        $authors    = $DB->get_records_list(
+            'user',
+            'id',
+            $authorids,
+            '',
+            'id,' . implode(',', \core_user\fields::get_name_fields())
+        );
 
         $result = [];
         foreach ($notes as $n) {

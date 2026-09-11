@@ -209,8 +209,11 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
         $tgid   = ($tglink && !empty($tglink->telegram_id)) ? (int) $tglink->telegram_id : 0;
 
         $course  = $DB->get_record('course', ['id' => $exam->courseid], 'fullname');
-        $student = $DB->get_record('user', ['id' => $se->userid],
-            'id,' . implode(',', \core_user\fields::get_name_fields()));
+        $student = $DB->get_record(
+            'user',
+            ['id' => $se->userid],
+            'id,' . implode(',', \core_user\fields::get_name_fields())
+        );
 
         // ── Reconstruct per-question feedback data from stored answers ────────
         $questionids = json_decode($se->question_ids ?? '[]', true);
@@ -327,8 +330,14 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
 /**
  * Low-level HTTP client for the SAIPA engine.
  *
- * Reads engine_url / engine_token from local_evalia's own admin settings.
- * Falls back to local_saipa settings when running in a joint deployment && * local_evalia's engine_url has not been explicitly configured.
+ * Reads engine_url / engine_token from local_evalia's own admin settings, and
+ * falls back to local_saipa's settings in a joint deployment where local_evalia's
+ * engine_url has not been explicitly configured.
+ *
+ * Uses Moodle's {@see \core\http_client} (Guzzle) so the request honours the
+ * site's proxy and HTTP-security settings. Never throws: transport failures,
+ * non-2xx responses and unparseable bodies are all returned as
+ * `['error' => message]` with a stable `Engine request failed: …` prefix.
  *
  * @param  string     $endpoint  Full path, e.g. '/index' or '/eval/rubric/generate'
  * @param  array|null $data      POST body as associative array; null = GET request
@@ -354,41 +363,46 @@ function local_evalia_raw_engine_request(string $endpoint, ?array $data = null, 
 
     $url = rtrim($engineurl, '/') . $endpoint;
 
-    $headers = [
-        'Content-Type: application/json',
-        'Accept: application/json',
-        'Authorization: Bearer ' . ($token ?? ''),
+    $options = [
+        'headers' => [
+            'Content-Type'  => 'application/json',
+            'Accept'        => 'application/json',
+            'Authorization' => 'Bearer ' . ($token ?? ''),
+        ],
+        // Inspect the status code ourselves — never let a 4xx/5xx throw.
+        'http_errors' => false,
     ];
 
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-        CURLOPT_URL            => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => $timeout,
-        CURLOPT_HTTPHEADER     => $headers,
-    ]);
-
+    $method = 'GET';
     if ($data !== null) {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $method          = 'POST';
+        $options['body'] = json_encode($data);
     }
 
-    $responsestr = curl_exec($ch);
-    $errno        = curl_errno($ch);
-    $error        = curl_error($ch);
-    curl_close($ch);
-
-    if ($errno) {
-        return ['error' => 'cURL error (' . $errno . '): ' . $error];
+    try {
+        $client   = new \core\http_client(['timeout' => $timeout]);
+        $response = $client->request($method, $url, $options);
+    } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        // Connection refused / timeout / DNS failure / blocked by Moodle's HTTP
+        // security helper / too many redirects.
+        return ['error' => 'Engine request failed: ' . $e->getMessage()];
     }
 
-    if ($responsestr === false || $responsestr === '') {
-        return ['error' => 'Empty response from engine'];
+    $status      = $response->getStatusCode();
+    $responsestr = (string) $response->getBody();
+
+    if ($status >= 400) {
+        $detail = $responsestr !== '' ? ': ' . substr($responsestr, 0, 300) : '';
+        return ['error' => 'Engine request failed: HTTP ' . $status . $detail];
+    }
+
+    if ($responsestr === '') {
+        return ['error' => 'Engine request failed: empty response from engine'];
     }
 
     $decoded = json_decode($responsestr, true);
-    if ($decoded === null) {
-        return ['error' => 'Invalid JSON from engine: ' . substr($responsestr, 0, 300)];
+    if (!is_array($decoded)) {
+        return ['error' => 'Engine request failed: invalid JSON — ' . substr($responsestr, 0, 300)];
     }
 
     return $decoded;

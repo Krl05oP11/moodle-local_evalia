@@ -7,6 +7,12 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 ### Changed
 - Engine connection language strings renamed `ENGINE_SECRET` → `SAIPA_API_TOKEN`
   (`en`, `es`, `pt_br`) to match the engine, which now requires the token.
+- All calls to `saipa-engine` now go through Moodle's `\core\http_client`
+  (Guzzle) instead of raw PHP `curl_*` (`local_evalia_raw_engine_request` in
+  `lib.php`, and the wizard's health-check handler in `setup.php`), so they
+  honour the site's proxy and HTTP-security settings. Transport errors now have
+  a stable `Engine request failed: …` prefix; non-2xx responses are reported as
+  errors instead of being parsed as a body.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for
@@ -21,6 +27,16 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   transport error, returns the `error_engine_unreachable` message, and counts
   students it could not sample (question bank too small) separately from
   students that were already assigned.
+- **Corrected the PHPCS compliance claim.** The 0.4.8 changelog said "zero
+  errors on all class, library, and configuration files". Measured under
+  `phpcs --standard=moodle` (the invocation CI and the plugins-directory
+  prechecks use — it does not read a plugin-local `phpcs.xml.dist`), the
+  committed tree had **132 errors** across 6 files. `classes/`, `lib.php` and
+  `settings.php` were indeed clean; the errors were in the page files
+  (`setup.php`, `student.php`, `student_exam.php`, two web-service classes).
+  `lib.php`/`setup.php`/`student_exam.php` and the two web-service classes are
+  now clean (mechanical `phpcbf` formatting + a scoped `MissingDocblock.File`
+  suppression on `setup.php`'s HTML template); `student.php` is in progress.
 
 ## [0.4.8] - 2026-04-11
 

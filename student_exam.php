@@ -170,8 +170,11 @@ if (!$previewmode) {
 
 // Fetch the student's name for the teacher preview banner.
 $studentuser = $previewmode
-    ? $DB->get_record('user', ['id' => $studentexam->userid],
-        'id,' . implode(',', \core_user\fields::get_name_fields()))
+    ? $DB->get_record(
+        'user',
+        ['id' => $studentexam->userid],
+        'id,' . implode(',', \core_user\fields::get_name_fields())
+    )
     : null;
 
 echo $OUTPUT->header();

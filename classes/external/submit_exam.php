@@ -98,8 +98,11 @@ class submit_exam extends external_api {
 
         // ── Notify course teachers via Telegram (non-blocking, best-effort) ──
         try {
-            $student  = $DB->get_record('user', ['id' => $studentexam->userid],
-                'id,' . implode(',', \core_user\fields::get_name_fields()));
+            $student  = $DB->get_record(
+                'user',
+                ['id' => $studentexam->userid],
+                'id,' . implode(',', \core_user\fields::get_name_fields())
+            );
             $course   = $DB->get_record('course', ['id' => $exam->courseid], 'id, fullname');
             $studentname = $student ? fullname($student) : 'Un alumno';
             $coursename  = $course ? format_string($course->fullname) : '';

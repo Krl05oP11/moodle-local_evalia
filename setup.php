@@ -58,29 +58,23 @@ if ($action === 'health') {
         die();
     }
 
-    $url     = rtrim($engineurl, '/') . '/health';
-    $headers = [
-        'Content-Type: application/json',
-        'Accept: application/json',
-        'Authorization: Bearer ' . $enginetoken,
-    ];
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-        CURLOPT_URL            => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 10,
-        CURLOPT_HTTPHEADER     => $headers,
-    ]);
-    $resp  = curl_exec($ch);
-    $errno = curl_errno($ch);
-    $err   = curl_error($ch);
-    $http  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($errno) {
-        echo json_encode(['error' => get_string('wizard_err_connection', 'local_evalia', $err)]);
+    $url = rtrim($engineurl, '/') . '/health';
+    try {
+        $client   = new \core\http_client(['timeout' => 10]);
+        $response = $client->get($url, [
+            'headers' => [
+                'Accept'        => 'application/json',
+                'Authorization' => 'Bearer ' . $enginetoken,
+            ],
+            'http_errors' => false,
+        ]);
+    } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        echo json_encode(['error' => get_string('wizard_err_connection', 'local_evalia', $e->getMessage())]);
         die();
     }
+    $http = $response->getStatusCode();
+    $resp = (string) $response->getBody();
+
     if ($http !== 200) {
         echo json_encode(['error' => get_string('wizard_err_http_status', 'local_evalia', $http)]);
         die();
@@ -150,6 +144,10 @@ $phpverstr    = PHP_VERSION;
 $moodleverstr = $CFG->release ?? 'unknown';
 
 echo $OUTPUT->header();
+
+// phpcs:disable moodle.Commenting.MissingDocblock.File -- False positive: this sniff
+// re-fires on every reopened PHP tag in the HTML template below, although the
+// file docblock is present at the top of the file. Re-enabled at end of file.
 ?>
 <style>
 /* ════════════════════════════════════════════════════════
@@ -921,4 +919,7 @@ echo $OUTPUT->header();
 }());
 </script>
 
-<?php echo $OUTPUT->footer(); ?>
+<?php
+// phpcs:enable moodle.Commenting.MissingDocblock.File
+echo $OUTPUT->footer();
+
