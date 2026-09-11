@@ -40,24 +40,51 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   output against the original hardcoded text byte-for-byte for the two
   trickiest interpolations (`preview_graded_msg`, `submitted_grade_msg`).
   `local_evalia_testsuite` still 23/23 green.
+- **`templates/evalia_teacher.mustache` i18n (the unit scoped below, now
+  done).** All ~40 hardcoded text nodes and ~12 hardcoded
+  `placeholder`/`title`/`aria-label` attributes moved to `teacher.php`
+  (which now passes ~65 new translated variables into the template, on top
+  of the pre-existing `tab_*`/`portfolio_*` ones) — no `{{#str}}` mustache
+  helpers were needed since the page already follows the
+  PHP-passes-pre-translated-strings pattern established by the other
+  `tab_*`/`portfolio_*` variables in this same file. Reused 21 lang keys
+  that already existed (`exam_create`, `exam_name`, `rubric_generate`,
+  `questions_generate`, `difficulty_*`, `questions_status_*`,
+  `portfolio_export_csv`, etc.) but were **never wired into this template**
+  — those buttons/labels were duplicated as hardcoded Spanish instead of
+  using the keys authored for them. Added 46 new keys (`en`/`es`/`pt_br`) for
+  everything without a prior key: the course-material card, the sources
+  accordion, the exam-window panel, the stats/feedback-prompt panels, the
+  7-step workflow modal (descriptions keep inline `<strong>`/`<em>` markup,
+  rendered via triple-mustache `{{{var}}}`), and the floating-assistant
+  panel. `teacher.php` PHP-linted clean; cross-checked programmatically that
+  every mustache variable has a matching `teacher.php` key and every
+  `get_string()` call resolves in all 3 language packs (no typos); `phpcs
+  --standard=moodle` on the 4 touched files (`teacher.php` + 3 lang files):
+  0 errors. **Not yet done: `amd/src/evalia_teacher.js`** (1850 lines, ~164
+  hardcoded literals) — separate pass, needs checking whether
+  `amd/build/evalia_teacher.min.js` is a real build artifact or an
+  unminified copy before editing (see `block_saipa`'s `chat.min.js`
+  precedent) and structural changes for `core/str`'s async API. Not yet
+  verified end-to-end against a running Moodle (no live stack this session);
+  PHPUnit/cache-purge verification pending.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for
   EVAL-IA (essay grading + feedback), vs. Haiku being sufficient for the
   companion SAIPA plugin. The model is selected engine-side; the plugin ships
   no default.
-- **i18n scope for the teacher panel, measured but not yet done.**
-  `teacher.php` itself is fully `get_string()`-clean (13 keys), but its
-  template `templates/evalia_teacher.mustache` (784 lines) has **zero**
-  `{{#str}}` helpers — ~40 hardcoded text nodes plus ~12 hardcoded
-  `placeholder`/`title`/`aria-label` attributes on a rough scan. Its AMD
-  module `amd/src/evalia_teacher.js` (1850 lines) also has **zero**
-  `core/str` usage, with a rough regex count of ~164 hardcoded string
-  literals (real count lower after filtering CSS classes/selectors/WS method
-  names, but still clearly the largest remaining i18n unit in either
-  plugin — bigger than `settings.php` + `student.php` + `student_exam.php`
-  combined). Deliberately scoped and deferred to its own pass rather than
-  folded into this changelog's other entries.
+- **i18n scope for the teacher panel, measured 2026-09-10.** `teacher.php`
+  itself was already fully `get_string()`-clean (13 keys). Its template
+  `templates/evalia_teacher.mustache` (784 lines) had **zero** translated
+  static text — ~40 hardcoded text nodes plus ~12 hardcoded
+  `placeholder`/`title`/`aria-label` attributes — **now done, see the
+  "Changed" entry above.** Its AMD module `amd/src/evalia_teacher.js` (1850
+  lines) still has **zero** `core/str` usage, with a rough regex count of
+  ~164 hardcoded string literals (real count lower after filtering CSS
+  classes/selectors/WS method names) — **still not done**, deferred to its
+  own pass (structural: `core/str` is async, and `amd/build/*.min.js` needs
+  checking before editing, per the `block_saipa` `chat.min.js` precedent).
 
 ### Fixed
 - `assign_exam` no longer calls the engine once per student against a downed

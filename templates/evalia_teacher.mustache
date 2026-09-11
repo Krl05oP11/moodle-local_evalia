@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-end mb-2">
         <button id="evalia-btn-workflow" class="btn btn-sm btn-outline-secondary"
                 style="border-color:#a5b4fc; color:#6366f1; font-size:.82rem;">
-            🗺️ Flujo de trabajo
+            🗺️ {{btn_workflow}}
         </button>
     </div>
 
@@ -57,32 +57,31 @@
                 <div class="card-header d-flex justify-content-between align-items-center"
                      style="background:#0891b2;">
                     <div>
-                        <strong style="color:#fff;">📚 Material del Curso</strong>
-                        <small style="color:#e0f7fa;" class="ms-2">Base de conocimiento para la IA (rúbrica, preguntas y feedback)</small>
+                        <strong style="color:#fff;">📚 {{material_title}}</strong>
+                        <small style="color:#e0f7fa;" class="ms-2">{{material_subtitle}}</small>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span id="evalia-index-status" class="small" style="color:#e0f7fa;"></span>
                         <button id="evalia-btn-index-course" class="btn btn-sm"
                                 style="background:#fff;color:#0891b2;border:none;font-weight:600;">
-                            🔍 Indexar Material
+                            🔍 {{btn_index_material}}
                         </button>
                     </div>
                 </div>
                 <div class="card-body py-2 px-3" style="background:#f0fdff;">
                     <p class="mb-1 small text-dark">
-                        <strong>¿Cómo funciona?</strong>
-                        La IA lee el material que el docente subió al curso para generar preguntas relevantes
-                        y explicar los errores de los alumnos con contexto del temario real.
+                        <strong>{{material_how_title}}</strong>
+                        {{material_how_desc}}
                     </p>
                     <ol class="mb-1 small text-dark ps-3">
-                        <li>Agregá contenido al curso: <strong>Página</strong> (texto/HTML) o <strong>Archivo</strong> (PDF) desde el menú <em>Agregar actividad o recurso</em>.</li>
-                        <li>Volvé aquí y hacé clic en <strong>🔍 Indexar Material</strong> — el sistema leerá y procesará todo automáticamente.</li>
-                        <li>Repetí el paso 2 cada vez que subas nuevo material.</li>
+                        <li>{{{material_step1}}}</li>
+                        <li>{{{material_step2}}}</li>
+                        <li>{{material_step3}}</li>
                     </ol>
                     <div id="evalia-index-loading" style="display:none;" class="mt-1">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-info" role="status"></div>
-                            <span class="text-info small">Indexando páginas, PDFs y presentaciones (PPTX) del curso — puede tardar varios minutos...</span>
+                            <span class="text-info small">{{material_indexing}}</span>
                         </div>
                     </div>
                 </div>
@@ -93,8 +92,8 @@
                 <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center"
                      id="evalia-sources-toggle" role="button" style="cursor:pointer;">
                     <span>
-                        📖 <strong>Fuentes del material</strong>
-                        <small class="text-muted ms-1">— filtrar qué capítulos usa la IA</small>
+                        📖 <strong>{{sources_title}}</strong>
+                        <small class="text-muted ms-1">{{sources_subtitle}}</small>
                     </span>
                     <span>
                         <span id="evalia-sources-badge" class="badge bg-secondary me-2" style="display:none;"></span>
@@ -103,12 +102,12 @@
                 </div>
                 <div id="evalia-sources-panel" class="card-body py-2 px-3" style="display:none;">
                     <div id="evalia-sources-list" class="mb-2">
-                        <span class="text-muted small">Cargando fuentes...</span>
+                        <span class="text-muted small">{{sources_loading}}</span>
                     </div>
                     <div class="mt-1">
-                        <a href="#" id="evalia-sources-select-all" class="small">Seleccionar todas</a>
+                        <a href="#" id="evalia-sources-select-all" class="small">{{sources_select_all}}</a>
                         <span class="text-muted mx-2">·</span>
-                        <a href="#" id="evalia-sources-select-none" class="small">Ninguna</a>
+                        <a href="#" id="evalia-sources-select-none" class="small">{{sources_select_none}}</a>
                     </div>
                 </div>
             </div>
@@ -121,21 +120,21 @@
                                id="evalia-rubric-scope"
                                class="form-control form-control-sm"
                                style="width:180px;"
-                               placeholder="Alcance (ej: Relaciones)">
+                               placeholder="{{rubric_scope_placeholder}}">
                         <input type="number"
                                id="evalia-rubric-item-count"
                                class="form-control form-control-sm"
                                style="width:80px;"
                                min="5" max="40" value="{{rubric_default_items}}"
-                               title="Cantidad de ítems en la rúbrica">
+                               title="{{rubric_item_count_title}}">
                         <button id="evalia-btn-generate-rubric" class="btn btn-primary">
-                            ✨ Generar Rúbrica con IA
+                            ✨ {{rubric_generate}}
                         </button>
                         <button id="evalia-btn-save-rubric" class="btn btn-success ms-2" style="display:none;">
-                            💾 Guardar Rúbrica
+                            💾 {{rubric_save}}
                         </button>
                         <button id="evalia-btn-activate-rubric" class="btn btn-warning ms-2" style="display:none;">
-                            ✅ Activar
+                            ✅ {{rubric_activate}}
                         </button>
                     </div>
                 </div>
@@ -144,7 +143,7 @@
                     <div id="evalia-rubric-loading" style="display:none;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                            <span>Generando rúbrica desde el material del curso...</span>
+                            <span>{{rubric_generating}}</span>
                         </div>
                     </div>
                     <div id="evalia-rubric-items-container">
@@ -160,7 +159,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{tab_questions}}</h5>
                     <button id="evalia-btn-generate-questions" class="btn btn-primary">
-                        ✨ Generar Preguntas
+                        ✨ {{questions_generate}}
                     </button>
                 </div>
                 <div class="card-body">
@@ -168,30 +167,30 @@
                     <div class="row g-2 mb-3" id="evalia-questions-filters">
                         <div class="col-md-4">
                             <select id="evalia-filter-topic" class="form-select form-select-sm">
-                                <option value="">Todos los temas</option>
+                                <option value="">{{filter_all_topics}}</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <select id="evalia-filter-difficulty" class="form-select form-select-sm">
-                                <option value="">Todas las dificultades</option>
-                                <option value="basic">Básica</option>
-                                <option value="medium">Media</option>
-                                <option value="advanced">Avanzada</option>
+                                <option value="">{{filter_all_difficulties}}</option>
+                                <option value="basic">{{difficulty_basic}}</option>
+                                <option value="medium">{{difficulty_medium}}</option>
+                                <option value="advanced">{{difficulty_advanced}}</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <select id="evalia-filter-status" class="form-select form-select-sm">
-                                <option value="">Todos los estados</option>
-                                <option value="draft">Pendiente</option>
-                                <option value="approved">Aprobada</option>
-                                <option value="rejected">Rechazada</option>
+                                <option value="">{{filter_all_statuses}}</option>
+                                <option value="draft">{{questions_status_draft}}</option>
+                                <option value="approved">{{questions_status_approved}}</option>
+                                <option value="rejected">{{questions_status_rejected}}</option>
                             </select>
                         </div>
                     </div>
                     <div id="evalia-questions-loading" style="display:none;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                            <span>Cargando preguntas...</span>
+                            <span>{{questions_loading}}</span>
                         </div>
                     </div>
                     <div id="evalia-questions-table-container">
@@ -208,38 +207,38 @@
                 <div class="col-md-5">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0">📋 Crear Examen</h6>
+                            <h6 class="mb-0">📋 {{exam_create}}</h6>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="form-label">Nombre del examen</label>
+                                <label class="form-label">{{exam_name}}</label>
                                 <input type="text" id="evalia-exam-name" class="form-control"
-                                       placeholder="Ej: Parcial 1 — Introducción a IA">
+                                       placeholder="{{exam_name_placeholder}}">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Instrucciones para los alumnos</label>
+                                <label class="form-label">{{exam_instructions}}</label>
                                 <textarea id="evalia-exam-instructions" class="form-control" rows="2"
-                                          placeholder="Lea cada pregunta con atención..."></textarea>
+                                          placeholder="{{exam_instructions_placeholder}}"></textarea>
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-4">
-                                    <label class="form-label form-label-sm">Básicas</label>
+                                    <label class="form-label form-label-sm">{{exam_basic_count}}</label>
                                     <input type="number" id="evalia-exam-basic" class="form-control form-control-sm"
                                            value="{{exam_default_basic}}" min="0" max="20">
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label form-label-sm">Medias</label>
+                                    <label class="form-label form-label-sm">{{exam_medium_count}}</label>
                                     <input type="number" id="evalia-exam-medium" class="form-control form-control-sm"
                                            value="{{exam_default_medium}}" min="0" max="20">
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label form-label-sm">Avanzadas</label>
+                                    <label class="form-label form-label-sm">{{exam_advanced_count}}</label>
                                     <input type="number" id="evalia-exam-advanced" class="form-control form-control-sm"
                                            value="{{exam_default_advanced}}" min="0" max="20">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Tiempo límite (minutos)</label>
+                                <label class="form-label">{{exam_time_limit}}</label>
                                 <input type="number" id="evalia-exam-timelimit" class="form-control"
                                        value="{{exam_default_time_limit}}" min="0" max="300">
                             </div>
@@ -247,30 +246,30 @@
                             <div class="mb-3 border rounded p-2" style="background:#f8f9fa;">
                                 <div class="d-flex align-items-center"
                                      id="evalia-exam-window-toggle" style="cursor:pointer;">
-                                    <span class="fw-semibold small">📅 Ventana de rendición</span>
-                                    <span class="text-muted small ms-2">(opcional)</span>
+                                    <span class="fw-semibold small">📅 {{exam_window_title}}</span>
+                                    <span class="text-muted small ms-2">{{label_optional}}</span>
                                     <span id="evalia-exam-window-arrow" class="ms-auto small text-secondary">▶</span>
                                 </div>
                                 <div id="evalia-exam-window-panel" style="display:none;" class="mt-2">
                                     <div class="row g-2">
                                         <div class="col-12">
-                                            <label class="form-label form-label-sm mb-1">Apertura</label>
+                                            <label class="form-label form-label-sm mb-1">{{exam_window_open_label}}</label>
                                             <input type="datetime-local" id="evalia-exam-timeopen"
                                                    class="form-control form-control-sm">
                                         </div>
                                         <div class="col-12">
-                                            <label class="form-label form-label-sm mb-1">Cierre</label>
+                                            <label class="form-label form-label-sm mb-1">{{exam_window_close_label}}</label>
                                             <input type="datetime-local" id="evalia-exam-timeclose"
                                                    class="form-control form-control-sm">
                                         </div>
                                     </div>
                                     <p class="text-muted small mt-1 mb-0">
-                                        Dejá ambos vacíos para examen siempre disponible.
+                                        {{exam_window_hint}}
                                     </p>
                                 </div>
                             </div>
                             <button id="evalia-btn-create-exam" class="btn btn-primary w-100">
-                                Crear Examen
+                                {{exam_create}}
                             </button>
                         </div>
                     </div>
@@ -278,17 +277,17 @@
                 {{! Right: student exam list }}
                 <div class="col-md-7">
                     <div class="alert alert-light border d-flex align-items-center gap-2 py-2 px-3 mb-2" style="font-size:.85rem;">
-                        <span>🔗 Enlace para alumnos:</span>
+                        <span>🔗 {{student_link_label}}</span>
                         <code id="evalia-student-url" class="flex-grow-1 text-truncate" style="font-size:.82rem;">{{student_page_url}}</code>
                         <button class="btn btn-sm btn-outline-secondary py-0"
-                                onclick="navigator.clipboard.writeText('{{student_page_url}}').then(function(){this.textContent='✅';setTimeout(function(){document.querySelector('#evalia-student-url').parentNode.querySelector('button').textContent='Copiar';},1500)}.bind(this))">Copiar</button>
+                                onclick="navigator.clipboard.writeText('{{student_page_url}}').then(function(){this.textContent='✅';setTimeout(function(){document.querySelector('#evalia-student-url').parentNode.querySelector('button').textContent='{{btn_copy}}';},1500)}.bind(this))">{{btn_copy}}</button>
                     </div>
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
-                                <h6 class="mb-0">👥 Alumnos</h6>
+                                <h6 class="mb-0">👥 {{label_students}}</h6>
                                 <select id="evalia-exam-selector" class="form-select form-select-sm" style="max-width:220px;">
-                                    <option value="">— Sin exámenes —</option>
+                                    <option value="">{{exam_selector_none}}</option>
                                     {{#exam_list}}
                                     <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                                     {{/exam_list}}
@@ -297,13 +296,13 @@
                             <div class="d-flex gap-2 align-items-center" style="flex-shrink:0;">
                                 <span id="evalia-grade-all-status" class="text-muted small"></span>
                                 <button id="evalia-btn-publish-all" class="btn btn-success btn-sm" style="display:none;">
-                                    ✅ Publicar notas
+                                    ✅ {{btn_publish_grades}}
                                 </button>
                                 <button id="evalia-btn-grade-all" class="btn btn-warning btn-sm" style="display:none;">
-                                    ⚡ Calificar todos con IA
+                                    ⚡ {{btn_grade_all}}
                                 </button>
                                 <button id="evalia-btn-assign-exam" class="btn btn-success btn-sm" style="display:none;">
-                                    📤 Asignar a todos
+                                    📤 {{exam_assign_all}}
                                 </button>
                             </div>
                         </div>
@@ -311,12 +310,12 @@
                             <div id="evalia-exams-loading" style="display:none;" class="p-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                    <span>Asignando exámenes únicos por alumno...</span>
+                                    <span>{{exam_assigning}}</span>
                                 </div>
                             </div>
                             <div id="evalia-student-exams-container">
                                 <p class="text-muted text-center p-4">
-                                    Cree un examen para ver el estado por alumno.
+                                    {{exam_none_created}}
                                 </p>
                             </div>
                         </div>
@@ -328,7 +327,7 @@
             <div id="evalia-stats-section" class="mt-4" style="display:none;">
                 <div class="card border-info">
                     <div class="card-header d-flex justify-content-between align-items-center bg-info bg-opacity-10">
-                        <h6 class="mb-0">📊 Estadísticas del Examen</h6>
+                        <h6 class="mb-0">📊 {{stats_title}}</h6>
                         <button id="evalia-btn-refresh-stats" class="btn btn-outline-info btn-sm">🔄</button>
                     </div>
                     <div class="card-body">
@@ -338,11 +337,11 @@
                         {{! Score distribution + top failed side by side }}
                         <div class="row g-3">
                             <div class="col-md-5">
-                                <h6 class="text-muted small mb-2">Distribución de notas</h6>
+                                <h6 class="text-muted small mb-2">{{stats_distribution_title}}</h6>
                                 <div id="evalia-stats-bands"></div>
                             </div>
                             <div class="col-md-7">
-                                <h6 class="text-muted small mb-2">Preguntas más falladas</h6>
+                                <h6 class="text-muted small mb-2">{{stats_failed_title}}</h6>
                                 <div id="evalia-stats-failed"></div>
                             </div>
                         </div>
@@ -354,23 +353,21 @@
             <div id="evalia-feedback-prompt-section" class="mt-4" style="display:none;">
                 <div class="card border-secondary">
                     <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                        <h6 class="mb-0">🤖 Prompt de retroalimentación IA</h6>
+                        <h6 class="mb-0">🤖 {{feedback_prompt_title}}</h6>
                         <button id="evalia-btn-reset-prompt" class="btn btn-outline-secondary btn-sm">
-                            ↺ Restaurar predeterminado
+                            ↺ {{btn_reset_prompt}}
                         </button>
                     </div>
                     <div class="card-body">
                         <p class="text-muted small mb-2">
-                            Este texto instruye a la IA sobre cómo redactar el mensaje de retroalimentación
-                            que recibirá el alumno tras ser calificado. Podés personalizar el tono,
-                            el idioma, el nivel de detalle o cualquier aspecto pedagógico.
+                            {{feedback_prompt_desc}}
                         </p>
                         <textarea id="evalia-feedback-prompt-textarea" class="form-control font-monospace"
                                   rows="10" style="font-size:0.82rem;"></textarea>
                         <div class="d-flex justify-content-end gap-2 mt-2">
                             <span id="evalia-prompt-save-status" class="text-muted small align-self-center"></span>
                             <button id="evalia-btn-save-prompt" class="btn btn-primary btn-sm">
-                                💾 Guardar prompt
+                                💾 {{btn_save_prompt}}
                             </button>
                         </div>
                     </div>
@@ -389,11 +386,11 @@
                             <h6 class="mb-0">👥 {{portfolio_students}}</h6>
                             <div class="d-flex gap-2">
                                 <a href="{{wwwroot}}/local/evalia/export_portfolio.php?courseid={{courseid}}"
-                                   class="btn btn-outline-success btn-sm" title="Descargar CSV">
-                                    📥 CSV
+                                   class="btn btn-outline-success btn-sm" title="{{btn_download_csv_title}}">
+                                    📥 {{portfolio_export_csv}}
                                 </a>
                                 <button id="evalia-btn-reload-portfolio"
-                                        class="btn btn-outline-secondary btn-sm" title="Recargar">
+                                        class="btn btn-outline-secondary btn-sm" title="{{btn_reload_title}}">
                                     🔄
                                 </button>
                             </div>
@@ -457,10 +454,10 @@
                                         <div class="input-group">
                                             <textarea id="evalia-portfolio-note-input"
                                                       class="form-control form-control-sm" rows="2"
-                                                      placeholder="Escribir observación..."></textarea>
+                                                      placeholder="{{note_placeholder}}"></textarea>
                                             <button class="btn btn-primary btn-sm"
                                                     id="evalia-btn-add-note">
-                                                Guardar
+                                                {{btn_save_note}}
                                             </button>
                                         </div>
                                     </div>
@@ -500,11 +497,11 @@
                 color:#fff; padding:14px 18px; border-radius:12px 12px 0 0;
                 display:flex; justify-content:space-between; align-items:center;
                 user-select:none;">
-        <span style="font-weight:700; font-size:1rem;">🗺️ Flujo de trabajo — EVAL-IA</span>
+        <span style="font-weight:700; font-size:1rem;">🗺️ {{workflow_modal_title}}</span>
         <button id="evalia-workflow-modal-close"
                 style="background:none; border:none; color:#fff; font-size:1.4rem;
                        line-height:1; cursor:pointer; padding:0 4px;"
-                aria-label="Cerrar">&times;</button>
+                aria-label="{{btn_close}}">&times;</button>
     </div>
     <div style="padding:20px 22px 18px; overflow-y:auto; max-height:80vh;">
 
@@ -520,11 +517,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#0891b2; font-size:.9rem;">📚 Indexar Material del Curso</div>
+                    <div style="font-weight:700; color:#0891b2; font-size:.9rem;">📚 {{workflow_step1_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        Subir PDFs, PPTX o Páginas al curso en Moodle, luego clic en
-                        <strong>"🔍 Indexar Material"</strong> (tarjeta azul, Tab Rúbrica).
-                        Repetir cada vez que se agrega nuevo contenido.
+                        {{{workflow_step1_desc}}}
                     </div>
                 </div>
             </div>
@@ -538,11 +533,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#6366f1; font-size:.9rem;">📋 Generar y Activar la Rúbrica</div>
+                    <div style="font-weight:700; color:#6366f1; font-size:.9rem;">📋 {{workflow_step2_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        Optativo: escribir un <strong>Alcance</strong> (ej: <em>"Relaciones"</em>) para exámenes parciales.
-                        Clic en <strong>"✨ Generar Rúbrica con IA"</strong> → revisar ítems →
-                        <strong>"💾 Guardar"</strong> y luego <strong>"✅ Activar"</strong>.
+                        {{{workflow_step2_desc}}}
                     </div>
                 </div>
             </div>
@@ -556,12 +549,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#7c3aed; font-size:.9rem;">❓ Banco de Preguntas</div>
+                    <div style="font-weight:700; color:#7c3aed; font-size:.9rem;">❓ {{workflow_step3_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        En el <strong>Tab Banco de Preguntas</strong>: seleccionar tema del dropdown →
-                        clic <strong>"✨ Generar Preguntas"</strong> → revisar y
-                        <strong>aprobar ✔</strong> o <strong>rechazar ✗</strong> cada pregunta.
-                        Repetir por cada tema de la rúbrica.
+                        {{{workflow_step3_desc}}}
                     </div>
                 </div>
             </div>
@@ -575,12 +565,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#0369a1; font-size:.9rem;">📝 Crear y Asignar el Examen</div>
+                    <div style="font-weight:700; color:#0369a1; font-size:.9rem;">📝 {{workflow_step4_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        En el <strong>Tab Exámenes</strong>: definir nombre, instrucciones y distribución de
-                        dificultad → <strong>"Crear Examen"</strong> → clic
-                        <strong>"📤 Asignar a todos"</strong>.
-                        Cada alumno recibe una selección de preguntas única (anti-copia).
+                        {{{workflow_step4_desc}}}
                     </div>
                 </div>
             </div>
@@ -594,11 +581,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#059669; font-size:.9rem;">👩‍🎓 Los alumnos rinden el examen</div>
+                    <div style="font-weight:700; color:#059669; font-size:.9rem;">👩‍🎓 {{workflow_step5_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        Cada alumno accede desde Moodle o por enlace directo, responde las preguntas
-                        y hace clic en <strong>"Enviar examen"</strong>. El estado aparece en tiempo real
-                        en la tabla de alumnos.
+                        {{{workflow_step5_desc}}}
                     </div>
                 </div>
             </div>
@@ -612,12 +597,9 @@
                     <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
                 </div>
                 <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#d97706; font-size:.9rem;">⚡ Corrección con IA y Feedback</div>
+                    <div style="font-weight:700; color:#d97706; font-size:.9rem;">⚡ {{workflow_step6_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        Clic en <strong>"⚡ Calificar todos con IA"</strong> — corrección automática de
-                        todos los envíos. Cada alumno recibe nota + explicación pedagógica por
-                        <strong>Telegram</strong>. Personalizá el mensaje desde el panel
-                        <em>"Prompt de retroalimentación"</em>.
+                        {{{workflow_step6_desc}}}
                     </div>
                 </div>
             </div>
@@ -628,11 +610,9 @@
                             color:#fff; display:flex; align-items:center; justify-content:center;
                             font-weight:700; font-size:.95rem; flex-shrink:0;">7</div>
                 <div style="flex:1;">
-                    <div style="font-weight:700; color:#475569; font-size:.9rem;">📁 Legajos</div>
+                    <div style="font-weight:700; color:#475569; font-size:.9rem;">📁 {{workflow_step7_title}}</div>
                     <div style="font-size:.82rem; color:#475569; margin-top:3px;">
-                        En el <strong>Tab Legajos</strong>: historial de exámenes, promedio y
-                        tendencia por alumno. Agregá observaciones personalizadas y exportá a
-                        <strong>CSV</strong>.
+                        {{{workflow_step7_desc}}}
                     </div>
                 </div>
             </div>
@@ -759,25 +739,23 @@
 .evalia-chat-input-row button:disabled { opacity: .6; cursor: not-allowed; }
 </style>
 
-<button id="evalia-fab" class="evalia-fab" title="Asistente EVAL-IA" aria-label="Abrir Asistente EVAL-IA">
+<button id="evalia-fab" class="evalia-fab" title="{{fab_title}}" aria-label="{{fab_aria_label}}">
     🤖
 </button>
 
 <div id="evalia-chat-panel" class="evalia-chat-panel" style="display:none;">
     <div class="evalia-chat-header">
-        <span>✨ Asistente EVAL-IA</span>
-        <button id="evalia-chat-close" class="evalia-chat-close" aria-label="Cerrar">&times;</button>
+        <span>✨ {{fab_title}}</span>
+        <button id="evalia-chat-close" class="evalia-chat-close" aria-label="{{btn_close}}">&times;</button>
     </div>
     <div id="evalia-chat-messages" class="evalia-chat-messages">
         <div class="evalia-msg evalia-msg--assistant">
-            ¡Hola! Soy tu asistente EVAL-IA. Puedo guiarte en cada paso del proceso:
-            indexar material, generar rúbricas, armar preguntas, crear y asignar exámenes.
-            ¿En qué paso estás o en qué puedo ayudarte?
+            {{chat_welcome_msg}}
         </div>
     </div>
     <div class="evalia-chat-input-row">
         <input id="evalia-chat-input" type="text"
-               placeholder="Escribir pregunta..."
+               placeholder="{{chat_input_placeholder}}"
                autocomplete="off">
         <button id="evalia-chat-send">&#10148;</button>
     </div>
