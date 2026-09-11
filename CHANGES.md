@@ -87,6 +87,27 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   checking before editing, per the `block_saipa` `chat.min.js` precedent).
 
 ### Fixed
+- **Engine connectivity fatal on installs where the engine runs on a private
+  address (the setup wizard's health check, and any other engine call).**
+  Moodle blocks RFC1918/loopback ranges for outbound cURL by default
+  (`curlsecurityblockedhosts` — this is Moodle's own out-of-the-box default,
+  present since it ships with `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`,
+  `127.0.0.0/8`, `localhost` pre-populated). The engine is meant to run on
+  exactly such an address, so every install following the recommended
+  topology hit this: Moodle's own security layer raises a `debugging()` call
+  before the plugin's `catch (\GuzzleHttp\Exception\GuzzleException $e)` ever
+  runs, and on any Moodle whose error handler turns notices into exceptions,
+  that surfaces as an uncaught fatal instead of the graceful "engine
+  unreachable" message the code already had a path for. New
+  `local_evalia\engine_security_helper` (`classes/engine_security_helper.php`
+  — duplicated from `local_saipa`'s copy on purpose, the two plugins install
+  independently) narrows Moodle's SSRF protection to allow exactly the one
+  host configured in `engine_url` — not a blanket bypass, and it does not
+  touch the site-wide `curlsecurityblockedhosts` list, so every other
+  consumer of Moodle's HTTP client keeps exactly the protection it had.
+  Covered by 7 new PHPUnit tests (`tests/engine_security_helper_test.php`)
+  that assert the helper narrows rather than opens. Verified end-to-end
+  against a live engine (not just unit tests).
 - `assign_exam` no longer calls the engine once per student against a downed
   engine, and no longer reports every student as "already had an exam" when the
   real cause was that `saipa-engine` was unreachable. It stops at the first
