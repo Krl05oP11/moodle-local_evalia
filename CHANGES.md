@@ -46,6 +46,18 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   EVAL-IA (essay grading + feedback), vs. Haiku being sufficient for the
   companion SAIPA plugin. The model is selected engine-side; the plugin ships
   no default.
+- **i18n scope for the teacher panel, measured but not yet done.**
+  `teacher.php` itself is fully `get_string()`-clean (13 keys), but its
+  template `templates/evalia_teacher.mustache` (784 lines) has **zero**
+  `{{#str}}` helpers — ~40 hardcoded text nodes plus ~12 hardcoded
+  `placeholder`/`title`/`aria-label` attributes on a rough scan. Its AMD
+  module `amd/src/evalia_teacher.js` (1850 lines) also has **zero**
+  `core/str` usage, with a rough regex count of ~164 hardcoded string
+  literals (real count lower after filtering CSS classes/selectors/WS method
+  names, but still clearly the largest remaining i18n unit in either
+  plugin — bigger than `settings.php` + `student.php` + `student_exam.php`
+  combined). Deliberately scoped and deferred to its own pass rather than
+  folded into this changelog's other entries.
 
 ### Fixed
 - `assign_exam` no longer calls the engine once per student against a downed
