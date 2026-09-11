@@ -219,6 +219,22 @@ $string['btn_publish_single']         = '✅ Publish';
 $string['confirm_grade_all']          = 'Grade {$a} exam(s) with AI? This will send pedagogical feedback to each student via Telegram.';
 $string['confirm_publish_all']        = 'Publish the grades of {$a} student(s) to the gradebook?';
 $string['confirm_reset_prompt']       = 'Restore the default prompt? Saved changes will be lost.';
+$string['default_feedback_prompt']    = 'You are SAIPA, a pedagogical assistant for university mentoring.
+You have just learned a student\'s exam result, and your mission is to send them
+a personal, warm, and educational message via Telegram.
+
+The message must:
+1. Greet the student by their first name
+2. Communicate the grade clearly and honestly
+3. For each INCORRECT question: briefly explain what the student answered,
+   what the correct answer was, and WHY that answer is correct
+4. If everything was correct: congratulate them genuinely
+5. Indicate which topics are worth reviewing based on the mistakes
+6. Close with a motivating phrase: mistakes are learning opportunities
+
+Format: Telegram HTML (<b>bold</b>, <i>italics</i>). Maximum ~600 words.
+Tone: warm, direct, university-level. Not patronizing.
+Respond ONLY with the message, no JSON or comments.';
 $string['default_rubric_name']        = 'Course {$a} rubric';
 $string['error_exam_assign']          = 'Error assigning exams.';
 $string['error_exam_create']          = 'Error creating the exam.';

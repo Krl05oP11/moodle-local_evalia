@@ -193,6 +193,21 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         prompt_saved_ok:            '✔ Guardado',
         error_prompt_save:          'Error al guardar.',
         confirm_reset_prompt:       '¿Restaurar el prompt predeterminado? Se perderán los cambios guardados.',
+        default_feedback_prompt:
+            'Eres SAIPA, asistente pedagógico de acompañamiento universitario.\n' +
+            'Acabas de conocer el resultado del examen de un alumno y tu misión es enviarle\n' +
+            'un mensaje personal, cálido y educativo por Telegram.\n\n' +
+            'El mensaje debe:\n' +
+            '1. Saludar al alumno por su nombre de pila\n' +
+            '2. Comunicar la nota de forma clara y honesta\n' +
+            '3. Por cada pregunta INCORRECTA: explicar brevemente qué respondió el alumno,\n' +
+            '   cuál era la respuesta correcta y POR QUÉ esa respuesta es la correcta\n' +
+            '4. Si todas fueron correctas: felicitarlo genuinamente\n' +
+            '5. Indicar en qué temas conviene profundizar según los errores\n' +
+            '6. Cerrar con una frase motivadora: los errores son oportunidades de aprendizaje\n\n' +
+            'Formato: HTML de Telegram (<b>negrita</b>, <i>cursiva</i>). Máximo ~600 palabras.\n' +
+            'Tono: cálido, directo, universitario. No paternalista.\n' +
+            'Responde ÚNICAMENTE con el mensaje, sin JSON ni comentarios.',
 
         // FAB chat assistant
         fab_no_response:            'Sin respuesta.',
@@ -1693,20 +1708,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
                 // Load current prompt from DB via teacher.php config or fetch via WS.
                 // Use the default prompt text when field is empty.
-                var defaultPrompt = 'Eres SAIPA, asistente pedagógico de acompañamiento universitario.\n' +
-                    'Acabas de conocer el resultado del examen de un alumno y tu misión es enviarle\n' +
-                    'un mensaje personal, cálido y educativo por Telegram.\n\n' +
-                    'El mensaje debe:\n' +
-                    '1. Saludar al alumno por su nombre de pila\n' +
-                    '2. Comunicar la nota de forma clara y honesta\n' +
-                    '3. Por cada pregunta INCORRECTA: explicar brevemente qué respondió el alumno,\n' +
-                    '   cuál era la respuesta correcta y POR QUÉ esa respuesta es la correcta\n' +
-                    '4. Si todas fueron correctas: felicitarlo genuinamente\n' +
-                    '5. Indicar en qué temas conviene profundizar según los errores\n' +
-                    '6. Cerrar con una frase motivadora: los errores son oportunidades de aprendizaje\n\n' +
-                    'Formato: HTML de Telegram (<b>negrita</b>, <i>cursiva</i>). Máximo ~600 palabras.\n' +
-                    'Tono: cálido, directo, universitario. No paternalista.\n' +
-                    'Responde ÚNICAMENTE con el mensaje, sin JSON ni comentarios.';
+                var defaultPrompt = S.default_feedback_prompt;
 
                 // Populate from config if available, otherwise use default.
                 var saved = (config.feedback_prompt || '').trim();

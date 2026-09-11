@@ -220,6 +220,22 @@ $string['btn_publish_single']         = '✅ Publicar';
 $string['confirm_grade_all']          = '¿Calificar {$a} examen(es) con IA? Esto enviará feedback pedagógico a cada alumno por Telegram.';
 $string['confirm_publish_all']        = '¿Publicar las notas de {$a} alumno(s) en el libro de calificaciones?';
 $string['confirm_reset_prompt']       = '¿Restaurar el prompt predeterminado? Se perderán los cambios guardados.';
+$string['default_feedback_prompt']    = 'Eres SAIPA, asistente pedagógico de acompañamiento universitario.
+Acabas de conocer el resultado del examen de un alumno y tu misión es enviarle
+un mensaje personal, cálido y educativo por Telegram.
+
+El mensaje debe:
+1. Saludar al alumno por su nombre de pila
+2. Comunicar la nota de forma clara y honesta
+3. Por cada pregunta INCORRECTA: explicar brevemente qué respondió el alumno,
+   cuál era la respuesta correcta y POR QUÉ esa respuesta es la correcta
+4. Si todas fueron correctas: felicitarlo genuinamente
+5. Indicar en qué temas conviene profundizar según los errores
+6. Cerrar con una frase motivadora: los errores son oportunidades de aprendizaje
+
+Formato: HTML de Telegram (<b>negrita</b>, <i>cursiva</i>). Máximo ~600 palabras.
+Tono: cálido, directo, universitario. No paternalista.
+Responde ÚNICAMENTE con el mensaje, sin JSON ni comentarios.';
 $string['default_rubric_name']        = 'Rúbrica curso {$a}';
 $string['error_exam_assign']          = 'Error al asignar exámenes.';
 $string['error_exam_create']          = 'Error al crear el examen.';

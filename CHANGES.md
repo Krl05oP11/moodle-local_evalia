@@ -82,26 +82,40 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   lang keys where the value matched exactly (`rubric_status_*`,
   `difficulty_*`, `questions_status_approved/rejected`, `exam_status_*`,
   `qtype_multichoice/shortanswer/essay`, `student:status_published`, etc.);
-  added 116 new keys (`en`/`es`/`pt_br`) for the rest, including short
+  added 117 new keys (`en`/`es`/`pt_br`) for the rest, including short
   table-column variants (`qtype_table_*`, `rubric_item_weight_short`)
   distinct from the full-length labels reused elsewhere on the same page.
   One reuse changes visible text on purpose: the question bank's "draft"
   badge now reads the fuller `questions_status_draft` ("Pendiente de
   revisión") instead of the JS's own shorter "Pendiente", matching the
-  label already chosen as canonical in the mustache pass. **Deliberately
-  left untouched:** the default AI feedback-prompt template
-  (`loadFeedbackPromptEditor()`) — it is the instruction text sent to the
-  LLM, not UI chrome, and translating it would change what language the
-  AI writes student feedback in; that is a behavior decision, not a string
-  swap, and is flagged for a separate discussion rather than folded in
-  here. `amd/build/evalia_teacher.min.js` was, like `block_saipa`'s
+  label already chosen as canonical in the mustache pass.
+
+  The default AI feedback-prompt template (`loadFeedbackPromptEditor()`) was
+  initially left out of this pass on purpose — it's the instruction text sent
+  to the LLM, not UI chrome, and translating it changes what language the AI
+  writes student feedback in, which looked like a behavior decision rather
+  than a string swap. Raised with Carlos, who asked: if the `en` pack ships
+  an English default but the site itself is running in Spanish, would the
+  plugin answer students in English regardless? No — resolved via
+  `get_string()` like every other string here, so it follows Moodle's normal
+  per-site language resolution: an `es` site gets the `es` version of the
+  default prompt (and the AI keeps replying in Spanish), an `en` site gets
+  the `en` version. It's also only ever the *default* — a teacher who has
+  already customized their prompt keeps their own text regardless of site
+  language (`loadFeedbackPromptEditor()`'s `saved || defaultPrompt` fallback
+  was already teacher-override-first before this change). Added
+  `default_feedback_prompt` (`en`/`es`/`pt_br`); `es` is byte-identical to
+  the text this file hardcoded before (verified with a diff against the
+  resolved string, not just eyeballed), so no behavior change for the
+  Spanish-language installs this plugin has shipped to so far.
+  `amd/build/evalia_teacher.min.js` was, like `block_saipa`'s
   `chat.min.js` before its fix, an unminified copy (1850 lines, identical
   to source) mistakenly checked in — regenerated with `terser`
   (`--compress --mangle --comments false`), same invocation shape as that
   precedent (~101KB source → ~49KB minified). Verified: `node --check` on
   both source and minified output; a script cross-check that every `S.`
   property is defined-and-used exactly once (no typos, no dead keys) and
-  that all 137 keys resolve in `en`/`es`/`pt_br`; `phpcs --standard=moodle`
+  that all 138 keys resolve in `en`/`es`/`pt_br`; `phpcs --standard=moodle`
   on the 3 touched lang files: 0 errors (warnings only, all pre-existing
   whole-file alphabetical-order warnings, same class already accepted
   elsewhere in this file). **Verified live** against the running dev stack
@@ -117,13 +131,14 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   EVAL-IA (essay grading + feedback), vs. Haiku being sufficient for the
   companion SAIPA plugin. The model is selected engine-side; the plugin ships
   no default.
-- **i18n scope for the teacher panel, measured 2026-09-10 — fully closed.**
-  `teacher.php` itself was already fully `get_string()`-clean (13 keys).
-  Its template `templates/evalia_teacher.mustache` (784 lines) and its AMD
-  module `amd/src/evalia_teacher.js` (1850 lines) both had zero translated
-  static text — see the two "Changed" entries above for how each was
-  closed. The only string left in the JS on purpose is the default AI
-  feedback-prompt template, which is grading behavior, not UI text.
+- **i18n scope for the teacher panel, measured 2026-09-10 — fully closed,
+  including the AI feedback-prompt default.** `teacher.php` itself was
+  already fully `get_string()`-clean (13 keys). Its template
+  `templates/evalia_teacher.mustache` (784 lines) and its AMD module
+  `amd/src/evalia_teacher.js` (1850 lines) both had zero translated static
+  text — see the "Changed" entries above for how each was closed, including
+  the default AI feedback-prompt template, which now resolves per site
+  language like everything else instead of being hardcoded Spanish.
 
 ### Fixed
 - **Engine connectivity fatal on installs where the engine runs on a private
