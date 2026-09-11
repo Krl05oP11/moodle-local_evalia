@@ -43,8 +43,13 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
     per reopened `<?php` tag) and `Generic.WhiteSpace.ScopeIndent` (PHP scope
     indent vs. HTML indent) over the template section only.
   - `setup.php`: scoped `MissingDocblock.File` suppression on its HTML template.
-  Rendered output of `student.php` is unchanged — but the page has not been
-  loaded by a real Moodle in this pass (no DB); worth a manual check.
+  Rendered output of `student.php` is unchanged (reasoned through the diff);
+  PHPUnit doesn't exercise page scripts, so this specific page still needs a
+  manual browse — everything else below WAS run against a real install.
+- **PHPUnit actually run** against a real Moodle 4.4.12 + PostgreSQL 14 (not
+  just `php -l`): **23 tests, 66 assertions, all green**
+  (`externallib_test.php` + `privacy_provider_test.php`). The 0.4.8 changelog's
+  "58 tests (337 assertions)" figure was wrong; 23/66 is the real count.
 
 ## [0.4.8] - 2026-04-11
 
