@@ -28,6 +28,18 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   `get_string()` with real arguments against the live install and comparing
   byte-for-byte to the original literals). `local_evalia_testsuite` still
   23/23 green.
+- **`student_exam.php` i18n.** The exam-taking/teacher-preview page had zero
+  `get_string()` calls despite being 416 lines of mixed student- and
+  teacher-facing text: the page title, the teacher-preview banner and its 4
+  status labels, the submitted/graded banners, the countdown-timer bar, the
+  per-question header and points badges, all 4 question-type placeholders,
+  the "correct answer" hints, the AI essay-score badge, and the grade/submit
+  buttons — 27 keys under `exam:*`. Two use object placeholders
+  (`exam:points_of`) or a plain `{$a}` (`exam:page_title`, built from the exam
+  name). Verified: all 27 resolve in `en`/`es`/`pt_br`; spot-checked rendered
+  output against the original hardcoded text byte-for-byte for the two
+  trickiest interpolations (`preview_graded_msg`, `submitted_grade_msg`).
+  `local_evalia_testsuite` still 23/23 green.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for

@@ -49,7 +49,7 @@ if (!$isteacher) {
 $PAGE->set_context($context);
 $PAGE->set_url('/local/evalia/student_exam.php', ['student_examid' => $studentexamid]);
 $PAGE->set_pagelayout('incourse');
-$PAGE->set_title($exam->name . ' — EVAL-IA');
+$PAGE->set_title(get_string('exam:page_title', 'local_evalia', $exam->name));
 $PAGE->set_heading($exam->name);
 
 // Load questions directly from DB (no WS overhead for server-side rendering).
@@ -181,19 +181,20 @@ echo $OUTPUT->header();
 
 // ── Teacher preview banner ────────────────────────────────────────────────────
 if ($previewmode) {
-    $studentname = $studentuser ? fullname($studentuser) : 'alumno';
+    $studentname = $studentuser ? fullname($studentuser) : get_string('exam:preview_student_fallback', 'local_evalia');
     $statuslabel = [
-        'assigned'  => 'Asignado (aún no iniciado)',
-        'started'   => 'En progreso',
-        'submitted' => 'Enviado — pendiente de calificación',
-        'graded'    => 'Calificado',
+        'assigned'  => get_string('exam:status_assigned', 'local_evalia'),
+        'started'   => get_string('exam:status_started', 'local_evalia'),
+        'submitted' => get_string('exam:status_submitted_review', 'local_evalia'),
+        'graded'    => get_string('exam:status_graded', 'local_evalia'),
     ][$studentexam->status] ?? $studentexam->status;
     echo '<div class="alert alert-secondary d-flex align-items-center gap-3 mt-3 mb-0">';
     echo '<span style="font-size:1.5rem;">🔍</span>';
     echo '<div>';
-    echo '<strong>Vista docente — solo lectura</strong><br>';
-    echo '<small>Alumno: <strong>' . htmlspecialchars($studentname) . '</strong> &nbsp;·&nbsp; ';
-    echo 'Estado: ' . htmlspecialchars($statuslabel) . '</small>';
+    echo '<strong>' . get_string('exam:preview_banner_title', 'local_evalia') . '</strong><br>';
+    echo '<small>' . get_string('exam:preview_student_label', 'local_evalia') . ' <strong>'
+        . htmlspecialchars($studentname) . '</strong> &nbsp;·&nbsp; ';
+    echo get_string('exam:preview_status_label', 'local_evalia') . ' ' . htmlspecialchars($statuslabel) . '</small>';
     echo '</div>';
     echo '</div>';
 }
@@ -201,12 +202,12 @@ if ($previewmode) {
 // ── Student submitted/graded view: simple banner, no questions ────────────────
 if ($alreadysubmitted && !$previewmode) {
     echo '<div class="alert alert-success mt-3">';
-    echo '<h4>✅ Examen enviado</h4>';
+    echo '<h4>' . get_string('exam:submitted_heading', 'local_evalia') . '</h4>';
     if (in_array($studentexam->status, ['graded', 'published'])) {
         $score = number_format((float) $studentexam->score, 1);
-        echo '<p class="mb-0">Tu nota: <strong>' . $score . ' / 10.0</strong>. El docente ya calificó tu examen.</p>';
+        echo '<p class="mb-0">' . get_string('exam:submitted_grade_msg', 'local_evalia', $score) . '</p>';
     } else {
-        echo '<p class="mb-0">Tu examen fue recibido correctamente. El docente lo revisará próximamente.</p>';
+        echo '<p class="mb-0">' . get_string('exam:submitted_pending_msg', 'local_evalia') . '</p>';
     }
     echo '</div>';
     echo $OUTPUT->footer();
@@ -217,7 +218,7 @@ if ($alreadysubmitted && !$previewmode) {
 if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     $score = number_format((float) $studentexam->score, 1);
     echo '<div class="alert alert-success mt-3 mb-2">';
-    echo '✅ <strong>Calificado:</strong> ' . $score . ' / 10.0';
+    echo '✅ ' . get_string('exam:preview_graded_msg', 'local_evalia', $score);
     echo '</div>';
 }
 
@@ -228,8 +229,8 @@ if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
 // Timer bar: only for the student, never for teacher preview.
 if (!$previewmode && $exam->time_limit_min > 0) {
     echo '<div id="evalia-timer-bar" class="alert alert-warning d-flex justify-content-between align-items-center mt-3 mb-0">';
-    echo '<span>⏱ Tiempo restante: <strong id="evalia-timer-display">--:--</strong></span>';
-    echo '<span class="small text-muted">El examen se envía automáticamente al llegar a 00:00.</span>';
+    echo '<span>' . get_string('exam:timer_remaining', 'local_evalia') . ' <strong id="evalia-timer-display">--:--</strong></span>';
+    echo '<span class="small text-muted">' . get_string('exam:timer_autosubmit', 'local_evalia') . '</span>';
     echo '</div>';
 }
 
@@ -259,7 +260,8 @@ foreach ($questionsdata as $q) {
     }
     echo '<div class="card mb-3' . $cardborder . '" id="evalia-q-' . $q['id'] . '">';
     echo '<div class="card-header d-flex justify-content-between align-items-start">';
-    echo '<span><strong>Pregunta ' . $q['num'] . '</strong> — <small class="text-muted">' . htmlspecialchars($q['topic']) . '</small></span>';
+    echo '<span><strong>' . get_string('exam:question_num', 'local_evalia', $q['num'])
+        . '</strong> — <small class="text-muted">' . htmlspecialchars($q['topic']) . '</small></span>';
     echo '<span class="d-flex gap-1 align-items-center">';
     // Difficulty badge.
     echo '<span class="badge bg-' . $diffclass . '">' . htmlspecialchars($q['difficulty']) . '</span>';
@@ -274,9 +276,10 @@ foreach ($questionsdata as $q) {
             $obtained   = $qcorrect ? $qweight : 0;
             $ptsclass  = $qcorrect ? 'bg-success' : 'bg-danger';
         }
-        echo '<span class="badge ' . $ptsclass . '">' . $obtained . '/' . $qweight . ' pts</span>';
+        $ptslabel = (object) ['obtained' => $obtained, 'total' => $qweight];
+        echo '<span class="badge ' . $ptsclass . '">' . get_string('exam:points_of', 'local_evalia', $ptslabel) . '</span>';
     } else {
-        echo '<span class="badge bg-secondary">' . $qweight . ' pts</span>';
+        echo '<span class="badge bg-secondary">' . get_string('exam:points_plain', 'local_evalia', $qweight) . '</span>';
     }
     echo '</span>';
     echo '</div>';
@@ -324,14 +327,15 @@ foreach ($questionsdata as $q) {
         echo '<div class="d-flex align-items-center gap-2">';
         echo '<input type="number" step="any" class="form-control evalia-answer' . $inpborder . '" '
             . 'name="answer_' . $q['id'] . '" data-qid="' . $q['id'] . '" '
-            . 'placeholder="Ingresá un valor numérico" style="max-width:200px;"' . $val . $disabled . '>';
+            . 'placeholder="' . get_string('exam:placeholder_numerical', 'local_evalia') . '" style="max-width:200px;"'
+            . $val . $disabled . '>';
         if ($gradedpreview) {
             echo $qcorrect ? '<span class="text-success fw-bold fs-5">✅</span>' : '<span class="text-danger fw-bold fs-5">❌</span>';
         }
         echo '</div>';
         if ($gradedpreview && !$qcorrect) {
-            echo '<small class="text-muted mt-1 d-block">Respuesta correcta: <strong>'
-                . htmlspecialchars($q['correct_answer']) . '</strong>'
+            echo '<small class="text-muted mt-1 d-block">' . get_string('exam:correct_answer_label', 'local_evalia')
+                . ' <strong>' . htmlspecialchars($q['correct_answer']) . '</strong>'
                 . ($q['tolerance'] > 0 ? ' (±' . $q['tolerance'] . ')' : '') . '</small>';
         }
     } else if ($q['question_type'] === 'essay') {
@@ -342,13 +346,13 @@ foreach ($questionsdata as $q) {
             $bordercls  = ($evalscore < 0) ? '' : (($evalscore >= 0.6) ? ' border-success' : (($evalscore > 0) ? ' border-warning' : ' border-danger'));
             echo '<textarea class="form-control evalia-answer' . $bordercls . '" '
                 . 'name="answer_' . $q['id'] . '" data-qid="' . $q['id'] . '" '
-                . 'rows="5" placeholder="Redactá tu respuesta aquí" disabled>'
+                . 'rows="5" placeholder="' . get_string('exam:placeholder_essay', 'local_evalia') . '" disabled>'
                 . $taval . '</textarea>';
             if ($evalscore >= 0) {
                 $pct = round($evalscore * 100);
                 $badgecls = ($evalscore >= 0.6) ? 'bg-success' : (($evalscore > 0) ? 'bg-warning text-dark' : 'bg-danger');
                 echo '<div class="mt-2 d-flex align-items-center gap-2">';
-                echo '<span class="badge ' . $badgecls . '">IA: ' . $pct . '%</span>';
+                echo '<span class="badge ' . $badgecls . '">' . get_string('exam:ai_score_label', 'local_evalia', $pct) . '</span>';
                 if (!empty($aifeedback)) {
                     echo '<small class="text-muted">' . htmlspecialchars($aifeedback) . '</small>';
                 }
@@ -357,7 +361,7 @@ foreach ($questionsdata as $q) {
         } else {
             echo '<textarea class="form-control evalia-answer" '
                 . 'name="answer_' . $q['id'] . '" data-qid="' . $q['id'] . '" '
-                . 'rows="5" placeholder="Redactá tu respuesta aquí"' . $disabled . '>'
+                . 'rows="5" placeholder="' . get_string('exam:placeholder_essay', 'local_evalia') . '"' . $disabled . '>'
                 . $taval . '</textarea>';
         }
     } else {
@@ -368,14 +372,14 @@ foreach ($questionsdata as $q) {
         echo '<div class="d-flex align-items-center gap-2">';
         echo '<input type="text" class="form-control evalia-answer' . $inpborder . '" '
             . 'name="answer_' . $q['id'] . '" data-qid="' . $q['id'] . '" '
-            . 'placeholder="Escribí tu respuesta"' . $val . $disabled . '>';
+            . 'placeholder="' . get_string('exam:placeholder_shortanswer', 'local_evalia') . '"' . $val . $disabled . '>';
         if ($gradedpreview) {
             echo $qcorrect ? '<span class="text-success fw-bold fs-5">✅</span>' : '<span class="text-danger fw-bold fs-5">❌</span>';
         }
         echo '</div>';
         if ($gradedpreview && !$qcorrect) {
-            echo '<small class="text-muted mt-1 d-block">Respuesta correcta: <strong>'
-                . htmlspecialchars($q['correct_answer']) . '</strong></small>';
+            echo '<small class="text-muted mt-1 d-block">' . get_string('exam:correct_answer_label', 'local_evalia')
+                . ' <strong>' . htmlspecialchars($q['correct_answer']) . '</strong></small>';
         }
     }
 
@@ -388,11 +392,11 @@ if ($previewmode) {
     // Grade panel: only for submitted status (graded already shows score above).
     if ($studentexam->status === 'submitted') {
         echo '<div class="card border-warning mt-3 mb-5" id="evalia-grade-panel">';
-        echo '<div class="card-header bg-warning text-dark fw-bold">📝 Calificar examen</div>';
+        echo '<div class="card-header bg-warning text-dark fw-bold">' . get_string('exam:grade_panel_title', 'local_evalia') . '</div>';
         echo '<div class="card-body">';
-        echo '<p class="text-muted small mb-3">Al confirmar, el engine de IA evaluará las respuestas del alumno y asignará una nota automáticamente.</p>';
+        echo '<p class="text-muted small mb-3">' . get_string('exam:grade_panel_desc', 'local_evalia') . '</p>';
         echo '<div class="d-flex align-items-center gap-3">';
-        echo '<button id="evalia-btn-grade" class="btn btn-warning btn-lg">⚡ Calificar con IA</button>';
+        echo '<button id="evalia-btn-grade" class="btn btn-warning btn-lg">' . get_string('exam:btn_grade_ai', 'local_evalia') . '</button>';
         echo '<span id="evalia-grade-status" class="text-muted small"></span>';
         echo '</div>';
         echo '</div>';
@@ -402,7 +406,7 @@ if ($previewmode) {
     echo '</form>';
     echo '<div class="d-flex justify-content-between align-items-center mb-5 mt-2">';
     echo '<div id="evalia-submit-status" class="text-muted small"></div>';
-    echo '<button id="evalia-btn-submit-exam" class="btn btn-success btn-lg">📤 Enviar examen</button>';
+    echo '<button id="evalia-btn-submit-exam" class="btn btn-success btn-lg">' . get_string('exam:btn_submit_exam', 'local_evalia') . '</button>';
     echo '</div>';
 }
 
