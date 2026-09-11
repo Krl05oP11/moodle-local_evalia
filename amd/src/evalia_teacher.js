@@ -24,7 +24,7 @@
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/log'], function(Ajax, Log) {
+define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     'use strict';
 
@@ -37,6 +37,189 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     var sourcesLoaded              = false;  // lazy-load guard for source panel
     var allSources                 = [];     // [{id, label, type}] from WS
     var defaultQuestionsCount      = 5;      // overridden from config.defaults in init()
+
+    // ─── i18n ────────────────────────────────────────────────────────────────
+    // Every UI string this module needs, keyed by its local_evalia lang key.
+    // Values below are the Spanish fallback (identical to the hardcoded text
+    // this module used before this pass) shown until loadStrings() resolves —
+    // Str.get_strings() is fast (cached) but async, so init() does not block on it.
+    // Strings containing "{$a}" / "{$a->prop}" are Moodle placeholders Moodle's
+    // get_string() leaves untouched when called with no $a — resolved here via
+    // core/str (no $a passed), then substituted manually with String.replace()
+    // at each call site. This lets every render function stay synchronous.
+    var S = {
+        // Rubric tab (Tab 1)
+        rubric_status_active:      'Activa',
+        rubric_status_draft:       'Borrador',
+        error_load_rubric:         'Error al cargar la rúbrica.',
+        rubric_empty_state:        'No hay rúbrica para este curso. Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.',
+        rubric_no_items:           'La rúbrica no tiene ítems.',
+        rubric_item_topic:         'Tema',
+        rubric_item_description:   'Descripción',
+        rubric_item_weight_short:  'Peso',
+        error_no_rubric_to_save:   'No hay rúbrica para guardar.',
+        error_rubric_needs_item:   'La rúbrica debe tener al menos un ítem.',
+        default_rubric_name:       'Rúbrica curso {$a}',
+        rubric_generated_ok:       'Rúbrica generada. Revísela y active cuando esté lista.',
+        error_rubric_generate_failed: 'No se pudo generar: {$a}',
+        error_rubric_generate:     'Error al generar la rúbrica.',
+        error_rubric_save:         'Error: {$a}',
+        error_rubric_save_generic: 'Error al guardar.',
+
+        // Question bank (Tab 2)
+        difficulty_basic:          'Básica',
+        difficulty_medium:         'Media',
+        difficulty_advanced:       'Avanzada',
+        questions_status_draft:    'Pendiente',
+        questions_status_approved: 'Aprobada',
+        questions_status_rejected: 'Rechazada',
+        qtype_table_multichoice:   'OM',
+        qtype_short_truefalse:     'V/F',
+        qtype_table_numerical:     'Núm',
+        qtype_table_shortanswer:   'Corta',
+        qtype_essay:               'Ensayo',
+        qtype_multichoice:         'Opción múltiple',
+        qtype_shortanswer:         'Respuesta corta',
+        error_load_bank:           'Error al cargar el banco.',
+        table_question:            'Pregunta',
+        table_type:                'Tipo',
+        questions_empty_filtered:  'No hay preguntas con los filtros seleccionados. Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.',
+        question_approved_ok:      'Pregunta aprobada.',
+        question_rejected_ok:      'Pregunta rechazada.',
+        error_question_update:     'Error al actualizar la pregunta.',
+        error_rubric_first:        'Primero genere y active una rúbrica.',
+        error_rubric_must_be_active: 'Active la rúbrica antes de generar preguntas.',
+        gen_questions_title:       '✨ Generar Preguntas con IA',
+        gen_questions_item_label:  'Ítem de rúbrica',
+        gen_questions_difficulty_label: 'Dificultad',
+        gen_questions_count_label: 'Cantidad',
+        gen_questions_btn:         'Generar',
+        gen_questions_types_label: 'Tipos de pregunta',
+        gen_questions_loading:     'Generando preguntas desde el material del curso...',
+        error_select_qtype:        'Seleccione al menos un tipo de pregunta.',
+        questions_generated_ok:    'Se generaron {$a} pregunta(s). Apruebe las que considere correctas.',
+        error_questions_generate:  'Error al generar preguntas.',
+
+        // Exams (Tab 3)
+        error_exam_name_required:  'Ingrese un nombre para el examen.',
+        error_exam_min_questions:  'El examen debe tener al menos 1 pregunta.',
+        error_exam_window_order:   'El cierre debe ser posterior a la apertura.',
+        exam_created_ok:           'Examen creado. Asígnelo a los alumnos cuando el banco esté listo.',
+        error_exam_create:         'Error al crear el examen.',
+        error_exam_first:          'Primero cree un examen.',
+        exam_assigned_result:      'Asignados: {$a->assigned} alumno(s). Omitidos: {$a->skipped}.',
+        error_exam_assign:         'Error al asignar exámenes.',
+        students_none_enrolled_exam: 'No hay alumnos inscriptos.',
+        error_load_students:       'Error al cargar alumnos.',
+        btn_publish_grades_count:  '✅ Publicar notas ({$a})',
+        exam_status_not_assigned:  'Sin asignar',
+        'student:status_published': '✅ Publicado',
+        exam_status_assigned:      'Asignado',
+        exam_status_started:       'En progreso',
+        exam_status_submitted:     'Enviado',
+        exam_status_graded:        'Calificado',
+        exam_preview_link_title:   'Previsualizar examen asignado',
+        exam_watching_link_title:  'El alumno está rindiendo',
+        exam_grade_link_title:     'Calificar examen enviado',
+        exam_view_graded_title:    'Ver examen calificado',
+        exam_publish_single_title: 'Publicar nota en el gradebook',
+        exam_view_published_title: 'Ver examen publicado',
+        link_view:                 '👁 Ver',
+        link_grade:                '📝 Calificar',
+        link_view_star:            '★ Ver',
+        btn_publish_single:        '✅ Publicar',
+        table_student:             'Alumno',
+        table_status:              'Estado',
+        table_grade:               'Nota',
+        table_action:              'Acción',
+        confirm_grade_all:         '¿Calificar {$a} examen(es) con IA? Esto enviará feedback pedagógico a cada alumno por Telegram.',
+        grading_in_progress:       '⏳ Calificando...',
+        grade_all_result:          '✔ {$a->graded} calificado(s)',
+        grade_all_skipped_suffix:  ' · {$a} omitido(s)',
+        btn_grade_all_with_ai:     '⚡ Calificar todos con IA',
+        error_grade_all:           'Error al calificar.',
+        error_grade_exams:         'Error al calificar los exámenes.',
+        publishing_ellipsis:       '⏳...',
+        grade_published_ok:        'Nota publicada en el libro de calificaciones.',
+        error_publish_grade:       'Error al publicar la nota.',
+        confirm_publish_all:       '¿Publicar las notas de {$a} alumno(s) en el libro de calificaciones?',
+        publishing_all:            '⏳ Publicando...',
+        grades_published_result:   '✅ {$a} nota(s) publicada(s) en el gradebook.',
+        error_publish_all:         'Error al publicar.',
+        error_publish_grades:      'Error al publicar las notas.',
+
+        // Exam stats (Tab 3)
+        stat_total:                'Total',
+        stat_graded:                'Calificados',
+        stat_submitted:             'Enviados',
+        stat_average:                'Promedio',
+        stat_passed:                 'Aprobados',
+        stats_no_data:              'Sin datos aún.',
+        stat_topic_title:           'Tema',
+        stat_pct_failed:            '{$a}% fallaron',
+
+        // Portfolio (Tab 4)
+        students_none_enrolled_course: 'No hay alumnos inscriptos en este curso.',
+        error_load_portfolio:      'Error al cargar legajos.',
+        tab_exams:                  'Exámenes',
+        portfolio_avg_grade:        'Nota prom.',
+        loading_ellipsis:           'Cargando...',
+        loading_exam_history:       'Cargando historial...',
+        exam_count_singular:        '{$a} examen',
+        exam_count_plural:          '{$a} exámenes',
+        portfolio_average_label:    'Promedio: {$a}',
+        no_exams_assigned_yet:      'Este alumno no tiene exámenes asignados aún.',
+        error_load_exam_history:    'Error al cargar el historial de exámenes.',
+        table_exam:                 'Examen',
+        table_date:                 'Fecha',
+        table_questions:            'Preguntas',
+        view_exam_title:            'Ver examen',
+        loading_observations:       'Cargando observaciones...',
+        error_load_notes:           'Error al cargar observaciones.',
+        portfolio_note_empty:       'Sin observaciones registradas.',
+        error_note_required:        'Escriba una observación antes de guardar.',
+        error_note_save:            'Error al guardar la observación.',
+        portfolio_note_saved:       'Observación guardada.',
+
+        // RAG indexing
+        index_result_sources_chunks: '{$a->sources} fuente(s), {$a->chunks} fragmentos indexados',
+        index_result_errors:        '{$a} error(es)',
+        index_result_nothing:       'No se encontró material para indexar',
+        error_index_generic:        'Error al indexar.',
+        error_index_course:         'Error al indexar el material del curso.',
+
+        // Feedback prompt editor
+        prompt_saving:              'Guardando...',
+        prompt_saved_ok:            '✔ Guardado',
+        error_prompt_save:          'Error al guardar.',
+        confirm_reset_prompt:       '¿Restaurar el prompt predeterminado? Se perderán los cambios guardados.',
+
+        // FAB chat assistant
+        fab_no_response:            'Sin respuesta.',
+        fab_connect_error:          'Error al conectar con el asistente.',
+
+        // Sources panel
+        sources_badge_count:        '{$a->checked}/{$a->total} fuentes',
+        sources_none_indexed:       'No hay material indexado para este curso.',
+        error_load_sources:         'Error al cargar fuentes.'
+    };
+
+    /**
+     * Resolves every string in S against the current language pack, in one
+     * batch request. Until this resolves, S already holds the Spanish text
+     * this module always showed, so rendering never blocks on it.
+     */
+    function loadStrings() {
+        var keys = Object.keys(S);
+        Str.get_strings(keys.map(function(k) {
+            return {key: k, component: 'local_evalia'};
+        })).then(function(values) {
+            keys.forEach(function(k, i) { S[k] = values[i]; });
+            return values;
+        }).catch(function(err) {
+            Log.error('evalia_teacher: string load error', err);
+        });
+    }
 
     // ─── Toast helper ────────────────────────────────────────────────────────
 
@@ -78,14 +261,13 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 } else {
                     var badgeClass = result.status === 'active' ? 'bg-success' : 'bg-secondary';
                     statusDiv.innerHTML = '<span class="badge ' + badgeClass + ' me-2">' +
-                        (result.status === 'active' ? 'Activa' : 'Borrador') + '</span>' +
+                        (result.status === 'active' ? S.rubric_status_active : S.rubric_status_draft) + '</span>' +
                         '<small class="text-muted">' + result.name + '</small>';
                 }
             }
 
             if (result.rubricid === 0) {
-                container.innerHTML = '<p class="text-muted">No hay rúbrica para este curso. ' +
-                    'Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.</p>';
+                container.innerHTML = '<p class="text-muted">' + S.rubric_empty_state + '</p>';
                 showRubricButtons(false, false);
                 return;
             }
@@ -95,7 +277,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
         }).fail(function(err) {
             Log.error('evalia_teacher: get_rubric failed', err);
-            container.innerHTML = '<p class="text-danger">Error al cargar la rúbrica.</p>';
+            container.innerHTML = '<p class="text-danger">' + S.error_load_rubric + '</p>';
         });
     }
 
@@ -109,7 +291,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     function renderRubricItems(items, status) {
         var container = document.getElementById('evalia-rubric-items-container');
         if (!items || items.length === 0) {
-            container.innerHTML = '<p class="text-muted">La rúbrica no tiene ítems.</p>';
+            container.innerHTML = '<p class="text-muted">' + S.rubric_no_items + '</p>';
             return;
         }
 
@@ -138,7 +320,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }).join('');
 
         container.innerHTML = '<div class="table-responsive"><table class="table table-sm table-hover">' +
-            '<thead class="table-light"><tr><th>#</th><th>Tema</th><th>Descripción</th><th>Peso</th></tr></thead>' +
+            '<thead class="table-light"><tr><th>#</th><th>' + S.rubric_item_topic + '</th><th>' +
+            S.rubric_item_description + '</th><th>' + S.rubric_item_weight_short + '</th></tr></thead>' +
             '<tbody>' + rows + '</tbody></table></div>';
     }
 
@@ -170,7 +353,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var total    = allSources.length;
         var checked  = document.querySelectorAll('#evalia-sources-list input[type=checkbox]:checked').length;
         badge.style.display = '';
-        badge.textContent   = checked + '/' + total + ' fuentes';
+        badge.textContent   = S.sources_badge_count.replace('{$a->checked}', checked).replace('{$a->total}', total);
         badge.className     = 'badge me-2 ' + (checked < total ? 'bg-warning text-dark' : 'bg-secondary');
     }
 
@@ -178,7 +361,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var list = document.getElementById('evalia-sources-list');
         if (!list) { return; }
         if (!sources.length) {
-            list.innerHTML = '<span class="text-muted small">No hay material indexado para este curso.</span>';
+            list.innerHTML = '<span class="text-muted small">' + S.sources_none_indexed + '</span>';
             return;
         }
         var icons = {page: '📄', resource: '📑', unknown: '📎'};
@@ -213,7 +396,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }).fail(function(err) {
             Log.error('evalia_teacher: get_course_sources failed', err);
             var list = document.getElementById('evalia-sources-list');
-            if (list) { list.innerHTML = '<span class="text-danger small">Error al cargar fuentes.</span>'; }
+            if (list) { list.innerHTML = '<span class="text-danger small">' + S.error_load_sources + '</span>'; }
         });
     }
 
@@ -291,27 +474,27 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setLoading('evalia-rubric-loading', false);
             setDisabled('evalia-btn-generate-rubric', false);
             if (result.success) {
-                showToast('Rúbrica generada. Revísela y active cuando esté lista.', 'success');
+                showToast(S.rubric_generated_ok, 'success');
                 loadRubric();
             } else {
-                showToast('No se pudo generar: ' + result.message, 'danger');
+                showToast(S.error_rubric_generate_failed.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setLoading('evalia-rubric-loading', false);
             setDisabled('evalia-btn-generate-rubric', false);
             Log.error('evalia_teacher: generate_rubric failed', err);
-            showToast('Error al generar la rúbrica.', 'danger');
+            showToast(S.error_rubric_generate, 'danger');
         });
     }
 
     function handleSaveRubric(activate) {
         if (!currentRubric || currentRubric.rubricid === 0) {
-            showToast('No hay rúbrica para guardar.', 'danger');
+            showToast(S.error_no_rubric_to_save, 'danger');
             return;
         }
         var items = collectRubricItems();
         if (items.length === 0) {
-            showToast('La rúbrica debe tener al menos un ítem.', 'danger');
+            showToast(S.error_rubric_needs_item, 'danger');
             return;
         }
 
@@ -322,7 +505,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             methodname: 'local_evalia_save_rubric',
             args: {
                 rubricid: currentRubric.rubricid,
-                name:     currentRubric.name || ('Rúbrica curso ' + courseId),
+                name:     currentRubric.name || S.default_rubric_name.replace('{$a}', courseId),
                 activate: activate ? 1 : 0,
                 items:    items
             }
@@ -334,12 +517,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 // Refresh topic filter in Tab 2 after rubric changes
                 refreshTopicFilter();
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setDisabled(btnId, false);
             Log.error('evalia_teacher: save_rubric failed', err);
-            showToast('Error al guardar.', 'danger');
+            showToast(S.error_rubric_save_generic, 'danger');
         });
     }
 
@@ -383,9 +566,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             setLoading('evalia-questions-loading', false);
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">' +
-                    'No hay preguntas con los filtros seleccionados. ' +
-                    'Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.</p>';
+                container.innerHTML = '<p class="text-muted text-center py-4">' + S.questions_empty_filtered + '</p>';
                 return;
             }
             renderQuestionsTable(result.questions);
@@ -393,7 +574,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setLoading('evalia-questions-loading', false);
             Log.error('evalia_teacher: get_question_bank failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger">Error al cargar el banco.</p>';
+                container.innerHTML = '<p class="text-danger">' + S.error_load_bank + '</p>';
             }
         });
     }
@@ -401,21 +582,21 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     function renderQuestionsTable(questions) {
         var container = document.getElementById('evalia-questions-table-container');
         var statusMap = {
-            'draft':    '<span class="badge bg-secondary">Pendiente</span>',
-            'approved': '<span class="badge bg-success">Aprobada</span>',
-            'rejected': '<span class="badge bg-danger">Rechazada</span>'
+            'draft':    '<span class="badge bg-secondary">' + S.questions_status_draft + '</span>',
+            'approved': '<span class="badge bg-success">' + S.questions_status_approved + '</span>',
+            'rejected': '<span class="badge bg-danger">' + S.questions_status_rejected + '</span>'
         };
         var diffMap = {
-            'basic':    '<span class="badge bg-info text-dark">Básica</span>',
-            'medium':   '<span class="badge bg-warning text-dark">Media</span>',
-            'advanced': '<span class="badge bg-danger">Avanzada</span>'
+            'basic':    '<span class="badge bg-info text-dark">' + S.difficulty_basic + '</span>',
+            'medium':   '<span class="badge bg-warning text-dark">' + S.difficulty_medium + '</span>',
+            'advanced': '<span class="badge bg-danger">' + S.difficulty_advanced + '</span>'
         };
         var typeMap = {
-            'multichoice': 'OM',
-            'truefalse':   'V/F',
-            'numerical':   'Núm',
-            'shortanswer': 'Corta',
-            'essay':       'Ensayo'
+            'multichoice': S.qtype_table_multichoice,
+            'truefalse':   S.qtype_short_truefalse,
+            'numerical':   S.qtype_table_numerical,
+            'shortanswer': S.qtype_table_shortanswer,
+            'essay':       S.qtype_essay
         };
 
         var rows = questions.map(function(q) {
@@ -437,7 +618,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
         container.innerHTML = '<div class="table-responsive"><table class="table table-sm table-hover mb-0">' +
             '<thead class="table-light"><tr>' +
-            '<th>Tema</th><th>Pregunta</th><th>Tipo</th><th>Dificultad</th><th>Estado</th><th></th>' +
+            '<th>' + S.rubric_item_topic + '</th><th>' + S.table_question + '</th><th>' + S.table_type +
+            '</th><th>' + S.gen_questions_difficulty_label + '</th><th>' + S.table_status + '</th><th></th>' +
             '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 
         container.querySelectorAll('.evalia-approve-btn').forEach(function(btn) {
@@ -454,14 +636,14 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             args: { questionid: questionId, status: status }
         }])[0].then(function(result) {
             if (result.success) {
-                showToast(status === 'approved' ? 'Pregunta aprobada.' : 'Pregunta rechazada.', 'success');
+                showToast(status === 'approved' ? S.question_approved_ok : S.question_rejected_ok, 'success');
                 loadQuestionBank();
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             Log.error('evalia_teacher: update_question failed', err);
-            showToast('Error al actualizar la pregunta.', 'danger');
+            showToast(S.error_question_update, 'danger');
         });
     }
 
@@ -469,11 +651,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         // Build inline form inside Tab 2, above the table.
         var container = document.getElementById('evalia-questions-table-container');
         if (!currentRubric || currentRubric.rubricid === 0) {
-            showToast('Primero genere y active una rúbrica.', 'danger');
+            showToast(S.error_rubric_first, 'danger');
             return;
         }
         if (currentRubric.status !== 'active') {
-            showToast('Active la rúbrica antes de generar preguntas.', 'danger');
+            showToast(S.error_rubric_must_be_active, 'danger');
             return;
         }
 
@@ -483,50 +665,50 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
         var formHtml = '<div class="card border-primary mb-3" id="evalia-gen-q-form">' +
             '<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">' +
-            '<span>✨ Generar Preguntas con IA</span>' +
+            '<span>' + S.gen_questions_title + '</span>' +
             '<button type="button" class="btn-close btn-close-white" id="evalia-gen-q-close"></button>' +
             '</div>' +
             '<div class="card-body">' +
             '<div class="row g-2">' +
             '<div class="col-md-4">' +
-            '<label class="form-label form-label-sm">Ítem de rúbrica</label>' +
+            '<label class="form-label form-label-sm">' + S.gen_questions_item_label + '</label>' +
             '<select id="gen-q-item" class="form-select form-select-sm">' + itemOptions + '</select>' +
             '</div>' +
             '<div class="col-md-3">' +
-            '<label class="form-label form-label-sm">Dificultad</label>' +
+            '<label class="form-label form-label-sm">' + S.gen_questions_difficulty_label + '</label>' +
             '<select id="gen-q-difficulty" class="form-select form-select-sm">' +
-            '<option value="basic">Básica</option>' +
-            '<option value="medium" selected>Media</option>' +
-            '<option value="advanced">Avanzada</option>' +
+            '<option value="basic">' + S.difficulty_basic + '</option>' +
+            '<option value="medium" selected>' + S.difficulty_medium + '</option>' +
+            '<option value="advanced">' + S.difficulty_advanced + '</option>' +
             '</select>' +
             '</div>' +
             '<div class="col-md-3">' +
-            '<label class="form-label form-label-sm">Cantidad</label>' +
+            '<label class="form-label form-label-sm">' + S.gen_questions_count_label + '</label>' +
             '<input type="number" id="gen-q-count" class="form-control form-control-sm" value="' + defaultQuestionsCount + '" min="1" max="10">' +
             '</div>' +
             '<div class="col-md-2 d-flex align-items-end">' +
-            '<button id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">Generar</button>' +
+            '<button id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">' + S.gen_questions_btn + '</button>' +
             '</div>' +
             '</div>' +
             '<div class="mt-2">' +
-            '<label class="form-label form-label-sm">Tipos de pregunta</label><br>' +
+            '<label class="form-label form-label-sm">' + S.gen_questions_types_label + '</label><br>' +
             '<div class="form-check form-check-inline">' +
             '<input class="form-check-input" type="checkbox" id="qt-multichoice" value="multichoice" checked>' +
-            '<label class="form-check-label" for="qt-multichoice">Opción múltiple</label></div>' +
+            '<label class="form-check-label" for="qt-multichoice">' + S.qtype_multichoice + '</label></div>' +
             '<div class="form-check form-check-inline">' +
             '<input class="form-check-input" type="checkbox" id="qt-truefalse" value="truefalse" checked>' +
-            '<label class="form-check-label" for="qt-truefalse">V/F</label></div>' +
+            '<label class="form-check-label" for="qt-truefalse">' + S.qtype_short_truefalse + '</label></div>' +
             '<div class="form-check form-check-inline">' +
             '<input class="form-check-input" type="checkbox" id="qt-shortanswer" value="shortanswer">' +
-            '<label class="form-check-label" for="qt-shortanswer">Respuesta corta</label></div>' +
+            '<label class="form-check-label" for="qt-shortanswer">' + S.qtype_shortanswer + '</label></div>' +
             '<div class="form-check form-check-inline">' +
             '<input class="form-check-input" type="checkbox" id="qt-essay" value="essay">' +
-            '<label class="form-check-label" for="qt-essay">Ensayo</label></div>' +
+            '<label class="form-check-label" for="qt-essay">' + S.qtype_essay + '</label></div>' +
             '</div>' +
             '<div id="gen-q-loading" style="display:none;" class="mt-2">' +
             '<div class="d-flex align-items-center gap-2 text-primary">' +
             '<div class="spinner-border spinner-border-sm" role="status"></div>' +
-            '<span>Generando preguntas desde el material del curso...</span>' +
+            '<span>' + S.gen_questions_loading + '</span>' +
             '</div></div>' +
             '</div></div>';
 
@@ -553,7 +735,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         });
 
         if (types.length === 0) {
-            showToast('Seleccione al menos un tipo de pregunta.', 'danger');
+            showToast(S.error_select_qtype, 'danger');
             return;
         }
 
@@ -573,7 +755,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setLoading('gen-q-loading', false);
             setDisabled('evalia-btn-do-generate-questions', false);
             if (result.success) {
-                showToast('Se generaron ' + result.generated + ' pregunta(s). Apruebe las que considere correctas.', 'success');
+                showToast(S.questions_generated_ok.replace('{$a}', result.generated), 'success');
                 // Reset all filters so the new draft questions are visible
                 var topicFilterEl = document.getElementById('evalia-filter-topic');
                 var diffFilterEl  = document.getElementById('evalia-filter-difficulty');
@@ -586,13 +768,13 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 if (container) { container.innerHTML = ''; }
                 loadQuestionBank();
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setLoading('gen-q-loading', false);
             setDisabled('evalia-btn-do-generate-questions', false);
             Log.error('evalia_teacher: generate_questions failed', err);
-            showToast('Error al generar preguntas.', 'danger');
+            showToast(S.error_questions_generate, 'danger');
         });
     }
 
@@ -609,12 +791,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var tcEl      = document.getElementById('evalia-exam-timeclose');
 
         if (!name || !name.value.trim()) {
-            showToast('Ingrese un nombre para el examen.', 'danger');
+            showToast(S.error_exam_name_required, 'danger');
             return;
         }
 
         if (!currentRubric || currentRubric.rubricid === 0) {
-            showToast('Primero genere y active una rúbrica.', 'danger');
+            showToast(S.error_rubric_first, 'danger');
             return;
         }
 
@@ -623,7 +805,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var advancedCount = parseInt(advanced.value, 10) || 0;
 
         if ((basicCount + mediumCount + advancedCount) < 1) {
-            showToast('El examen debe tener al menos 1 pregunta.', 'danger');
+            showToast(S.error_exam_min_questions, 'danger');
             return;
         }
 
@@ -637,7 +819,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             timeclose = Math.floor(new Date(tcEl.value).getTime() / 1000);
         }
         if (timeopen > 0 && timeclose > 0 && timeclose <= timeopen) {
-            showToast('El cierre debe ser posterior a la apertura.', 'danger');
+            showToast(S.error_exam_window_order, 'danger');
             return;
         }
 
@@ -661,7 +843,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setDisabled('evalia-btn-create-exam', false);
             if (result.success) {
                 currentExamId = result.examid;
-                showToast('Examen creado. Asígnelo a los alumnos cuando el banco esté listo.', 'success');
+                showToast(S.exam_created_ok, 'success');
                 // Add option to exam selector dropdown and select it
                 var selector = document.getElementById('evalia-exam-selector');
                 if (selector) {
@@ -680,18 +862,18 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 loadStudentExams(result.examid);
                 loadExamStats(result.examid);
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setDisabled('evalia-btn-create-exam', false);
             Log.error('evalia_teacher: create_exam failed', err);
-            showToast('Error al crear el examen.', 'danger');
+            showToast(S.error_exam_create, 'danger');
         });
     }
 
     function handleAssignExam() {
         if (!currentExamId) {
-            showToast('Primero cree un examen.', 'danger');
+            showToast(S.error_exam_first, 'danger');
             return;
         }
 
@@ -705,17 +887,17 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setLoading('evalia-exams-loading', false);
             setDisabled('evalia-btn-assign-exam', false);
             if (result.success) {
-                showToast('Asignados: ' + result.assigned + ' alumno(s). Omitidos: ' + result.skipped + '.', 'success');
+                showToast(S.exam_assigned_result.replace('{$a->assigned}', result.assigned).replace('{$a->skipped}', result.skipped), 'success');
                 loadStudentExams(currentExamId);
                 loadExamStats(currentExamId);
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setLoading('evalia-exams-loading', false);
             setDisabled('evalia-btn-assign-exam', false);
             Log.error('evalia_teacher: assign_exam failed', err);
-            showToast('Error al asignar exámenes.', 'danger');
+            showToast(S.error_exam_assign, 'danger');
         });
     }
 
@@ -730,7 +912,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             args: { examid: examId }
         }])[0].then(function(result) {
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center p-4">No hay alumnos inscriptos.</p>';
+                container.innerHTML = '<p class="text-muted text-center p-4">' + S.students_none_enrolled_exam + '</p>';
                 return;
             }
             renderStudentExamsTable(result.students);
@@ -755,11 +937,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 btnPublishAll.style.display = gradedCount > 0 ? '' : 'none';
                 btnPublishAll.dataset.examid = examId;
                 btnPublishAll.dataset.count  = gradedCount;
-                btnPublishAll.textContent = '✅ Publicar notas (' + gradedCount + ')';
+                btnPublishAll.textContent = S.btn_publish_grades_count.replace('{$a}', gradedCount);
             }
         }).fail(function(err) {
             Log.error('evalia_teacher: get_student_exams failed', err);
-            container.innerHTML = '<p class="text-danger p-3">Error al cargar alumnos.</p>';
+            container.innerHTML = '<p class="text-danger p-3">' + S.error_load_students + '</p>';
         });
     }
 
@@ -767,12 +949,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var container = document.getElementById('evalia-student-exams-container');
         var wwwroot   = (typeof M !== 'undefined' && M.cfg) ? M.cfg.wwwroot : '';
         var statusMap = {
-            'not_assigned': '<span class="badge bg-light text-dark border">Sin asignar</span>',
-            'assigned':     '<span class="badge" style="background-color:#0d6efd;color:#fff">Asignado</span>',
-            'started':      '<span class="badge bg-warning text-dark">En progreso</span>',
-            'submitted':    '<span class="badge bg-info text-dark">Enviado</span>',
-            'graded':       '<span class="badge bg-success">Calificado</span>',
-            'published':    '<span class="badge" style="background:#198754;color:#fff;">✅ Publicado</span>'
+            'not_assigned': '<span class="badge bg-light text-dark border">' + S.exam_status_not_assigned + '</span>',
+            'assigned':     '<span class="badge" style="background-color:#0d6efd;color:#fff">' + S.exam_status_assigned + '</span>',
+            'started':      '<span class="badge bg-warning text-dark">' + S.exam_status_started + '</span>',
+            'submitted':    '<span class="badge bg-info text-dark">' + S.exam_status_submitted + '</span>',
+            'graded':       '<span class="badge bg-success">' + S.exam_status_graded + '</span>',
+            'published':    '<span class="badge" style="background:#198754;color:#fff;">' + S['student:status_published'] + '</span>'
         };
 
         var rows = students.map(function(s) {
@@ -786,26 +968,26 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 var examUrl = wwwroot + '/local/evalia/student_exam.php?student_examid=' + s.student_examid;
                 if (s.status === 'assigned') {
                     examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-secondary py-0" title="Previsualizar examen asignado">' +
-                        '👁 Ver</a>';
+                        'class="btn btn-sm btn-outline-secondary py-0" title="' + S.exam_preview_link_title + '">' +
+                        S.link_view + '</a>';
                 } else if (s.status === 'started') {
                     examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-primary py-0" title="El alumno está rindiendo">' +
-                        '👁 Ver</a>';
+                        'class="btn btn-sm btn-outline-primary py-0" title="' + S.exam_watching_link_title + '">' +
+                        S.link_view + '</a>';
                 } else if (s.status === 'submitted') {
                     examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-warning py-0" title="Calificar examen enviado">' +
-                        '📝 Calificar</a>';
+                        'class="btn btn-sm btn-warning py-0" title="' + S.exam_grade_link_title + '">' +
+                        S.link_grade + '</a>';
                 } else if (s.status === 'graded') {
                     examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-success py-0 me-1" title="Ver examen calificado">' +
-                        '★ Ver</a>' +
+                        'class="btn btn-sm btn-outline-success py-0 me-1" title="' + S.exam_view_graded_title + '">' +
+                        S.link_view_star + '</a>' +
                         '<button class="btn btn-sm btn-success py-0 evalia-btn-publish-single" ' +
-                        'data-student-examid="' + s.student_examid + '" title="Publicar nota en el gradebook">' +
-                        '✅ Publicar</button>';
+                        'data-student-examid="' + s.student_examid + '" title="' + S.exam_publish_single_title + '">' +
+                        S.btn_publish_single + '</button>';
                 } else if (s.status === 'published') {
                     examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="text-success small" title="Ver examen publicado">★ Ver</a>';
+                        'class="text-success small" title="' + S.exam_view_published_title + '">' + S.link_view_star + '</a>';
                 }
             }
 
@@ -819,7 +1001,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
         container.innerHTML = '<div class="table-responsive"><table class="table table-sm mb-0">' +
             '<thead class="table-light"><tr>' +
-            '<th>Alumno</th><th>Estado</th><th class="text-center">Nota</th><th class="text-center">Acción</th>' +
+            '<th>' + S.table_student + '</th><th>' + S.table_status + '</th><th class="text-center">' +
+            S.table_grade + '</th><th class="text-center">' + S.table_action + '</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody></table></div>';
 
@@ -846,7 +1029,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             setLoading('evalia-portfolio-loading', false);
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center p-4">No hay alumnos inscriptos en este curso.</p>';
+                container.innerHTML = '<p class="text-muted text-center p-4">' + S.students_none_enrolled_course + '</p>';
                 return;
             }
             renderPortfolioTable(result.students);
@@ -854,7 +1037,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setLoading('evalia-portfolio-loading', false);
             Log.error('evalia_teacher: get_student_portfolio failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger p-3">Error al cargar legajos.</p>';
+                container.innerHTML = '<p class="text-danger p-3">' + S.error_load_portfolio + '</p>';
             }
         });
     }
@@ -882,9 +1065,9 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         container.innerHTML = '<div class="table-responsive">' +
             '<table class="table table-sm table-hover mb-0">' +
             '<thead class="table-light"><tr>' +
-            '<th>Alumno</th>' +
-            '<th class="text-center">Exámenes</th>' +
-            '<th class="text-center">Nota prom.</th>' +
+            '<th>' + S.table_student + '</th>' +
+            '<th class="text-center">' + S.tab_exams + '</th>' +
+            '<th class="text-center">' + S.portfolio_avg_grade + '</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
             '</table></div>';
@@ -927,7 +1110,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         // Reset notes panel
         var notesContainer = document.getElementById('evalia-portfolio-notes-container');
         if (notesContainer) {
-            notesContainer.innerHTML = '<p class="text-muted small">Cargando...</p>';
+            notesContainer.innerHTML = '<p class="text-muted small">' + S.loading_ellipsis + '</p>';
         }
         var noteInput = document.getElementById('evalia-portfolio-note-input');
         if (noteInput) { noteInput.value = ''; }
@@ -935,7 +1118,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         // Reset exams panel and load history
         var examsContainer = document.getElementById('evalia-portfolio-exams-container');
         if (examsContainer) {
-            examsContainer.innerHTML = '<p class="text-muted text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>Cargando historial...</p>';
+            examsContainer.innerHTML = '<p class="text-muted text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>' + S.loading_exam_history + '</p>';
         }
 
         // Update stats header
@@ -974,9 +1157,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         // cells[1]=exams, cells[2]=avg grade
         var examsText = cells[1] ? cells[1].textContent.trim() : '0';
         var gradeText = cells[2] ? cells[2].textContent.trim() : '—';
+        var examsLabel = (examsText !== '1')
+            ? S.exam_count_plural.replace('{$a}', examsText)
+            : S.exam_count_singular.replace('{$a}', examsText);
         statsEl.innerHTML =
-            '<span class="fw-semibold me-3">📝 ' + examsText + ' examen' + (examsText !== '1' ? 'es' : '') + '</span>' +
-            '<span class="fw-semibold text-primary">Promedio: ' + gradeText + '</span>';
+            '<span class="fw-semibold me-3">📝 ' + examsLabel + '</span>' +
+            '<span class="fw-semibold text-primary">' + S.portfolio_average_label.replace('{$a}', gradeText) + '</span>';
     }
 
     function switchPortfolioTab(tab) {
@@ -1022,14 +1208,14 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">Este alumno no tiene exámenes asignados aún.</p>';
+                container.innerHTML = '<p class="text-muted text-center py-4">' + S.no_exams_assigned_yet + '</p>';
                 return;
             }
             renderPortfolioExams(result.exams);
         }).fail(function(err) {
             Log.error('evalia_teacher: get_student_exam_history failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger small p-3">Error al cargar el historial de exámenes.</p>';
+                container.innerHTML = '<p class="text-danger small p-3">' + S.error_load_exam_history + '</p>';
             }
         });
     }
@@ -1062,7 +1248,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             var sc = statusClasses[ex.status] || 'secondary';
             var viewLink = ex.status === 'graded' || ex.status === 'submitted'
                 ? ' <a href="' + M.cfg.wwwroot + '/local/evalia/student_exam.php?student_examid=' + ex.student_examid + '" ' +
-                  'class="btn btn-outline-secondary btn-sm py-0 ms-1" target="_blank" title="Ver examen">🔍</a>'
+                  'class="btn btn-outline-secondary btn-sm py-0 ms-1" target="_blank" title="' + S.view_exam_title + '">🔍</a>'
                 : '';
 
             return '<tr>' +
@@ -1080,11 +1266,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             '<div class="table-responsive">' +
             '<table class="table table-sm table-hover mb-0">' +
             '<thead class="table-light"><tr>' +
-            '<th>Examen</th>' +
-            '<th class="text-center">Estado</th>' +
-            '<th class="text-center">Nota</th>' +
-            '<th class="text-center">Fecha</th>' +
-            '<th class="text-center">Preguntas</th>' +
+            '<th>' + S.table_exam + '</th>' +
+            '<th class="text-center">' + S.table_status + '</th>' +
+            '<th class="text-center">' + S.table_grade + '</th>' +
+            '<th class="text-center">' + S.table_date + '</th>' +
+            '<th class="text-center">' + S.table_questions + '</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
             '</table></div>';
@@ -1095,7 +1281,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         if (!container) { return; }
         if (userid !== selectedPortfolioUserId) { return; }
 
-        container.innerHTML = '<p class="text-muted small">Cargando observaciones...</p>';
+        container.innerHTML = '<p class="text-muted small">' + S.loading_observations + '</p>';
 
         Ajax.call([{
             methodname: 'local_evalia_get_portfolio_notes',
@@ -1103,14 +1289,14 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted small">Sin observaciones registradas.</p>';
+                container.innerHTML = '<p class="text-muted small">' + S.portfolio_note_empty + '</p>';
                 return;
             }
             renderNotesList(result.notes);
         }).fail(function(err) {
             Log.error('evalia_teacher: get_portfolio_notes failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger small">Error al cargar observaciones.</p>';
+                container.innerHTML = '<p class="text-danger small">' + S.error_load_notes + '</p>';
             }
         });
     }
@@ -1136,7 +1322,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var input = document.getElementById('evalia-portfolio-note-input');
         var text  = input ? input.value.trim() : '';
         if (!text) {
-            showToast('Escriba una observación antes de guardar.', 'danger');
+            showToast(S.error_note_required, 'danger');
             return;
         }
 
@@ -1149,17 +1335,17 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             setDisabled('evalia-btn-add-note', false);
             if (result.success) {
                 if (input) { input.value = ''; }
-                showToast('Observación guardada.', 'success');
+                showToast(S.portfolio_note_saved, 'success');
                 loadStudentNotes(selectedPortfolioUserId);
                 // Reload portfolio list to reflect updated last_activity
                 loadPortfolio();
             } else {
-                showToast('Error: ' + result.message, 'danger');
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
             setDisabled('evalia-btn-add-note', false);
             Log.error('evalia_teacher: add_portfolio_note failed', err);
-            showToast('Error al guardar la observación.', 'danger');
+            showToast(S.error_note_save, 'danger');
         });
     }
 
@@ -1173,12 +1359,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var count = parseInt(btn.dataset.count, 10) || 0;
         if (count === 0) { return; }
 
-        if (!window.confirm('¿Calificar ' + count + ' examen(es) con IA? Esto enviará feedback pedagógico a cada alumno por Telegram.')) {
+        if (!window.confirm(S.confirm_grade_all.replace('{$a}', count))) {
             return;
         }
 
         btn.disabled = true;
-        btn.textContent = '⏳ Calificando...';
+        btn.textContent = S.grading_in_progress;
         if (statusEl) { statusEl.textContent = ''; }
 
         Ajax.call([{
@@ -1187,8 +1373,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             btn.disabled = false;
             btn.style.display = 'none';
-            var msg = '✔ ' + result.graded + ' calificado(s)';
-            if (result.skipped > 0) { msg += ' · ' + result.skipped + ' omitido(s)'; }
+            var msg = S.grade_all_result.replace('{$a->graded}', result.graded);
+            if (result.skipped > 0) { msg += S.grade_all_skipped_suffix.replace('{$a}', result.skipped); }
             if (statusEl) {
                 statusEl.textContent = msg;
                 statusEl.className = 'text-success small';
@@ -1199,35 +1385,35 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             loadExamStats(currentExamId);
         }).fail(function(err) {
             btn.disabled = false;
-            btn.textContent = '⚡ Calificar todos con IA';
+            btn.textContent = S.btn_grade_all_with_ai;
             Log.error('evalia_teacher: grade_all_exams failed', err);
             if (statusEl) {
-                statusEl.textContent = 'Error al calificar.';
+                statusEl.textContent = S.error_grade_all;
                 statusEl.className = 'text-danger small';
             }
-            showToast('Error al calificar los exámenes.', 'danger');
+            showToast(S.error_grade_exams, 'danger');
         });
     }
 
     function handlePublishGrade(studentExamId, btn) {
         if (!studentExamId) { return; }
-        if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+        if (btn) { btn.disabled = true; btn.textContent = S.publishing_ellipsis; }
 
         Ajax.call([{
             methodname: 'local_evalia_publish_grade',
             args: { student_examid: studentExamId, override_score: -1 }
         }])[0].then(function(result) {
             if (result.success) {
-                showToast('Nota publicada en el libro de calificaciones.', 'success');
+                showToast(S.grade_published_ok, 'success');
                 loadStudentExams(currentExamId);
             } else {
-                if (btn) { btn.disabled = false; btn.textContent = '✅ Publicar'; }
-                showToast('Error: ' + result.message, 'danger');
+                if (btn) { btn.disabled = false; btn.textContent = S.btn_publish_single; }
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
             }
         }).fail(function(err) {
-            if (btn) { btn.disabled = false; btn.textContent = '✅ Publicar'; }
+            if (btn) { btn.disabled = false; btn.textContent = S.btn_publish_single; }
             Log.error('evalia_teacher: publish_grade failed', err);
-            showToast('Error al publicar la nota.', 'danger');
+            showToast(S.error_publish_grade, 'danger');
         });
     }
 
@@ -1239,12 +1425,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var count = parseInt(btn.dataset.count, 10) || 0;
         if (count === 0) { return; }
 
-        if (!window.confirm('¿Publicar las notas de ' + count + ' alumno(s) en el libro de calificaciones?')) {
+        if (!window.confirm(S.confirm_publish_all.replace('{$a}', count))) {
             return;
         }
 
         btn.disabled    = true;
-        btn.textContent = '⏳ Publicando...';
+        btn.textContent = S.publishing_all;
         if (statusEl) { statusEl.textContent = ''; }
 
         Ajax.call([{
@@ -1253,17 +1439,17 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         }])[0].then(function(result) {
             btn.disabled       = false;
             btn.style.display  = 'none';
-            var msg = '✅ ' + result.published + ' nota(s) publicada(s) en el gradebook.';
+            var msg = S.grades_published_result.replace('{$a}', result.published);
             if (statusEl) { statusEl.textContent = msg; statusEl.className = 'text-success small'; }
             showToast(msg, 'success');
             loadStudentExams(currentExamId);
             loadExamStats(currentExamId);
         }).fail(function(err) {
             btn.disabled       = false;
-            btn.textContent    = '✅ Publicar notas (' + count + ')';
+            btn.textContent    = S.btn_publish_grades_count.replace('{$a}', count);
             Log.error('evalia_teacher: publish_all_grades failed', err);
-            if (statusEl) { statusEl.textContent = 'Error al publicar.'; statusEl.className = 'text-danger small'; }
-            showToast('Error al publicar las notas.', 'danger');
+            if (statusEl) { statusEl.textContent = S.error_publish_all; statusEl.className = 'text-danger small'; }
+            showToast(S.error_publish_grades, 'danger');
         });
     }
 
@@ -1291,11 +1477,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             var total = r.counts.assigned + r.counts.started + r.counts.submitted + r.counts.graded;
             var passRate = r.graded > 0 ? Math.round(r.pass_count / r.graded * 100) : 0;
             summaryEl.innerHTML =
-                statCard('👥', 'Total', total,           'secondary') +
-                statCard('✅', 'Calificados', r.graded,   'success') +
-                statCard('📤', 'Enviados',   r.counts.submitted, 'info') +
-                statCard('⭐', 'Promedio',   r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—', 'primary') +
-                statCard('🎯', 'Aprobados',  r.graded > 0 ? passRate + '%' : '—', passRate >= 50 ? 'success' : 'warning');
+                statCard('👥', S.stat_total, total,           'secondary') +
+                statCard('✅', S.stat_graded, r.graded,   'success') +
+                statCard('📤', S.stat_submitted,   r.counts.submitted, 'info') +
+                statCard('⭐', S.stat_average,   r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—', 'primary') +
+                statCard('🎯', S.stat_passed,  r.graded > 0 ? passRate + '%' : '—', passRate >= 50 ? 'success' : 'warning');
         }
 
         // ── Score bands ───────────────────────────────────────────────────────
@@ -1313,27 +1499,26 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                     '<span class="small fw-bold" style="width:20px;">' + b.count + '</span>' +
                     '</div>';
             }).join('');
-            bandsEl.innerHTML = rows || '<p class="text-muted small">Sin datos aún.</p>';
+            bandsEl.innerHTML = rows || '<p class="text-muted small">' + S.stats_no_data + '</p>';
         }
 
         // ── Top failed questions ───────────────────────────────────────────────
         var failedEl = document.getElementById('evalia-stats-failed');
         if (failedEl) {
             if (!r.top_failed || r.top_failed.length === 0) {
-                failedEl.innerHTML = '<p class="text-muted small">Sin datos aún.</p>';
+                failedEl.innerHTML = '<p class="text-muted small">' + S.stats_no_data + '</p>';
             } else {
-                // Difficulty: Básica=teal, Media=blue, Avanzada=orange — all with white text
-                var diffStyle = {
-                    'Básica':   'background:#0d9488;color:#fff;',
-                    'Media':    'background:#2563eb;color:#fff;',
-                    'Avanzada': 'background:#ea580c;color:#fff;'
-                };
+                // Difficulty badge colors, keyed by the resolved label: basic=teal, medium=blue, advanced=orange.
+                var diffStyle = {};
+                diffStyle[S.difficulty_basic]    = 'background:#0d9488;color:#fff;';
+                diffStyle[S.difficulty_medium]   = 'background:#2563eb;color:#fff;';
+                diffStyle[S.difficulty_advanced] = 'background:#ea580c;color:#fff;';
                 var items = r.top_failed.map(function(q, idx) {
                     var pct  = q.total > 0 ? Math.round(q.fail_count / q.total * 100) : 0;
                     var stem = q.stem.length > 100 ? q.stem.substring(0, 97) + '…' : q.stem;
                     var badges = '';
                     if (q.topic) {
-                        badges += '<span class="badge me-1" style="background:#6366f1;color:#fff;" title="Tema">' + q.topic + '</span>';
+                        badges += '<span class="badge me-1" style="background:#6366f1;color:#fff;" title="' + S.stat_topic_title + '">' + q.topic + '</span>';
                     }
                     if (q.difficulty) {
                         var ds = diffStyle[q.difficulty] || 'background:#6b7280;color:#fff;';
@@ -1343,7 +1528,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                         '<div class="d-flex justify-content-between align-items-start mb-1">' +
                         '<span class="text-muted small fw-bold me-2">#' + (idx + 1) + '</span>' +
                         '<div class="flex-grow-1">' + badges + '</div>' +
-                        '<span class="small text-danger fw-bold ms-2">' + pct + '% fallaron</span>' +
+                        '<span class="small text-danger fw-bold ms-2">' + S.stat_pct_failed.replace('{$a}', pct) + '</span>' +
                         '</div>' +
                         '<div class="small text-dark mb-1">' + stem + '</div>' +
                         '<div class="progress" style="height:6px;">' +
@@ -1389,13 +1574,13 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
             var parts = [];
             if (indexed.length > 0) {
-                parts.push(indexed.length + ' fuente(s), ' + chunks + ' fragmentos indexados');
+                parts.push(S.index_result_sources_chunks.replace('{$a->sources}', indexed.length).replace('{$a->chunks}', chunks));
             }
             if (errors.length > 0) {
-                parts.push(errors.length + ' error(es)');
+                parts.push(S.index_result_errors.replace('{$a}', errors.length));
             }
             if (parts.length === 0) {
-                parts.push('No se encontró material para indexar');
+                parts.push(S.index_result_nothing);
             }
 
             var msg = parts.join(' · ');
@@ -1406,8 +1591,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             btn.disabled = false;
             setLoading('evalia-index-loading', false);
             Log.error('evalia_teacher: index_course failed', err);
-            if (statusEl) { statusEl.textContent = 'Error al indexar.'; }
-            showToast('Error al indexar el material del curso.', 'danger');
+            if (statusEl) { statusEl.textContent = S.error_index_generic; }
+            showToast(S.error_index_course, 'danger');
         });
     }
 
@@ -1415,6 +1600,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
     return {
         init: function(config) {
+            loadStrings();
             courseId = config.courseid;
             if (config.defaults && config.defaults.questions_default_count) {
                 defaultQuestionsCount = parseInt(config.defaults.questions_default_count, 10) || 5;
@@ -1532,19 +1718,19 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 if (btnSave) {
                     btnSave.addEventListener('click', function() {
                         btnSave.disabled = true;
-                        if (statusEl) { statusEl.textContent = 'Guardando...'; }
+                        if (statusEl) { statusEl.textContent = S.prompt_saving; }
                         Ajax.call([{
                             methodname: 'local_evalia_save_feedback_prompt',
                             args: { examid: examId, prompt: textarea.value }
                         }])[0].then(function(result) {
                             btnSave.disabled = false;
                             if (statusEl) {
-                                statusEl.textContent = result.success ? '✔ Guardado' : result.message;
+                                statusEl.textContent = result.success ? S.prompt_saved_ok : result.message;
                                 setTimeout(function() { statusEl.textContent = ''; }, 3000);
                             }
                         }).fail(function() {
                             btnSave.disabled = false;
-                            if (statusEl) { statusEl.textContent = 'Error al guardar.'; }
+                            if (statusEl) { statusEl.textContent = S.error_prompt_save; }
                         });
                     });
                 }
@@ -1553,7 +1739,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                 var btnReset = document.getElementById('evalia-btn-reset-prompt');
                 if (btnReset) {
                     btnReset.addEventListener('click', function() {
-                        if (window.confirm('¿Restaurar el prompt predeterminado? Se perderán los cambios guardados.')) {
+                        if (window.confirm(S.confirm_reset_prompt)) {
                             textarea.value = defaultPrompt;
                         }
                     });
@@ -1738,11 +1924,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                         args: { message: text, context: 'evalia_teacher' }
                     }])[0].then(function(r) {
                         if (typingEl && typingEl.parentNode) { typingEl.parentNode.removeChild(typingEl); }
-                        appendMsg(r.reply || 'Sin respuesta.', 'assistant');
+                        appendMsg(r.reply || S.fab_no_response, 'assistant');
                         return r;
                     }).fail(function(err) {
                         if (typingEl && typingEl.parentNode) { typingEl.parentNode.removeChild(typingEl); }
-                        appendMsg('Error al conectar con el asistente.', 'assistant');
+                        appendMsg(S.fab_connect_error, 'assistant');
                         Log.error('evalia_teacher: FAB chat error', err);
                     }).always(function() {
                         if (sendBtn) { sendBtn.disabled = false; }

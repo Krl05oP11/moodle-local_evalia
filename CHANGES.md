@@ -61,30 +61,69 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
   every mustache variable has a matching `teacher.php` key and every
   `get_string()` call resolves in all 3 language packs (no typos); `phpcs
   --standard=moodle` on the 4 touched files (`teacher.php` + 3 lang files):
-  0 errors. **Not yet done: `amd/src/evalia_teacher.js`** (1850 lines, ~164
-  hardcoded literals) — separate pass, needs checking whether
-  `amd/build/evalia_teacher.min.js` is a real build artifact or an
-  unminified copy before editing (see `block_saipa`'s `chat.min.js`
-  precedent) and structural changes for `core/str`'s async API. Not yet
-  verified end-to-end against a running Moodle (no live stack this session);
-  PHPUnit/cache-purge verification pending.
+  0 errors.
+- **`amd/src/evalia_teacher.js` i18n (the unit deferred above, now done).**
+  All hardcoded Spanish literals across the 4 tabs (Rubric, Question Bank,
+  Exams, Portfolios), the workflow modal and the floating chat assistant
+  moved to `local_evalia` lang strings, resolved via `core/str`. Pattern:
+  a module-level `S` object holds every string, seeded with the current
+  Spanish text as a fallback so rendering never blocks on the (fast, cached)
+  `Str.get_strings()` batch call fired at `init()` — matches `block_saipa`'s
+  `chat.js` precedent, which also confirmed `core/str`'s `get_string(s)`
+  returns native Promises (`.then().catch()`), unlike `core/ajax`'s jQuery
+  deferreds (`.then().fail()`) used everywhere else in this file. For the
+  ~18 strings with a `{$a}`/`{$a->prop}` placeholder, the template is
+  pre-fetched once (Moodle's `get_string()` leaves the placeholder
+  untouched when called with no `$a`, confirmed by reading
+  `string_manager_standard::get_string()`) and substituted per use with
+  plain `String.replace()` — this keeps every render function synchronous,
+  including the ones called inside `Array.map()` loops, instead of
+  restructuring them around a nested async call per row. Reused 20 existing
+  lang keys where the value matched exactly (`rubric_status_*`,
+  `difficulty_*`, `questions_status_approved/rejected`, `exam_status_*`,
+  `qtype_multichoice/shortanswer/essay`, `student:status_published`, etc.);
+  added 116 new keys (`en`/`es`/`pt_br`) for the rest, including short
+  table-column variants (`qtype_table_*`, `rubric_item_weight_short`)
+  distinct from the full-length labels reused elsewhere on the same page.
+  One reuse changes visible text on purpose: the question bank's "draft"
+  badge now reads the fuller `questions_status_draft` ("Pendiente de
+  revisión") instead of the JS's own shorter "Pendiente", matching the
+  label already chosen as canonical in the mustache pass. **Deliberately
+  left untouched:** the default AI feedback-prompt template
+  (`loadFeedbackPromptEditor()`) — it is the instruction text sent to the
+  LLM, not UI chrome, and translating it would change what language the
+  AI writes student feedback in; that is a behavior decision, not a string
+  swap, and is flagged for a separate discussion rather than folded in
+  here. `amd/build/evalia_teacher.min.js` was, like `block_saipa`'s
+  `chat.min.js` before its fix, an unminified copy (1850 lines, identical
+  to source) mistakenly checked in — regenerated with `terser`
+  (`--compress --mangle --comments false`), same invocation shape as that
+  precedent (~101KB source → ~49KB minified). Verified: `node --check` on
+  both source and minified output; a script cross-check that every `S.`
+  property is defined-and-used exactly once (no typos, no dead keys) and
+  that all 137 keys resolve in `en`/`es`/`pt_br`; `phpcs --standard=moodle`
+  on the 3 touched lang files: 0 errors (warnings only, all pre-existing
+  whole-file alphabetical-order warnings, same class already accepted
+  elsewhere in this file). **Verified live** against the running dev stack
+  (admin session, course 2): all 4 tabs, the question bank filters, and the
+  portfolio student-detail flow render correctly with real backend data and
+  zero console errors — including the resolved (not fallback) strings, e.g.
+  the question bank's "Pendiente de revisión" badge, "1 examen" / "Promedio:
+  10.0" in the portfolio stats header, and "Sin observaciones registradas."
+  for a student with no notes.
 
 ### Documentation
 - README now records the recommended LLM: **Claude Sonnet or higher** for
   EVAL-IA (essay grading + feedback), vs. Haiku being sufficient for the
   companion SAIPA plugin. The model is selected engine-side; the plugin ships
   no default.
-- **i18n scope for the teacher panel, measured 2026-09-10.** `teacher.php`
-  itself was already fully `get_string()`-clean (13 keys). Its template
-  `templates/evalia_teacher.mustache` (784 lines) had **zero** translated
-  static text — ~40 hardcoded text nodes plus ~12 hardcoded
-  `placeholder`/`title`/`aria-label` attributes — **now done, see the
-  "Changed" entry above.** Its AMD module `amd/src/evalia_teacher.js` (1850
-  lines) still has **zero** `core/str` usage, with a rough regex count of
-  ~164 hardcoded string literals (real count lower after filtering CSS
-  classes/selectors/WS method names) — **still not done**, deferred to its
-  own pass (structural: `core/str` is async, and `amd/build/*.min.js` needs
-  checking before editing, per the `block_saipa` `chat.min.js` precedent).
+- **i18n scope for the teacher panel, measured 2026-09-10 — fully closed.**
+  `teacher.php` itself was already fully `get_string()`-clean (13 keys).
+  Its template `templates/evalia_teacher.mustache` (784 lines) and its AMD
+  module `amd/src/evalia_teacher.js` (1850 lines) both had zero translated
+  static text — see the two "Changed" entries above for how each was
+  closed. The only string left in the JS on purpose is the default AI
+  feedback-prompt template, which is grading behavior, not UI text.
 
 ### Fixed
 - **Engine connectivity fatal on installs where the engine runs on a private
