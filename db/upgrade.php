@@ -49,6 +49,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('fk_createdby', XMLDB_KEY_FOREIGN, ['created_by'], 'user', ['id']);
             $table->add_key('uq_courseid', XMLDB_KEY_UNIQUE, ['courseid']);
             $dbman->create_table($table);
         }
@@ -64,6 +66,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '5');
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
+            $table->add_index('idx_rubricid_sort', XMLDB_INDEX_NOTUNIQUE, ['rubricid', 'sortorder']);
             $dbman->create_table($table);
         }
 
@@ -85,7 +89,11 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
+            $table->add_key('fk_rubric_item', XMLDB_KEY_FOREIGN, ['rubric_item_id'], 'evalia_rubric_items', ['id']);
             $table->add_index('idx_courseid_difficulty_status', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'difficulty', 'status']);
+            $table->add_index('idx_item_difficulty', XMLDB_INDEX_NOTUNIQUE, ['rubric_item_id', 'difficulty']);
             $dbman->create_table($table);
         }
 
@@ -99,6 +107,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('feedback', XMLDB_TYPE_TEXT, null, null, null);
             $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '5');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'evalia_question_bank', ['id']);
+            $table->add_index('idx_questionid_sort', XMLDB_INDEX_NOTUNIQUE, ['questionid', 'sortorder']);
             $dbman->create_table($table);
         }
 
@@ -120,6 +130,10 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
+            $table->add_key('fk_createdby', XMLDB_KEY_FOREIGN, ['created_by'], 'user', ['id']);
+            $table->add_index('idx_courseid_status', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'status']);
             $dbman->create_table($table);
         }
 
@@ -138,7 +152,10 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timesubmitted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'evalia_exams', ['id']);
+            $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
             $table->add_key('uq_exam_user', XMLDB_KEY_UNIQUE, ['examid', 'userid']);
+            $table->add_index('idx_userid_status', XMLDB_INDEX_NOTUNIQUE, ['userid', 'status']);
             $dbman->create_table($table);
         }
 
@@ -154,6 +171,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
             $table->add_key('uq_user_course', XMLDB_KEY_UNIQUE, ['userid', 'courseid']);
             $dbman->create_table($table);
         }
@@ -168,6 +187,10 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('created_by', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('fk_createdby', XMLDB_KEY_FOREIGN, ['created_by'], 'user', ['id']);
+            $table->add_index('idx_userid_course', XMLDB_INDEX_NOTUNIQUE, ['userid', 'courseid']);
             $dbman->create_table($table);
         }
 
@@ -182,6 +205,9 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('status', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'sent');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'evalia_exams', ['id']);
+            $table->add_index('idx_userid_timesent', XMLDB_INDEX_NOTUNIQUE, ['userid', 'timesent']);
             $dbman->create_table($table);
         }
 

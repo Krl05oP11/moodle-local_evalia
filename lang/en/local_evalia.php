@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Plugin metadata
+$string['calendar_exam_event']        = 'Exam: {$a}';
 $string['difficulty_advanced']        = 'Advanced';
 $string['difficulty_basic']           = 'Basic';
 $string['difficulty_medium']          = 'Medium';
@@ -522,8 +523,11 @@ $string['settings:questions_default_count_desc'] = 'Initial value in the "Genera
 $string['settings:rubric_default_items']       = 'Default number of items';
 $string['settings:rubric_default_items_desc']  = 'Initial value of the field when opening the generation form (range: 5–40).';
 $string['settings:weight_advanced']            = 'Weight — advanced questions';
+$string['settings:weight_advanced_desc']       = 'Points awarded for each correctly answered advanced-difficulty question. Default: 3.';
 $string['settings:weight_basic']               = 'Weight — basic questions';
+$string['settings:weight_basic_desc']          = 'Points awarded for each correctly answered basic-difficulty question. Default: 1.';
 $string['settings:weight_medium']              = 'Weight — medium questions';
+$string['settings:weight_medium_desc']         = 'Points awarded for each correctly answered medium-difficulty question. Default: 2.';
 
 // Student panel (student.php).
 $string['student:btn_continue']         = '▶️ Continue →';

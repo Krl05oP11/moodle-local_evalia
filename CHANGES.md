@@ -4,7 +4,29 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Fixed
+- **`calendar_exam_event` lang key existed in `es`/`pt_br` but not in `en`**
+  (the reverse of the usual gap). Used for real in
+  `local_evalia_create_exam_calendar_event()` (`lib.php`) — an English-language
+  site would have shown the literal `[[calendar_exam_event]]` as the calendar
+  event title for every scheduled exam. Added to `en`: `'Exam: {$a}'`.
+- **`db/upgrade.php` didn't match `db/install.xml` for any of the 9 tables
+  it creates.** A site upgrading from a pre-2026032901 install (the
+  `$oldversion < 2026032901` fallback block) ended up with all 18 foreign
+  keys and 7 indexes missing, compared to a fresh install via
+  `install.xml`. Added every missing `add_key()`/`add_index()` call so
+  both paths produce an identical schema. Verified with a structural diff
+  script (parses both `install.xml` and `upgrade.php`, compares the
+  key/index set per table): 0 mismatches across all 9 tables. Not
+  verified via a live upgrade simulation, to avoid touching this repo's
+  `docker/` stack's persisted test data — the structural diff is exact
+  and doesn't need one.
+
 ### Changed
+- **`settings.php`: 3 settings had no admin-facing description**
+  (`weight_basic`, `weight_medium`, `weight_advanced` — the difficulty
+  weights used in `grade_exam.php`'s score calculation). Added a `*_desc`
+  lang key for each (en/es/pt_br) and wired it into `settings.php`.
 - Engine connection language strings renamed `ENGINE_SECRET` → `SAIPA_API_TOKEN`
   (`en`, `es`, `pt_br`) to match the engine, which now requires the token.
 - All calls to `saipa-engine` now go through Moodle's `\core\http_client`

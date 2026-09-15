@@ -127,7 +127,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_basic',
         get_string('settings:weight_basic', 'local_evalia'),
-        '',
+        get_string('settings:weight_basic_desc', 'local_evalia'),
         '1',
         PARAM_FLOAT
     ));
@@ -135,7 +135,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_medium',
         get_string('settings:weight_medium', 'local_evalia'),
-        '',
+        get_string('settings:weight_medium_desc', 'local_evalia'),
         '2',
         PARAM_FLOAT
     ));
@@ -143,7 +143,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext(
         'local_evalia/weight_advanced',
         get_string('settings:weight_advanced', 'local_evalia'),
-        '',
+        get_string('settings:weight_advanced_desc', 'local_evalia'),
         '3',
         PARAM_FLOAT
     ));

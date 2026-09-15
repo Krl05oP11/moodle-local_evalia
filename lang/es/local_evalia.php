@@ -524,8 +524,11 @@ $string['settings:questions_default_count_desc'] = 'Cantidad inicial en el diál
 $string['settings:rubric_default_items']       = 'Cantidad de ítems por defecto';
 $string['settings:rubric_default_items_desc']  = 'Valor inicial del campo al abrir el formulario de generación (rango: 5–40).';
 $string['settings:weight_advanced']            = 'Peso — preguntas avanzadas';
+$string['settings:weight_advanced_desc']       = 'Puntos otorgados por cada pregunta de dificultad avanzada respondida correctamente. Por defecto: 3.';
 $string['settings:weight_basic']               = 'Peso — preguntas básicas';
+$string['settings:weight_basic_desc']          = 'Puntos otorgados por cada pregunta de dificultad básica respondida correctamente. Por defecto: 1.';
 $string['settings:weight_medium']              = 'Peso — preguntas medias';
+$string['settings:weight_medium_desc']         = 'Puntos otorgados por cada pregunta de dificultad media respondida correctamente. Por defecto: 2.';
 
 // Student panel (student.php).
 $string['student:btn_continue']         = '▶️ Continuar →';
