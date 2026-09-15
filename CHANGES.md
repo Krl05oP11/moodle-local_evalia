@@ -5,6 +5,20 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 ## [Unreleased]
 
 ### Fixed
+- **The `allowed_sources` / BM25 claim from [0.4.5] was false until now.**
+  `[0.4.5]` said "Engine retriever supports `allowed_sources` for both dense
+  and BM25 search," but the engine's `retrieve()` never accepted that
+  parameter — every call to `generate_rubric`/`generate_questions` with a
+  `source_filter` set (the "which materials should the AI use" selector in
+  the Rubrics tab) threw a `TypeError` and returned a 500. There was also no
+  BM25 implementation at all, dense-embedding search only. Both are now
+  real: `retrieve()` in `saipa-engine/rag/retriever.py` accepts
+  `allowed_sources` and applies it server-side to both a ChromaDB dense
+  query and a `rank_bm25` lexical search over the same (optionally
+  filtered) corpus, fused via Reciprocal Rank Fusion. Verified against the
+  real engine container: the previously-crashing rubric-generation call
+  now returns 200, and a direct check confirmed a source filter excludes
+  non-matching chunks from both legs (no cross-source leakage).
 - **`calendar_exam_event` lang key existed in `es`/`pt_br` but not in `en`**
   (the reverse of the usual gap). Used for real in
   `local_evalia_create_exam_calendar_event()` (`lib.php`) — an English-language
