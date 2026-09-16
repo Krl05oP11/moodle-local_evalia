@@ -55,7 +55,7 @@ $PAGE->set_heading(get_string('teacher_page_heading', 'local_evalia'));
 // Query the most recently created exam for this course (if any) so AMD can
 // pre-populate Tab 3 without requiring a new exam to be created first.
 $latestexam = $DB->get_records_select(
-    'evalia_exams',
+    'local_evalia_exams',
     'courseid = :courseid',
     ['courseid' => $courseid],
     'id DESC',
@@ -68,7 +68,7 @@ $latestexamid = $latestexam ? (int) $latestexam->id : 0;
 
 // Build exam list for the selector dropdown.
 $allexams = $DB->get_records_select(
-    'evalia_exams',
+    'local_evalia_exams',
     'courseid = :courseid',
     ['courseid' => $courseid],
     'id DESC',

@@ -61,14 +61,14 @@ class grade_all_exams extends external_api {
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
         $examid = (int) $params['examid'];
 
-        $exam    = $DB->get_record('evalia_exams', ['id' => $examid], '*', MUST_EXIST);
+        $exam    = $DB->get_record('local_evalia_exams', ['id' => $examid], '*', MUST_EXIST);
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
         // Find all submitted (not yet graded) exams.
         $submitted = $DB->get_records(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             ['examid' => $examid, 'status' => 'submitted'],
             'id ASC',
             'id, userid, answers, question_ids'

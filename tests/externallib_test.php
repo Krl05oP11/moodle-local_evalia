@@ -75,7 +75,7 @@ final class externallib_test extends \advanced_testcase {
     private function create_rubric(string $name = 'Test Rubric', string $status = 'draft'): int {
         global $DB;
         $now = time();
-        return (int) $DB->insert_record('evalia_rubrics', (object) [
+        return (int) $DB->insert_record('local_evalia_rubrics', (object) [
             'courseid'     => $this->course->id,
             'name'         => $name,
             'status'       => $status,
@@ -112,7 +112,7 @@ final class externallib_test extends \advanced_testcase {
         $rubricid = $this->create_rubric('Introduction to Graphs');
 
         $now = time();
-        $DB->insert_record('evalia_rubric_items', (object) [
+        $DB->insert_record('local_evalia_rubric_items', (object) [
             'rubricid'          => $rubricid,
             'topic'             => 'Graph Theory Basics',
             'description'       => '',
@@ -165,11 +165,11 @@ final class externallib_test extends \advanced_testcase {
 
         $this->assertTrue($result['success']);
 
-        $rubric = $DB->get_record('evalia_rubrics', ['id' => $rubricid]);
+        $rubric = $DB->get_record('local_evalia_rubrics', ['id' => $rubricid]);
         $this->assertSame('New Name', $rubric->name);
         $this->assertSame('draft', $rubric->status);
 
-        $items = $DB->get_records('evalia_rubric_items', ['rubricid' => $rubricid]);
+        $items = $DB->get_records('local_evalia_rubric_items', ['rubricid' => $rubricid]);
         $this->assertCount(2, $items);
     }
 
@@ -187,7 +187,7 @@ final class externallib_test extends \advanced_testcase {
         \local_evalia\external\save_rubric::execute($rubricid, 'Active Rubric', true, []);
         $this->resetDebugging();
 
-        $rubric = $DB->get_record('evalia_rubrics', ['id' => $rubricid]);
+        $rubric = $DB->get_record('local_evalia_rubrics', ['id' => $rubricid]);
         $this->assertSame('active', $rubric->status);
     }
 
@@ -232,7 +232,7 @@ final class externallib_test extends \advanced_testcase {
         $this->assertTrue($result['success']);
         $this->assertGreaterThan(0, $result['examid']);
 
-        $exam = $DB->get_record('evalia_exams', ['id' => $result['examid']]);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $result['examid']]);
         $this->assertNotFalse($exam);
         $this->assertSame('Midterm', $exam->name);
         $this->assertSame('draft', $exam->status);
@@ -307,7 +307,7 @@ final class externallib_test extends \advanced_testcase {
         $this->assertTrue($result['success']);
         $this->assertGreaterThan(0, $result['noteid']);
 
-        $note = $DB->get_record('evalia_portfolio_notes', ['id' => $result['noteid']]);
+        $note = $DB->get_record('local_evalia_portfolio_notes', ['id' => $result['noteid']]);
         $this->assertNotFalse($note);
         $this->assertSame('Student shows great progress.', $note->note_text);
         $this->assertEquals($this->student->id, (int) $note->userid);

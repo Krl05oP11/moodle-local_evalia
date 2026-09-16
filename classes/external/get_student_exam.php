@@ -53,8 +53,8 @@ class get_student_exam extends external_api {
         global $DB, $USER;
 
         $params       = self::validate_parameters(self::execute_parameters(), ['student_examid' => $studentexamid]);
-        $studentexam = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam         = $DB->get_record('evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
+        $studentexam = $DB->get_record('local_evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
+        $exam         = $DB->get_record('local_evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
         $context      = \context_course::instance($exam->courseid);
         self::validate_context($context);
 
@@ -130,7 +130,7 @@ class get_student_exam extends external_api {
         // Load questions — exclude correct_answer && tolerance (never send to student).
         [$insql, $inparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
         $questions = $DB->get_records_select(
-            'evalia_question_bank',
+            'local_evalia_question_bank',
             "id $insql",
             $inparams,
             '',
@@ -143,7 +143,7 @@ class get_student_exam extends external_api {
             $optqids = array_keys($questions);
             [$optsql, $optparams] = $DB->get_in_or_equal($optqids, SQL_PARAMS_NAMED, 'oqid');
             $options = $DB->get_records_select(
-                'evalia_question_options',
+                'local_evalia_question_options',
                 "questionid $optsql",
                 $optparams,
                 'sortorder ASC',
@@ -177,7 +177,7 @@ class get_student_exam extends external_api {
 
         // Mark as started on first load (if still in assigned state).
         if ($studentexam->status === 'assigned') {
-            $DB->update_record('evalia_student_exams', (object) [
+            $DB->update_record('local_evalia_student_exams', (object) [
                 'id'           => $studentexam->id,
                 'status'       => 'started',
                 'timemodified' => time(),

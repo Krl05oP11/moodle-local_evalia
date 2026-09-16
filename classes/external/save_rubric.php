@@ -72,7 +72,7 @@ class save_rubric extends external_api {
             'items'    => $items,
         ]);
 
-        $rubric = $DB->get_record('evalia_rubrics', ['id' => $params['rubricid']], '*', MUST_EXIST);
+        $rubric = $DB->get_record('local_evalia_rubrics', ['id' => $params['rubricid']], '*', MUST_EXIST);
         $context = \context_course::instance($rubric->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
@@ -80,7 +80,7 @@ class save_rubric extends external_api {
         $now    = time();
         $status = $params['activate'] ? 'active' : $rubric->status;
 
-        $DB->update_record('evalia_rubrics', (object) [
+        $DB->update_record('local_evalia_rubrics', (object) [
             'id'           => $rubric->id,
             'name'         => $params['name'],
             'status'       => $status,
@@ -97,11 +97,11 @@ class save_rubric extends external_api {
             if ($it['id'] > 0) {
                 // Verify item belongs to this rubric before updating.
                 $existing = $DB->get_record(
-                    'evalia_rubric_items',
+                    'local_evalia_rubric_items',
                     ['id' => $it['id'], 'rubricid' => $rubric->id]
                 );
                 if ($existing) {
-                    $DB->update_record('evalia_rubric_items', (object) [
+                    $DB->update_record('local_evalia_rubric_items', (object) [
                         'id'                => $it['id'],
                         'topic'             => $it['topic'],
                         'description'       => $description,
@@ -110,7 +110,7 @@ class save_rubric extends external_api {
                     ]);
                 }
             } else {
-                $DB->insert_record('evalia_rubric_items', (object) [
+                $DB->insert_record('local_evalia_rubric_items', (object) [
                     'rubricid'          => $rubric->id,
                     'topic'             => $it['topic'],
                     'description'       => $description,

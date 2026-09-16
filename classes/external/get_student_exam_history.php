@@ -66,8 +66,8 @@ class get_student_exam_history extends external_api {
                        se.score, se.max_score, se.status,
                        se.timesubmitted, se.timemodified,
                        se.question_ids
-                  FROM {evalia_student_exams} se
-                  JOIN {evalia_exams} e ON e.id = se.examid
+                  FROM {local_evalia_student_exams} se
+                  JOIN {local_evalia_exams} e ON e.id = se.examid
                  WHERE se.userid = :userid
                    AND e.courseid = :courseid
               ORDER BY se.timemodified DESC';

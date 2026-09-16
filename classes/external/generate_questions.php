@@ -81,11 +81,11 @@ class generate_questions extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // Load rubric item to get topic + description.
-        $item = $DB->get_record('evalia_rubric_items', ['id' => $params['rubric_item_id']], '*', MUST_EXIST);
+        $item = $DB->get_record('local_evalia_rubric_items', ['id' => $params['rubric_item_id']], '*', MUST_EXIST);
 
         // Verify item belongs to a rubric for this course.
         $rubric = $DB->get_record(
-            'evalia_rubrics',
+            'local_evalia_rubrics',
             ['id' => $item->rubricid, 'courseid' => $params['courseid']],
             'id',
             MUST_EXIST
@@ -119,7 +119,7 @@ class generate_questions extends external_api {
                 $qtype = 'multichoice';
             }
 
-            $questionid = (int) $DB->insert_record('evalia_question_bank', (object) [
+            $questionid = (int) $DB->insert_record('local_evalia_question_bank', (object) [
                 'courseid'       => $params['courseid'],
                 'rubricid'       => $rubric->id,
                 'rubric_item_id' => $item->id,
@@ -139,7 +139,7 @@ class generate_questions extends external_api {
             if (in_array($qtype, ['multichoice', 'truefalse'])) {
                 $options = $q['options'] ?? [];
                 foreach ($options as $optidx => $opt) {
-                    $DB->insert_record('evalia_question_options', (object) [
+                    $DB->insert_record('local_evalia_question_options', (object) [
                         'questionid'  => $questionid,
                         'option_text' => $opt['text'] ?? '',
                         'is_correct'  => empty($opt['correct']) ? 0 : 1,

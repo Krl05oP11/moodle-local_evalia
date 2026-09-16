@@ -60,7 +60,7 @@ class get_portfolio_notes extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        $notes = $DB->get_records('evalia_portfolio_notes', [
+        $notes = $DB->get_records('local_evalia_portfolio_notes', [
             'userid'   => $params['userid'],
             'courseid' => $params['courseid'],
         ], 'timecreated DESC');

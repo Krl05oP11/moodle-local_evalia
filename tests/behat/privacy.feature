@@ -1,4 +1,4 @@
-@local_evalia @local_evalia_privacy
+@local @local_evalia @local_evalia_privacy
 Feature: EVAL-IA privacy compliance
   As a site administrator
   I need to be able to export and delete user data stored by EVAL-IA

@@ -53,8 +53,8 @@ $myexams = $DB->get_records_sql(
             e.timeopen,
             e.timeclose,
             e.instructions
-       FROM {evalia_student_exams} se
-       JOIN {evalia_exams} e ON e.id = se.examid
+       FROM {local_evalia_student_exams} se
+       JOIN {local_evalia_exams} e ON e.id = se.examid
       WHERE se.userid   = :userid
         AND e.courseid  = :courseid
       ORDER BY e.timecreated DESC',

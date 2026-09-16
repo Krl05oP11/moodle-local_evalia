@@ -1,4 +1,4 @@
-@local_evalia @local_evalia_teacher
+@local @local_evalia @local_evalia_teacher
 Feature: EVAL-IA teacher panel
   As a teacher enrolled in a course
   I need to access the EVAL-IA teacher panel

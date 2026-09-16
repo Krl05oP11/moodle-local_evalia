@@ -56,8 +56,8 @@ class grade_exam extends external_api {
             'answers'        => $answers,
         ]);
 
-        $studentexam = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam         = $DB->get_record('evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
+        $studentexam = $DB->get_record('local_evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
+        $exam         = $DB->get_record('local_evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
         $context      = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
@@ -82,7 +82,7 @@ class grade_exam extends external_api {
         // Load question bank records (stem + topic needed for feedback message).
         [$insql, $inparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
         $questions = $DB->get_records_select(
-            'evalia_question_bank',
+            'local_evalia_question_bank',
             "id $insql",
             $inparams,
             '',
@@ -95,7 +95,7 @@ class grade_exam extends external_api {
             $optqids = array_keys($questions);
             [$optsql, $optparams] = $DB->get_in_or_equal($optqids, SQL_PARAMS_NAMED, 'oqid');
             $opts = $DB->get_records_select(
-                'evalia_question_options',
+                'local_evalia_question_options',
                 "questionid $optsql AND is_correct = 1",
                 $optparams,
                 'sortorder ASC',
@@ -244,7 +244,7 @@ class grade_exam extends external_api {
         }
 
         // Update student exam record.
-        $DB->update_record('evalia_student_exams', (object) [
+        $DB->update_record('local_evalia_student_exams', (object) [
             'id'            => $studentexam->id,
             'score'         => $score10,
             'max_score'     => 10.0,
@@ -255,7 +255,7 @@ class grade_exam extends external_api {
         ]);
 
         // Upsert evalia_portfolio.
-        $portfolio = $DB->get_record('evalia_portfolio', [
+        $portfolio = $DB->get_record('local_evalia_portfolio', [
             'userid'   => $studentexam->userid,
             'courseid' => $exam->courseid,
         ]);
@@ -263,8 +263,8 @@ class grade_exam extends external_api {
         // Re-query all graded scores for this student+course to recompute avg.
         $gradedrows = $DB->get_records_sql(
             'SELECT se.score
-               FROM {evalia_student_exams} se
-               JOIN {evalia_exams} e ON e.id = se.examid
+               FROM {local_evalia_student_exams} se
+               JOIN {local_evalia_exams} e ON e.id = se.examid
               WHERE se.userid = :userid AND e.courseid = :courseid AND se.status = :status',
             ['userid' => $studentexam->userid, 'courseid' => $exam->courseid, 'status' => 'graded']
         );
@@ -274,7 +274,7 @@ class grade_exam extends external_api {
             : $score10;
 
         if (!$portfolio) {
-            $DB->insert_record('evalia_portfolio', (object) [
+            $DB->insert_record('local_evalia_portfolio', (object) [
                 'userid'        => $studentexam->userid,
                 'courseid'      => $exam->courseid,
                 'total_exams'   => count($allscores),
@@ -284,7 +284,7 @@ class grade_exam extends external_api {
                 'timemodified'  => $now,
             ]);
         } else {
-            $DB->update_record('evalia_portfolio', (object) [
+            $DB->update_record('local_evalia_portfolio', (object) [
                 'id'            => $portfolio->id,
                 'total_exams'   => count($allscores),
                 'avg_grade'     => $avggrade,

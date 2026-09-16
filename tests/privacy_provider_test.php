@@ -89,7 +89,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $now = time();
 
         // Rubric.
-        $this->rubricid = (int) $DB->insert_record('evalia_rubrics', (object) [
+        $this->rubricid = (int) $DB->insert_record('local_evalia_rubrics', (object) [
             'courseid'     => $this->course->id,
             'name'         => 'Privacy Test Rubric',
             'status'       => 'active',
@@ -99,7 +99,7 @@ final class privacy_provider_test extends \advanced_testcase {
         ]);
 
         // Exam.
-        $this->examid = (int) $DB->insert_record('evalia_exams', (object) [
+        $this->examid = (int) $DB->insert_record('local_evalia_exams', (object) [
             'courseid'       => $this->course->id,
             'rubricid'       => $this->rubricid,
             'name'           => 'Privacy Test Exam',
@@ -118,7 +118,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Student exam instances.
         foreach ([$this->student, $this->student2] as $u) {
-            $DB->insert_record('evalia_student_exams', (object) [
+            $DB->insert_record('local_evalia_student_exams', (object) [
                 'examid'        => $this->examid,
                 'userid'        => $u->id,
                 'question_ids'  => '[1,2,3]',
@@ -134,7 +134,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Portfolios.
         foreach ([$this->student, $this->student2] as $u) {
-            $DB->insert_record('evalia_portfolio', (object) [
+            $DB->insert_record('local_evalia_portfolio', (object) [
                 'userid'        => $u->id,
                 'courseid'      => $this->course->id,
                 'total_exams'   => 1,
@@ -147,7 +147,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Portfolio notes.
         foreach ([$this->student, $this->student2] as $u) {
-            $DB->insert_record('evalia_portfolio_notes', (object) [
+            $DB->insert_record('local_evalia_portfolio_notes', (object) [
                 'userid'      => $u->id,
                 'courseid'    => $this->course->id,
                 'note_text'   => 'Observation for ' . $u->username,
@@ -158,7 +158,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Feedback logs.
         foreach ([$this->student, $this->student2] as $u) {
-            $DB->insert_record('evalia_feedback_log', (object) [
+            $DB->insert_record('local_evalia_feedback_log', (object) [
                 'userid'       => $u->id,
                 'examid'       => $this->examid,
                 'channel'      => 'telegram',
@@ -189,10 +189,10 @@ final class privacy_provider_test extends \advanced_testcase {
             $names[] = $item->get_name();
         }
 
-        $this->assertContains('evalia_student_exams', $names);
-        $this->assertContains('evalia_portfolio', $names);
-        $this->assertContains('evalia_portfolio_notes', $names);
-        $this->assertContains('evalia_feedback_log', $names);
+        $this->assertContains('local_evalia_student_exams', $names);
+        $this->assertContains('local_evalia_portfolio', $names);
+        $this->assertContains('local_evalia_portfolio_notes', $names);
+        $this->assertContains('local_evalia_feedback_log', $names);
         $this->assertContains('saipa_engine', $names);
     }
 
@@ -271,26 +271,26 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Student 1 data is gone.
         $se = $DB->get_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             'examid = :eid AND userid = :uid',
             ['eid' => $this->examid, 'uid' => $this->student->id]
         );
         $this->assertEmpty($se);
 
         $p = $DB->get_record(
-            'evalia_portfolio',
+            'local_evalia_portfolio',
             ['userid' => $this->student->id, 'courseid' => $this->course->id]
         );
         $this->assertFalse($p);
 
         $pn = $DB->get_records(
-            'evalia_portfolio_notes',
+            'local_evalia_portfolio_notes',
             ['userid' => $this->student->id, 'courseid' => $this->course->id]
         );
         $this->assertEmpty($pn);
 
         $fl = $DB->get_records_select(
-            'evalia_feedback_log',
+            'local_evalia_feedback_log',
             'examid = :eid AND userid = :uid',
             ['eid' => $this->examid, 'uid' => $this->student->id]
         );
@@ -298,14 +298,14 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Student 2 data is untouched.
         $se2 = $DB->get_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             'examid = :eid AND userid = :uid',
             ['eid' => $this->examid, 'uid' => $this->student2->id]
         );
         $this->assertCount(1, $se2);
 
         $p2 = $DB->get_record(
-            'evalia_portfolio',
+            'local_evalia_portfolio',
             ['userid' => $this->student2->id, 'courseid' => $this->course->id]
         );
         $this->assertNotFalse($p2);
@@ -326,20 +326,20 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Both students' data is gone.
         $se = $DB->count_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             'examid = :eid',
             ['eid' => $this->examid]
         );
         $this->assertSame(0, $se);
 
-        $p = $DB->count_records('evalia_portfolio', ['courseid' => $this->course->id]);
+        $p = $DB->count_records('local_evalia_portfolio', ['courseid' => $this->course->id]);
         $this->assertSame(0, $p);
 
-        $pn = $DB->count_records('evalia_portfolio_notes', ['courseid' => $this->course->id]);
+        $pn = $DB->count_records('local_evalia_portfolio_notes', ['courseid' => $this->course->id]);
         $this->assertSame(0, $pn);
 
         $fl = $DB->count_records_select(
-            'evalia_feedback_log',
+            'local_evalia_feedback_log',
             'examid = :eid',
             ['eid' => $this->examid]
         );
@@ -364,7 +364,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Student 1 gone.
         $se1 = $DB->count_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             'examid = :eid AND userid = :uid',
             ['eid' => $this->examid, 'uid' => $this->student->id]
         );
@@ -372,7 +372,7 @@ final class privacy_provider_test extends \advanced_testcase {
 
         // Student 2 still there.
         $se2 = $DB->count_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             'examid = :eid AND userid = :uid',
             ['eid' => $this->examid, 'uid' => $this->student2->id]
         );

@@ -68,7 +68,7 @@ class add_portfolio_note extends external_api {
         }
 
         $now    = time();
-        $noteid = $DB->insert_record('evalia_portfolio_notes', (object) [
+        $noteid = $DB->insert_record('local_evalia_portfolio_notes', (object) [
             'userid'      => $params['userid'],
             'courseid'    => $params['courseid'],
             'note_text'   => $text,
@@ -77,12 +77,12 @@ class add_portfolio_note extends external_api {
         ]);
 
         // Touch last_activity in portfolio if the record already exists.
-        $portfolio = $DB->get_record('evalia_portfolio', [
+        $portfolio = $DB->get_record('local_evalia_portfolio', [
             'userid'   => $params['userid'],
             'courseid' => $params['courseid'],
         ]);
         if ($portfolio) {
-            $DB->update_record('evalia_portfolio', (object) [
+            $DB->update_record('local_evalia_portfolio', (object) [
                 'id'            => $portfolio->id,
                 'last_activity' => $now,
                 'timemodified'  => $now,

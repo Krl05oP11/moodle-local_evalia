@@ -59,14 +59,14 @@ class assign_exam extends external_api {
 
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
 
-        $exam = $DB->get_record('evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
         // Load all APPROVED questions for this course with metadata needed by the sampler.
         $bank = $DB->get_records_select(
-            'evalia_question_bank',
+            'local_evalia_question_bank',
             'courseid = :courseid AND status = :status',
             ['courseid' => $exam->courseid, 'status' => 'approved'],
             '',
@@ -108,7 +108,7 @@ class assign_exam extends external_api {
         $studentids = array_keys($students);
         [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
         $existing = $DB->get_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             "examid = :examid AND userid $insql",
             array_merge(['examid' => $exam->id], $inparams),
             '',
@@ -160,7 +160,7 @@ class assign_exam extends external_api {
                 continue;
             }
 
-            $DB->insert_record('evalia_student_exams', (object) [
+            $DB->insert_record('local_evalia_student_exams', (object) [
                 'examid'        => $exam->id,
                 'userid'        => $userid,
                 'question_ids'  => json_encode($sample['selected_ids']),
@@ -178,8 +178,8 @@ class assign_exam extends external_api {
 
         // Activate the exam template once at least one student was assigned.
         if ($assigned > 0 && $exam->status === 'draft') {
-            $DB->set_field('evalia_exams', 'status', 'active', ['id' => $exam->id]);
-            $DB->set_field('evalia_exams', 'timemodified', $now, ['id' => $exam->id]);
+            $DB->set_field('local_evalia_exams', 'status', 'active', ['id' => $exam->id]);
+            $DB->set_field('local_evalia_exams', 'timemodified', $now, ['id' => $exam->id]);
         }
 
         // Create a course calendar event if the exam has a scheduled time window.

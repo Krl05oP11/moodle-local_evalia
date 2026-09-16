@@ -52,7 +52,7 @@ class get_student_exams extends external_api {
 
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
 
-        $exam = $DB->get_record('evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
@@ -75,7 +75,7 @@ class get_student_exams extends external_api {
 
         // Load existing assignments for these students.
         $assignments = $DB->get_records_select(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             "examid = :examid AND userid $insql",
             array_merge(['examid' => $exam->id], $inparams),
             '',

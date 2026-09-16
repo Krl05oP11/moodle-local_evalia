@@ -59,16 +59,16 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
         // Teacher-authored data: rubrics && exams store created_by (teacher user ID).
         // Not personal data in the GDPR sense, but declared for Moodle table-coverage compliance.
-        $collection->add_database_table('evalia_rubrics', [
+        $collection->add_database_table('local_evalia_rubrics', [
             'created_by' => 'privacy:metadata:evalia_rubrics:created_by',
         ], 'privacy:metadata:evalia_rubrics');
 
-        $collection->add_database_table('evalia_exams', [
+        $collection->add_database_table('local_evalia_exams', [
             'created_by' => 'privacy:metadata:evalia_exams:created_by',
         ], 'privacy:metadata:evalia_exams');
 
         // Per-student exam instances.
-        $collection->add_database_table('evalia_student_exams', [
+        $collection->add_database_table('local_evalia_student_exams', [
             'userid'        => 'privacy:metadata:evalia_student_exams:userid',
             'question_ids'  => 'privacy:metadata:evalia_student_exams:question_ids',
             'answers'       => 'privacy:metadata:evalia_student_exams:answers',
@@ -78,7 +78,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         ], 'privacy:metadata:evalia_student_exams');
 
         // Student performance summary.
-        $collection->add_database_table('evalia_portfolio', [
+        $collection->add_database_table('local_evalia_portfolio', [
             'userid'        => 'privacy:metadata:evalia_portfolio:userid',
             'avg_grade'     => 'privacy:metadata:evalia_portfolio:avg_grade',
             'total_exams'   => 'privacy:metadata:evalia_portfolio:total_exams',
@@ -86,7 +86,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         ], 'privacy:metadata:evalia_portfolio');
 
         // Teacher observations about a student.
-        $collection->add_database_table('evalia_portfolio_notes', [
+        $collection->add_database_table('local_evalia_portfolio_notes', [
             'userid'      => 'privacy:metadata:evalia_portfolio_notes:userid',
             'note_text'   => 'privacy:metadata:evalia_portfolio_notes:note_text',
             'created_by'  => 'privacy:metadata:evalia_portfolio_notes:created_by',
@@ -94,7 +94,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         ], 'privacy:metadata:evalia_portfolio_notes');
 
         // Feedback delivery log.
-        $collection->add_database_table('evalia_feedback_log', [
+        $collection->add_database_table('local_evalia_feedback_log', [
             'userid'       => 'privacy:metadata:evalia_feedback_log:userid',
             'channel'      => 'privacy:metadata:evalia_feedback_log:channel',
             'message_text' => 'privacy:metadata:evalia_feedback_log:message_text',
@@ -127,30 +127,30 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $sql = 'SELECT ctx.id
                   FROM {context} ctx
                   JOIN {course} c ON c.id = ctx.instanceid AND ctx.contextlevel = :ctxlevel
-                  JOIN {evalia_exams} e ON e.courseid = c.id
-                  JOIN {evalia_student_exams} se ON se.examid = e.id AND se.userid = :userid';
+                  JOIN {local_evalia_exams} e ON e.courseid = c.id
+                  JOIN {local_evalia_student_exams} se ON se.examid = e.id AND se.userid = :userid';
         $contextlist->add_from_sql($sql, ['ctxlevel' => CONTEXT_COURSE, 'userid' => $userid]);
 
         // Contexts via portfolio.
         $sql = 'SELECT ctx.id
                   FROM {context} ctx
                   JOIN {course} c ON c.id = ctx.instanceid AND ctx.contextlevel = :ctxlevel
-                  JOIN {evalia_portfolio} p ON p.courseid = c.id AND p.userid = :userid';
+                  JOIN {local_evalia_portfolio} p ON p.courseid = c.id AND p.userid = :userid';
         $contextlist->add_from_sql($sql, ['ctxlevel' => CONTEXT_COURSE, 'userid' => $userid]);
 
         // Contexts via portfolio notes (student is the subject).
         $sql = 'SELECT ctx.id
                   FROM {context} ctx
                   JOIN {course} c ON c.id = ctx.instanceid AND ctx.contextlevel = :ctxlevel
-                  JOIN {evalia_portfolio_notes} pn ON pn.courseid = c.id AND pn.userid = :userid';
+                  JOIN {local_evalia_portfolio_notes} pn ON pn.courseid = c.id AND pn.userid = :userid';
         $contextlist->add_from_sql($sql, ['ctxlevel' => CONTEXT_COURSE, 'userid' => $userid]);
 
         // Contexts via feedback log (join exam → course).
         $sql = 'SELECT ctx.id
                   FROM {context} ctx
                   JOIN {course} c ON c.id = ctx.instanceid AND ctx.contextlevel = :ctxlevel
-                  JOIN {evalia_exams} e ON e.courseid = c.id
-                  JOIN {evalia_feedback_log} fl ON fl.examid = e.id AND fl.userid = :userid';
+                  JOIN {local_evalia_exams} e ON e.courseid = c.id
+                  JOIN {local_evalia_feedback_log} fl ON fl.examid = e.id AND fl.userid = :userid';
         $contextlist->add_from_sql($sql, ['ctxlevel' => CONTEXT_COURSE, 'userid' => $userid]);
 
         return $contextlist;
@@ -170,23 +170,23 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
         // Users with student exams in this course.
         $sql = 'SELECT se.userid
-                  FROM {evalia_student_exams} se
-                  JOIN {evalia_exams} e ON e.id = se.examid
+                  FROM {local_evalia_student_exams} se
+                  JOIN {local_evalia_exams} e ON e.id = se.examid
                  WHERE e.courseid = :courseid';
         $userlist->add_from_sql('userid', $sql, ['courseid' => $courseid]);
 
         // Users with portfolio entries.
-        $sql = 'SELECT userid FROM {evalia_portfolio} WHERE courseid = :courseid';
+        $sql = 'SELECT userid FROM {local_evalia_portfolio} WHERE courseid = :courseid';
         $userlist->add_from_sql('userid', $sql, ['courseid' => $courseid]);
 
         // Users who are subjects of portfolio notes.
-        $sql = 'SELECT userid FROM {evalia_portfolio_notes} WHERE courseid = :courseid';
+        $sql = 'SELECT userid FROM {local_evalia_portfolio_notes} WHERE courseid = :courseid';
         $userlist->add_from_sql('userid', $sql, ['courseid' => $courseid]);
 
         // Users with feedback log entries for exams in this course.
         $sql = 'SELECT fl.userid
-                  FROM {evalia_feedback_log} fl
-                  JOIN {evalia_exams} e ON e.id = fl.examid
+                  FROM {local_evalia_feedback_log} fl
+                  JOIN {local_evalia_exams} e ON e.id = fl.examid
                  WHERE e.courseid = :courseid';
         $userlist->add_from_sql('userid', $sql, ['courseid' => $courseid]);
     }
@@ -216,8 +216,8 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // ── Student exams ─────────────────────────────────────────────
             $sql = 'SELECT se.*, e.name AS exam_name
-                      FROM {evalia_student_exams} se
-                      JOIN {evalia_exams} e ON e.id = se.examid
+                      FROM {local_evalia_student_exams} se
+                      JOIN {local_evalia_exams} e ON e.id = se.examid
                      WHERE e.courseid = :courseid AND se.userid = :userid
                   ORDER BY se.timecreated';
             $records = $DB->get_records_sql($sql, ['courseid' => $courseid, 'userid' => $userid]);
@@ -241,7 +241,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // ── Portfolio ─────────────────────────────────────────────────
             $portfolio = $DB->get_record(
-                'evalia_portfolio',
+                'local_evalia_portfolio',
                 ['userid' => $userid, 'courseid' => $courseid]
             );
             if ($portfolio) {
@@ -258,7 +258,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // ── Portfolio notes about this student ────────────────────────
             $notes = $DB->get_records(
-                'evalia_portfolio_notes',
+                'local_evalia_portfolio_notes',
                 ['userid' => $userid, 'courseid' => $courseid],
                 'timecreated ASC'
             );
@@ -278,8 +278,8 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // ── Feedback log ──────────────────────────────────────────────
             $sql = 'SELECT fl.*
-                      FROM {evalia_feedback_log} fl
-                      JOIN {evalia_exams} e ON e.id = fl.examid
+                      FROM {local_evalia_feedback_log} fl
+                      JOIN {local_evalia_exams} e ON e.id = fl.examid
                      WHERE e.courseid = :courseid AND fl.userid = :userid
                   ORDER BY fl.timesent';
             $logs = $DB->get_records_sql($sql, ['courseid' => $courseid, 'userid' => $userid]);
@@ -319,21 +319,21 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $courseid = $context->instanceid;
 
         // Student exams: collect IDs first, then delete answers.
-        $examids = $DB->get_fieldset_select('evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]);
+        $examids = $DB->get_fieldset_select('local_evalia_exams', 'id', 'courseid = :cid', ['cid' => $courseid]);
 
         if (!empty($examids)) {
             [$insql, $inparams] = $DB->get_in_or_equal($examids, SQL_PARAMS_NAMED, 'eid');
 
             // Delete feedback logs for these exams.
-            $DB->delete_records_select('evalia_feedback_log', "examid $insql", $inparams);
+            $DB->delete_records_select('local_evalia_feedback_log', "examid $insql", $inparams);
 
             // Delete student exam instances.
-            $DB->delete_records_select('evalia_student_exams', "examid $insql", $inparams);
+            $DB->delete_records_select('local_evalia_student_exams', "examid $insql", $inparams);
         }
 
         // Portfolio && notes are keyed by courseid directly.
-        $DB->delete_records('evalia_portfolio', ['courseid' => $courseid]);
-        $DB->delete_records('evalia_portfolio_notes', ['courseid' => $courseid]);
+        $DB->delete_records('local_evalia_portfolio', ['courseid' => $courseid]);
+        $DB->delete_records('local_evalia_portfolio_notes', ['courseid' => $courseid]);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -361,7 +361,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // Student exams.
             $examids = $DB->get_fieldset_select(
-                'evalia_exams',
+                'local_evalia_exams',
                 'id',
                 'courseid = :cid',
                 ['cid' => $courseid]
@@ -371,12 +371,12 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                 $inparams['uid'] = $userid;
 
                 $DB->delete_records_select(
-                    'evalia_feedback_log',
+                    'local_evalia_feedback_log',
                     "examid $insql AND userid = :uid",
                     $inparams
                 );
                 $DB->delete_records_select(
-                    'evalia_student_exams',
+                    'local_evalia_student_exams',
                     "examid $insql AND userid = :uid",
                     $inparams
                 );
@@ -384,13 +384,13 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             // Portfolio.
             $DB->delete_records(
-                'evalia_portfolio',
+                'local_evalia_portfolio',
                 ['userid' => $userid, 'courseid' => $courseid]
             );
 
             // Portfolio notes where this user is the SUBJECT.
             $DB->delete_records(
-                'evalia_portfolio_notes',
+                'local_evalia_portfolio_notes',
                 ['userid' => $userid, 'courseid' => $courseid]
             );
         }
@@ -422,7 +422,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
         // Exams in this course.
         $examids = $DB->get_fieldset_select(
-            'evalia_exams',
+            'local_evalia_exams',
             'id',
             'courseid = :cid',
             ['cid' => $courseid]
@@ -434,12 +434,12 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
             $params = array_merge($uidparams, $eidparams);
 
             $DB->delete_records_select(
-                'evalia_feedback_log',
+                'local_evalia_feedback_log',
                 "examid $eidsql AND userid $uidsql",
                 $params
             );
             $DB->delete_records_select(
-                'evalia_student_exams',
+                'local_evalia_student_exams',
                 "examid $eidsql AND userid $uidsql",
                 $params
             );
@@ -447,14 +447,14 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
         // Portfolio.
         $DB->delete_records_select(
-            'evalia_portfolio',
+            'local_evalia_portfolio',
             "courseid = :cid AND userid $uidsql",
             array_merge(['cid' => $courseid], $uidparams)
         );
 
         // Portfolio notes (student is subject).
         $DB->delete_records_select(
-            'evalia_portfolio_notes',
+            'local_evalia_portfolio_notes',
             "courseid = :cid AND userid $uidsql",
             array_merge(['cid' => $courseid], $uidparams)
         );

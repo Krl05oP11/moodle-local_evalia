@@ -201,11 +201,11 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
     }
 
     try {
-        $se   = $DB->get_record('evalia_student_exams', ['id' => $studentexamid], '*', MUST_EXIST);
-        $exam = $DB->get_record('evalia_exams', ['id' => $se->examid], '*', MUST_EXIST);
+        $se   = $DB->get_record('local_evalia_student_exams', ['id' => $studentexamid], '*', MUST_EXIST);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $se->examid], '*', MUST_EXIST);
 
         // Telegram chat_id for this student (may be 0 → engine will skip send).
-        $tglink = $DB->get_record('saipa_telegram_links', ['userid' => $se->userid], 'telegram_id');
+        $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $se->userid], 'telegram_id');
         $tgid   = ($tglink && !empty($tglink->telegram_id)) ? (int) $tglink->telegram_id : 0;
 
         $course  = $DB->get_record('course', ['id' => $exam->courseid], 'fullname');
@@ -225,7 +225,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
 
         [$insql, $inparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
         $questions = $DB->get_records_select(
-            'evalia_question_bank',
+            'local_evalia_question_bank',
             "id $insql",
             $inparams,
             '',
@@ -237,7 +237,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
         if (!empty($questions)) {
             [$optsql, $optparams] = $DB->get_in_or_equal(array_keys($questions), SQL_PARAMS_NAMED, 'oqid');
             $opts = $DB->get_records_select(
-                'evalia_question_options',
+                'local_evalia_question_options',
                 "questionid $optsql AND is_correct = 1",
                 $optparams,
                 '',
@@ -312,7 +312,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
 
     // Log attempt.
     try {
-        $DB->insert_record('evalia_feedback_log', (object) [
+        $DB->insert_record('local_evalia_feedback_log', (object) [
             'userid'       => $se->userid ?? 0,
             'examid'       => $se->id ?? 0,
             'channel'      => 'telegram',

@@ -1,4 +1,4 @@
-@local_evalia @local_evalia_setup
+@local @local_evalia @local_evalia_setup
 Feature: EVAL-IA setup wizard
   As a site administrator
   I need to configure the EVAL-IA engine connection

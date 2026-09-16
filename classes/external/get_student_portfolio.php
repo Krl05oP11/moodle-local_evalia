@@ -72,7 +72,7 @@ class get_student_portfolio extends external_api {
         // Load portfolio records for all students at once.
         [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
         $portfolios = $DB->get_records_select(
-            'evalia_portfolio',
+            'local_evalia_portfolio',
             "userid $insql AND courseid = :courseid",
             array_merge($inparams, ['courseid' => $params['courseid']]),
             '',

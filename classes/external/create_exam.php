@@ -93,7 +93,7 @@ class create_exam extends external_api {
 
         // Verify rubric exists && belongs to this course.
         $DB->get_record(
-            'evalia_rubrics',
+            'local_evalia_rubrics',
             ['id' => $params['rubricid'], 'courseid' => $params['courseid']],
             'id',
             MUST_EXIST
@@ -106,7 +106,7 @@ class create_exam extends external_api {
         }
 
         $now    = time();
-        $examid = (int) $DB->insert_record('evalia_exams', (object) [
+        $examid = (int) $DB->insert_record('local_evalia_exams', (object) [
             'courseid'       => $params['courseid'],
             'rubricid'       => $params['rubricid'],
             'name'           => $params['name'],
@@ -128,7 +128,7 @@ class create_exam extends external_api {
         // Register a grade item in the Moodle gradebook for this exam.
         $gradeitemid = local_evalia_grade_item_update($examid, $params['courseid'], $params['name']);
         if ($gradeitemid > 0) {
-            $DB->set_field('evalia_exams', 'grade_itemid', $gradeitemid, ['id' => $examid]);
+            $DB->set_field('local_evalia_exams', 'grade_itemid', $gradeitemid, ['id' => $examid]);
         }
 
         return ['success' => true, 'examid' => $examid, 'message' => 'Examen creado correctamente.'];

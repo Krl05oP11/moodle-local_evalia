@@ -49,7 +49,7 @@ if (!empty($students)) {
     $studentids = array_keys($students);
     [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'uid');
     $portfolios = $DB->get_records_select(
-        'evalia_portfolio',
+        'local_evalia_portfolio',
         "userid $insql AND courseid = :courseid",
         array_merge($inparams, ['courseid' => $courseid]),
         '',
@@ -66,7 +66,7 @@ if (!empty($students)) {
     $studentids = array_keys($students);
     [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'nuid');
     $notes = $DB->get_records_select(
-        'evalia_portfolio_notes',
+        'local_evalia_portfolio_notes',
         "userid $insql AND courseid = :courseid",
         array_merge($inparams, ['courseid' => $courseid]),
         'timecreated DESC',

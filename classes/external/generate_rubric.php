@@ -101,11 +101,11 @@ class generate_rubric extends external_api {
         $rawitems = $response['items'] ?? [];
 
         // Upsert evalia_rubrics (one per course).
-        $existing = $DB->get_record('evalia_rubrics', ['courseid' => $params['courseid']]);
+        $existing = $DB->get_record('local_evalia_rubrics', ['courseid' => $params['courseid']]);
 
         if ($existing) {
             $rubricid = (int) $existing->id;
-            $DB->update_record('evalia_rubrics', (object) [
+            $DB->update_record('local_evalia_rubrics', (object) [
                 'id'           => $rubricid,
                 'name'         => $name,
                 'description'  => $desc,
@@ -113,9 +113,9 @@ class generate_rubric extends external_api {
                 'timemodified' => $now,
             ]);
             // Remove old items — they will be replaced.
-            $DB->delete_records('evalia_rubric_items', ['rubricid' => $rubricid]);
+            $DB->delete_records('local_evalia_rubric_items', ['rubricid' => $rubricid]);
         } else {
-            $rubricid = (int) $DB->insert_record('evalia_rubrics', (object) [
+            $rubricid = (int) $DB->insert_record('local_evalia_rubrics', (object) [
                 'courseid'     => $params['courseid'],
                 'name'         => $name,
                 'description'  => $desc,
@@ -129,7 +129,7 @@ class generate_rubric extends external_api {
         // Insert new items.
         $saveditems = [];
         foreach ($rawitems as $idx => $it) {
-            $itemid = (int) $DB->insert_record('evalia_rubric_items', (object) [
+            $itemid = (int) $DB->insert_record('local_evalia_rubric_items', (object) [
                 'rubricid'          => $rubricid,
                 'topic'             => $it['topic'] ?? 'Tema ' . ($idx + 1),
                 'description'       => $it['description'] ?? '',

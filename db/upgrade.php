@@ -38,8 +38,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     // This block runs only when upgrading from a pre-2026032901 installation.
     if ($oldversion < 2026032901) {
         // evalia_rubrics
-        if (!$dbman->table_exists('evalia_rubrics')) {
-            $table = new xmldb_table('evalia_rubrics');
+        if (!$dbman->table_exists('local_evalia_rubrics')) {
+            $table = new xmldb_table('local_evalia_rubrics');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
@@ -56,8 +56,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         }
 
         // evalia_rubric_items
-        if (!$dbman->table_exists('evalia_rubric_items')) {
-            $table = new xmldb_table('evalia_rubric_items');
+        if (!$dbman->table_exists('local_evalia_rubric_items')) {
+            $table = new xmldb_table('local_evalia_rubric_items');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('rubricid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('topic', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
@@ -66,14 +66,14 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '5');
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'local_evalia_rubrics', ['id']);
             $table->add_index('idx_rubricid_sort', XMLDB_INDEX_NOTUNIQUE, ['rubricid', 'sortorder']);
             $dbman->create_table($table);
         }
 
         // evalia_question_bank
-        if (!$dbman->table_exists('evalia_question_bank')) {
-            $table = new xmldb_table('evalia_question_bank');
+        if (!$dbman->table_exists('local_evalia_question_bank')) {
+            $table = new xmldb_table('local_evalia_question_bank');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('rubricid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -90,16 +90,16 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
             $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
-            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
-            $table->add_key('fk_rubric_item', XMLDB_KEY_FOREIGN, ['rubric_item_id'], 'evalia_rubric_items', ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'local_evalia_rubrics', ['id']);
+            $table->add_key('fk_rubric_item', XMLDB_KEY_FOREIGN, ['rubric_item_id'], 'local_evalia_rubric_items', ['id']);
             $table->add_index('idx_courseid_difficulty_status', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'difficulty', 'status']);
             $table->add_index('idx_item_difficulty', XMLDB_INDEX_NOTUNIQUE, ['rubric_item_id', 'difficulty']);
             $dbman->create_table($table);
         }
 
         // evalia_question_options
-        if (!$dbman->table_exists('evalia_question_options')) {
-            $table = new xmldb_table('evalia_question_options');
+        if (!$dbman->table_exists('local_evalia_question_options')) {
+            $table = new xmldb_table('local_evalia_question_options');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('option_text', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
@@ -107,14 +107,14 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('feedback', XMLDB_TYPE_TEXT, null, null, null);
             $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '5');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-            $table->add_key('fk_questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'evalia_question_bank', ['id']);
+            $table->add_key('fk_questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'local_evalia_question_bank', ['id']);
             $table->add_index('idx_questionid_sort', XMLDB_INDEX_NOTUNIQUE, ['questionid', 'sortorder']);
             $dbman->create_table($table);
         }
 
         // evalia_exams
-        if (!$dbman->table_exists('evalia_exams')) {
-            $table = new xmldb_table('evalia_exams');
+        if (!$dbman->table_exists('local_evalia_exams')) {
+            $table = new xmldb_table('local_evalia_exams');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('rubricid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -131,15 +131,15 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
             $table->add_key('fk_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
-            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'evalia_rubrics', ['id']);
+            $table->add_key('fk_rubricid', XMLDB_KEY_FOREIGN, ['rubricid'], 'local_evalia_rubrics', ['id']);
             $table->add_key('fk_createdby', XMLDB_KEY_FOREIGN, ['created_by'], 'user', ['id']);
             $table->add_index('idx_courseid_status', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'status']);
             $dbman->create_table($table);
         }
 
         // evalia_student_exams
-        if (!$dbman->table_exists('evalia_student_exams')) {
-            $table = new xmldb_table('evalia_student_exams');
+        if (!$dbman->table_exists('local_evalia_student_exams')) {
+            $table = new xmldb_table('local_evalia_student_exams');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('examid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -152,7 +152,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('timesubmitted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'evalia_exams', ['id']);
+            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'local_evalia_exams', ['id']);
             $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
             $table->add_key('uq_exam_user', XMLDB_KEY_UNIQUE, ['examid', 'userid']);
             $table->add_index('idx_userid_status', XMLDB_INDEX_NOTUNIQUE, ['userid', 'status']);
@@ -160,8 +160,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         }
 
         // evalia_portfolio (Fase 2 — created now, populated later)
-        if (!$dbman->table_exists('evalia_portfolio')) {
-            $table = new xmldb_table('evalia_portfolio');
+        if (!$dbman->table_exists('local_evalia_portfolio')) {
+            $table = new xmldb_table('local_evalia_portfolio');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -178,8 +178,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         }
 
         // evalia_portfolio_notes (Fase 2)
-        if (!$dbman->table_exists('evalia_portfolio_notes')) {
-            $table = new xmldb_table('evalia_portfolio_notes');
+        if (!$dbman->table_exists('local_evalia_portfolio_notes')) {
+            $table = new xmldb_table('local_evalia_portfolio_notes');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -195,8 +195,8 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         }
 
         // evalia_feedback_log (Fase 2)
-        if (!$dbman->table_exists('evalia_feedback_log')) {
-            $table = new xmldb_table('evalia_feedback_log');
+        if (!$dbman->table_exists('local_evalia_feedback_log')) {
+            $table = new xmldb_table('local_evalia_feedback_log');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
             $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
             $table->add_field('examid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
@@ -206,7 +206,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $table->add_field('status', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'sent');
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
             $table->add_key('fk_userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
-            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'evalia_exams', ['id']);
+            $table->add_key('fk_examid', XMLDB_KEY_FOREIGN, ['examid'], 'local_evalia_exams', ['id']);
             $table->add_index('idx_userid_timesent', XMLDB_INDEX_NOTUNIQUE, ['userid', 'timesent']);
             $dbman->create_table($table);
         }
@@ -230,7 +230,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     if ($oldversion < 2026040201) {
         // Add feedback_prompt column to evalia_exams.
         // Allows teachers to customise the AI feedback message per course/exam.
-        $table = new xmldb_table('evalia_exams');
+        $table = new xmldb_table('local_evalia_exams');
         $field = new xmldb_field('feedback_prompt', XMLDB_TYPE_TEXT, null, null, null, null, null, 'timemodified');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
@@ -241,7 +241,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     if ($oldversion < 2026040901) {
         // Fase 2.1: Scheduled availability + Moodle gradebook integration.
         // Add timeopen, timeclose, grade_itemid to evalia_exams.
-        $table = new xmldb_table('evalia_exams');
+        $table = new xmldb_table('local_evalia_exams');
 
         $fieldtimeopen = new xmldb_field('timeopen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'time_limit_min');
         if (!$dbman->field_exists($table, $fieldtimeopen)) {
@@ -281,6 +281,31 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         // Called from assign_exam.php when timeopen > 0.
         // No schema changes.
         upgrade_plugin_savepoint(true, 2026040904, 'local', 'evalia');
+    }
+
+    if ($oldversion < 2026091501) {
+        // Bloque E (Marketplace readiness): db/install.xml previously created
+        // tables without the required frankenstyle prefix (evalia_* instead
+        // of local_evalia_*), which moodle-plugin-ci's validate step rejects.
+        // Rename in place to preserve existing data on already-installed sites.
+        $renames = [
+            'evalia_rubrics'          => 'local_evalia_rubrics',
+            'evalia_rubric_items'     => 'local_evalia_rubric_items',
+            'evalia_question_bank'    => 'local_evalia_question_bank',
+            'evalia_question_options' => 'local_evalia_question_options',
+            'evalia_exams'            => 'local_evalia_exams',
+            'evalia_student_exams'    => 'local_evalia_student_exams',
+            'evalia_portfolio'        => 'local_evalia_portfolio',
+            'evalia_portfolio_notes'  => 'local_evalia_portfolio_notes',
+            'evalia_feedback_log'     => 'local_evalia_feedback_log',
+        ];
+        foreach ($renames as $oldname => $newname) {
+            $table = new xmldb_table($oldname);
+            if ($dbman->table_exists($table) && !$dbman->table_exists(new xmldb_table($newname))) {
+                $dbman->rename_table($table, $newname);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026091501, 'local', 'evalia');
     }
 
     return true;

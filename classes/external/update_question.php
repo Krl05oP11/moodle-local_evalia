@@ -60,7 +60,7 @@ class update_question extends external_api {
             'stem'       => $stem,
         ]);
 
-        $question = $DB->get_record('evalia_question_bank', ['id' => $params['questionid']], '*', MUST_EXIST);
+        $question = $DB->get_record('local_evalia_question_bank', ['id' => $params['questionid']], '*', MUST_EXIST);
 
         // Verify the caller has manage capability in the question's course.
         $context = \context_course::instance($question->courseid);
@@ -81,7 +81,7 @@ class update_question extends external_api {
             $update->stem = $params['stem'];
         }
 
-        $DB->update_record('evalia_question_bank', $update);
+        $DB->update_record('local_evalia_question_bank', $update);
 
         return ['success' => true, 'message' => 'Pregunta actualizada.'];
     }

@@ -57,7 +57,7 @@ class publish_all_grades extends external_api {
 
         $params = self::validate_parameters(self::execute_parameters(), ['examid' => $examid]);
 
-        $exam = $DB->get_record('evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
 
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
@@ -65,7 +65,7 @@ class publish_all_grades extends external_api {
 
         // Load all graded student exams for this exam.
         $graded = $DB->get_records(
-            'evalia_student_exams',
+            'local_evalia_student_exams',
             ['examid' => $exam->id, 'status' => 'graded'],
             '',
             'id, userid, score'
@@ -92,7 +92,7 @@ class publish_all_grades extends external_api {
         $ids = array_keys($graded);
         [$insql, $inparams] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'seid');
         $DB->execute(
-            "UPDATE {evalia_student_exams} SET status = 'published', timemodified = :now WHERE id $insql",
+            "UPDATE {local_evalia_student_exams} SET status = 'published', timemodified = :now WHERE id $insql",
             array_merge(['now' => time()], $inparams)
         );
 

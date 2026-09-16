@@ -61,8 +61,8 @@ class publish_grade extends external_api {
             'override_score' => $overridescore,
         ]);
 
-        $se   = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam = $DB->get_record('evalia_exams', ['id' => $se->examid], '*', MUST_EXIST);
+        $se   = $DB->get_record('local_evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
+        $exam = $DB->get_record('local_evalia_exams', ['id' => $se->examid], '*', MUST_EXIST);
 
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
@@ -77,7 +77,7 @@ class publish_grade extends external_api {
         // Apply teacher override if provided (value >= 0 means intentional override).
         if ($params['override_score'] >= 0) {
             $override = max(0.0, min(10.0, (float) $params['override_score']));
-            $DB->set_field('evalia_student_exams', 'score', $override, ['id' => $se->id]);
+            $DB->set_field('local_evalia_student_exams', 'score', $override, ['id' => $se->id]);
             $se->score = $override;
         }
 
@@ -87,7 +87,7 @@ class publish_grade extends external_api {
         local_evalia_grade_item_update($exam->id, $exam->courseid, $exam->name, (int) $se->userid, $score);
 
         // Mark as published.
-        $DB->update_record('evalia_student_exams', (object) [
+        $DB->update_record('local_evalia_student_exams', (object) [
             'id'           => $se->id,
             'status'       => 'published',
             'timemodified' => $now,
@@ -108,8 +108,8 @@ class publish_grade extends external_api {
      */
     public static function recalculate_portfolio(int $userid, int $courseid, int $now, \moodle_database $DB): void {
         $sql = 'SELECT AVG(se.score) AS avg_score, COUNT(se.id) AS total
-                  FROM {evalia_student_exams} se
-                  JOIN {evalia_exams} e ON se.examid = e.id
+                  FROM {local_evalia_student_exams} se
+                  JOIN {local_evalia_exams} e ON se.examid = e.id
                  WHERE se.userid   = :userid
                    AND e.courseid  = :courseid
                    AND se.status   = :status';
@@ -118,9 +118,9 @@ class publish_grade extends external_api {
         $avg   = $row ? round((float) ($row->avg_score ?? 0), 2) : 0.0;
         $total = $row ? (int) ($row->total ?? 0) : 0;
 
-        $existing = $DB->get_record('evalia_portfolio', ['userid' => $userid, 'courseid' => $courseid]);
+        $existing = $DB->get_record('local_evalia_portfolio', ['userid' => $userid, 'courseid' => $courseid]);
         if ($existing) {
-            $DB->update_record('evalia_portfolio', (object) [
+            $DB->update_record('local_evalia_portfolio', (object) [
                 'id'            => $existing->id,
                 'total_exams'   => $total,
                 'avg_grade'     => $avg,
@@ -128,7 +128,7 @@ class publish_grade extends external_api {
                 'timemodified'  => $now,
             ]);
         } else {
-            $DB->insert_record('evalia_portfolio', (object) [
+            $DB->insert_record('local_evalia_portfolio', (object) [
                 'userid'        => $userid,
                 'courseid'      => $courseid,
                 'total_exams'   => $total,

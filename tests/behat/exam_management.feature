@@ -1,4 +1,4 @@
-@local_evalia @local_evalia_exams
+@local @local_evalia @local_evalia_exams
 Feature: EVAL-IA exam management
   As a teacher
   I need to create and manage exams for my course

@@ -29,8 +29,8 @@ require_once(__DIR__ . '/../../config.php');
 
 $studentexamid = required_param('student_examid', PARAM_INT);
 
-$studentexam = $DB->get_record('evalia_student_exams', ['id' => $studentexamid], '*', MUST_EXIST);
-$exam         = $DB->get_record('evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
+$studentexam = $DB->get_record('local_evalia_student_exams', ['id' => $studentexamid], '*', MUST_EXIST);
+$exam         = $DB->get_record('local_evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
 $context      = context_course::instance($exam->courseid);
 $course       = $DB->get_record('course', ['id' => $exam->courseid], '*', MUST_EXIST);
 
@@ -59,7 +59,7 @@ $questionsdata = [];
 if (!empty($questionids)) {
     [$insql, $inparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
     $questions = $DB->get_records_select(
-        'evalia_question_bank',
+        'local_evalia_question_bank',
         "id $insql",
         $inparams,
         '',
@@ -71,7 +71,7 @@ if (!empty($questionids)) {
     if (!empty($optqids)) {
         [$optsql, $optparams] = $DB->get_in_or_equal($optqids, SQL_PARAMS_NAMED, 'oqid');
         $options = $DB->get_records_select(
-            'evalia_question_options',
+            'local_evalia_question_options',
             "questionid $optsql",
             $optparams,
             'sortorder ASC',
@@ -103,7 +103,7 @@ if (!empty($questionids)) {
 
 // Mark as started if needed.
 if ($studentexam->status === 'assigned' && $isowner) {
-    $DB->update_record('evalia_student_exams', (object) [
+    $DB->update_record('local_evalia_student_exams', (object) [
         'id'           => $studentexam->id,
         'status'       => 'started',
         'timemodified' => time(),

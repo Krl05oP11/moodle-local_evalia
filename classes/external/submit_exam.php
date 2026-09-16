@@ -59,8 +59,8 @@ class submit_exam extends external_api {
             'answers'        => $answers,
         ]);
 
-        $studentexam = $DB->get_record('evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam         = $DB->get_record('evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
+        $studentexam = $DB->get_record('local_evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
+        $exam         = $DB->get_record('local_evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
         $context      = \context_course::instance($exam->courseid);
         self::validate_context($context);
 
@@ -88,7 +88,7 @@ class submit_exam extends external_api {
         }
 
         $now = time();
-        $DB->update_record('evalia_student_exams', (object) [
+        $DB->update_record('local_evalia_student_exams', (object) [
             'id'            => $studentexam->id,
             'answers'       => $params['answers'],
             'status'        => 'submitted',
@@ -120,7 +120,7 @@ class submit_exam extends external_api {
             $teacherids = array_keys(get_users_by_capability($context, 'local/evalia:manage', 'u.id'));
 
             foreach ($teacherids as $tid) {
-                $tglink = $DB->get_record('saipa_telegram_links', ['userid' => $tid], 'telegram_id');
+                $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $tid], 'telegram_id');
                 if ($tglink && !empty($tglink->telegram_id)) {
                     local_evalia_engine_request('/notify', [
                         'telegram_id' => (int) $tglink->telegram_id,

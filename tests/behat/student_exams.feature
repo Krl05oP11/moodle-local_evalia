@@ -1,4 +1,4 @@
-@local_evalia @local_evalia_student
+@local @local_evalia @local_evalia_student
 Feature: EVAL-IA student exam list
   As a student enrolled in a course
   I need to see my assigned exams

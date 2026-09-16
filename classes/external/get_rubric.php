@@ -55,7 +55,7 @@ class get_rubric extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        $rubric = $DB->get_record('evalia_rubrics', ['courseid' => $params['courseid']]);
+        $rubric = $DB->get_record('local_evalia_rubrics', ['courseid' => $params['courseid']]);
 
         if (!$rubric) {
             return [
@@ -69,7 +69,7 @@ class get_rubric extends external_api {
         }
 
         $rawitems = $DB->get_records(
-            'evalia_rubric_items',
+            'local_evalia_rubric_items',
             ['rubricid' => $rubric->id],
             'sortorder ASC, id ASC',
             'id, topic, description, difficulty_weight, sortorder'

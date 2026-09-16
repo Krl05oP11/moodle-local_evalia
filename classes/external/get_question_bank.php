@@ -82,7 +82,7 @@ class get_question_bank extends external_api {
         }
 
         $questions = $DB->get_records_select(
-            'evalia_question_bank',
+            'local_evalia_question_bank',
             $where,
             $qparams,
             'timecreated DESC',
@@ -97,7 +97,7 @@ class get_question_bank extends external_api {
         $qids = array_keys($questions);
         [$insql, $inparams] = $DB->get_in_or_equal($qids, SQL_PARAMS_NAMED, 'qid');
         $alloptions = $DB->get_records_select(
-            'evalia_question_options',
+            'local_evalia_question_options',
             "questionid $insql",
             $inparams,
             'questionid ASC, sortorder ASC',

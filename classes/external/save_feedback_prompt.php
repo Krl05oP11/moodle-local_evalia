@@ -55,12 +55,12 @@ class save_feedback_prompt extends external_api {
             'prompt' => $prompt,
         ]);
 
-        $exam    = $DB->get_record('evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
+        $exam    = $DB->get_record('local_evalia_exams', ['id' => $params['examid']], '*', MUST_EXIST);
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        $DB->update_record('evalia_exams', (object) [
+        $DB->update_record('local_evalia_exams', (object) [
             'id'              => $exam->id,
             'feedback_prompt' => trim($params['prompt']),
             'timemodified'    => time(),
