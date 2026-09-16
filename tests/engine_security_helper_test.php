@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_evalia\tests;
+namespace local_evalia;
 
 use local_evalia\engine_security_helper;
 
