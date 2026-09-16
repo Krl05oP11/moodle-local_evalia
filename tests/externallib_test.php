@@ -22,7 +22,9 @@
  *
  * Engine-dependent WS (generate_rubric, generate_questions, grade_exam,
  * publish_grade, index_course) are excluded — they require a live AI
- * engine && are covered by integration tests.
+ * engine && are covered by integration tests. Exception: grade_exam's
+ * blank-answers guard (below) returns before any engine call, so it's
+ * genuinely engine-free and tested here.
  *
  * @package    local_evalia
  * @category   test
@@ -409,5 +411,92 @@ final class externallib_test extends \advanced_testcase {
         $this->setUser($this->student);
         $this->expectException(\required_capability_exception::class);
         \local_evalia\external\get_student_exams::execute($exam['examid']);
+    }
+
+    // Grade_exam -- blank-answers guard only (see class docblock: the rest
+    // of grade_exam needs a live engine and isn't covered here).
+
+    /**
+     * Insert a student_exam row directly && return its ID. question_ids can
+     * be nonsense here -- the blank-answers guard returns before it's read.
+     */
+    private function create_student_exam(int $examid, string $answers, string $status = 'submitted'): int {
+        global $DB;
+        $now = time();
+        return (int) $DB->insert_record('local_evalia_student_exams', (object) [
+            'examid'        => $examid,
+            'userid'        => $this->student->id,
+            'question_ids'  => '[1,2]',
+            'answers'       => $answers,
+            'status'        => $status,
+            'timecreated'   => $now,
+            'timemodified'  => $now,
+            'timesubmitted' => $now,
+        ]);
+    }
+
+    /**
+     * A submission with answers="[]" (PHP's json_encode([]) shape for an
+     * empty array -- what a genuinely blank submit_exam call stores) must
+     * not be silently scored 0.0/10.0 and marked graded. Found live
+     * 2026-09-16 grading a real blank submission through this exact WS
+     * (grade_all_exams.php already had this guard; grade_exam.php didn't).
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_blank_array_answers_not_silently_graded(): void {
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '[]');
+
+        $result = \local_evalia\external\grade_exam::execute($studentexamid, '[]');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Sin respuestas guardadas.', $result['message']);
+
+        global $DB;
+        $after = $DB->get_record('local_evalia_student_exams', ['id' => $studentexamid]);
+        $this->assertSame('submitted', $after->status, 'Must not be marked graded on a blank submission');
+        // Score's DB default is '0.00' (install.xml), untouched here -- the
+        // real signal that grading was skipped, not faked, is the status
+        // above staying 'submitted' rather than becoming 'graded'.
+        $this->assertSame('0.00', $after->score);
+    }
+
+    /**
+     * Same guard, "{}" form (the shape a hand-built or future client might
+     * send for "no answers" instead of "[]").
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_blank_object_answers_not_silently_graded(): void {
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '{}');
+
+        $result = \local_evalia\external\grade_exam::execute($studentexamid, '{}');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Sin respuestas guardadas.', $result['message']);
+    }
+
+    /**
+     * A non-blank (but still nonsense) answers payload must NOT hit the
+     * blank-answers guard -- proves the guard is scoped to the three blank
+     * forms, not to "anything that later fails to grade cleanly".
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_nonblank_answers_do_not_hit_blank_guard(): void {
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '{"1":"some answer"}');
+
+        $result = \local_evalia\external\grade_exam::execute($studentexamid, '{"1":"some answer"}');
+
+        $this->assertNotSame('Sin respuestas guardadas.', $result['message']);
     }
 }

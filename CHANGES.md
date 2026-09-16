@@ -5,6 +5,25 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 ## [Unreleased]
 
 ### Fixed
+- **A blank exam submission could be silently scored 0.0/10 and marked
+  "graded" instead of flagged for teacher attention.** Found live
+  2026-09-16 running a real teacher+student pass end to end (rubric →
+  questions → exam → assignment → submission → AI grading → publish →
+  Telegram feedback, against a live engine, not a mock). `grade_exam.php`
+  (single-exam grading) had no guard against an empty `answers` payload
+  (`"[]"`/`"{}"`/`""`) — it silently proceeded, sent an empty map to the
+  engine, and fell back to PHP grading with every question scored wrong,
+  indistinguishable from a student who genuinely tried and failed every
+  question. `grade_all_exams.php` (bulk grading) already had this exact
+  guard; `grade_exam.php` now matches it — returns "Sin respuestas
+  guardadas" and leaves the exam in `submitted` status instead of marking
+  it `graded`. Verified with a real blank submission against the dev
+  database before and after the fix, plus new PHPUnit coverage
+  (`tests/externallib_test.php`).
+- **Database Tables section of the README was wrong** — every table name
+  was missing its `local_` prefix (e.g. `evalia_rubrics` instead of the
+  real `local_evalia_rubrics`). Same bug class already found and fixed in
+  `local_saipa`'s README earlier this session.
 - **The `allowed_sources` / BM25 claim from [0.4.5] was false until now.**
   `[0.4.5]` said "Engine retriever supports `allowed_sources` for both dense
   and BM25 search," but the engine's `retrieve()` never accepted that

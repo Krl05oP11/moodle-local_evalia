@@ -212,15 +212,15 @@ local_evalia/                          routers/eval.py
 
 | Table | Purpose |
 |-------|---------|
-| `evalia_rubrics` | One evaluation rubric per course |
-| `evalia_rubric_items` | Rubric competency items (topics) |
-| `evalia_question_bank` | AI-generated questions per rubric item |
-| `evalia_question_options` | Answer options for multiple-choice / true-false |
-| `evalia_exams` | Exam templates (structure, time window, gradebook item) |
-| `evalia_student_exams` | Per-student exam instance (assigned questions, answers, score) |
-| `evalia_portfolio` | Exam performance summary per student per course |
-| `evalia_portfolio_notes` | Teacher observations on a student portfolio |
-| `evalia_feedback_log` | Log of AI feedback messages sent to students |
+| `local_evalia_rubrics` | One evaluation rubric per course |
+| `local_evalia_rubric_items` | Rubric competency items (topics) |
+| `local_evalia_question_bank` | AI-generated questions per rubric item |
+| `local_evalia_question_options` | Answer options for multiple-choice / true-false |
+| `local_evalia_exams` | Exam templates (structure, time window, gradebook item) |
+| `local_evalia_student_exams` | Per-student exam instance (assigned questions, answers, score) |
+| `local_evalia_portfolio` | Exam performance summary per student per course |
+| `local_evalia_portfolio_notes` | Teacher observations on a student portfolio |
+| `local_evalia_feedback_log` | Log of AI feedback messages sent to students |
 
 ---
 
@@ -230,10 +230,10 @@ EVAL-IA implements the full Moodle Privacy API (`core_privacy\local\request`). P
 
 | Table | Fields |
 |-------|--------|
-| `evalia_student_exams` | userid, answers, score, status, timesubmitted |
-| `evalia_portfolio` | userid, avg_grade, total_exams, last_activity |
-| `evalia_portfolio_notes` | userid (student subject), note_text |
-| `evalia_feedback_log` | userid, message_text, channel, status |
+| `local_evalia_student_exams` | userid, answers, score, status, timesubmitted |
+| `local_evalia_portfolio` | userid, avg_grade, total_exams, last_activity |
+| `local_evalia_portfolio_notes` | userid (student subject), note_text |
+| `local_evalia_feedback_log` | userid, message_text, channel, status |
 
 Exam content is sent to the SAIPA Engine for AI grading. No personally identifiable information is transmitted — only question stems and anonymised answer text.
 

@@ -55,6 +55,18 @@ class grade_exam extends external_api {
             ];
         }
 
+        // No answers saved at all -- distinct from "attempted and got every
+        // question wrong": don't silently score this 0.0/10.0 and mark it
+        // graded, or a student who never opened the exam looks identical to
+        // one who tried and failed. Same guard grade_all_exams.php already
+        // has for its bulk path (found live 2026-09-16: single-exam grading
+        // had no equivalent check, so grading one student at a time through
+        // this WS could still do it).
+        if (empty($params['answers']) || $params['answers'] === '{}' || $params['answers'] === '[]') {
+            return ['success' => false, 'score' => 0.0, 'max_score' => 10.0, 'percent' => 0.0,
+                    'message' => 'Sin respuestas guardadas.'];
+        }
+
         // Load assigned question IDs.
         $questionids = json_decode($studentexam->question_ids ?? '[]', true);
         if (empty($questionids)) {
