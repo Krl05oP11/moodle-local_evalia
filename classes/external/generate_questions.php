@@ -126,7 +126,7 @@ class generate_questions extends external_api {
                 'question_type'  => $qtype,
                 'stem'           => $q['stem'] ?? '',
                 'difficulty'     => $q['difficulty'] ?? $params['difficulty'],
-                'topic'          => $item->topic, // always use rubric item topic for exact-match filtering
+                'topic'          => $item->topic, // Always use rubric item topic for exact-match filtering.
                 'correct_answer' => $q['correct_answer'] ?? '',
                 'tolerance'      => (float) ($q['tolerance'] ?? 0),
                 'source_chunks'  => null,

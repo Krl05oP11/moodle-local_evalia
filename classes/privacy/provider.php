@@ -48,7 +48,6 @@ use core_privacy\local\request\helper;
  * Privacy provider for local_evalia.
  */
 class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider {
-    // ──────────────────────────────────────────────────────────────────────
     // 1. Metadata declaration
     // ──────────────────────────────────────────────────────────────────────
 
@@ -111,7 +110,6 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         return $collection;
     }
 
-    // ──────────────────────────────────────────────────────────────────────
     // 2. Context discovery
     // ──────────────────────────────────────────────────────────────────────
 
@@ -191,7 +189,6 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $userlist->add_from_sql('userid', $sql, ['courseid' => $courseid]);
     }
 
-    // ──────────────────────────────────────────────────────────────────────
     // 3. Data export
     // ──────────────────────────────────────────────────────────────────────
 
@@ -214,7 +211,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
 
             $courseid = $context->instanceid;
 
-            // ── Student exams ─────────────────────────────────────────────
+            // Student exams.
             $sql = 'SELECT se.*, e.name AS exam_name
                       FROM {local_evalia_student_exams} se
                       JOIN {local_evalia_exams} e ON e.id = se.examid
@@ -239,7 +236,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                 );
             }
 
-            // ── Portfolio ─────────────────────────────────────────────────
+            // Portfolio.
             $portfolio = $DB->get_record(
                 'local_evalia_portfolio',
                 ['userid' => $userid, 'courseid' => $courseid]
@@ -256,7 +253,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                 );
             }
 
-            // ── Portfolio notes about this student ────────────────────────
+            // Portfolio notes about this student.
             $notes = $DB->get_records(
                 'local_evalia_portfolio_notes',
                 ['userid' => $userid, 'courseid' => $courseid],
@@ -276,7 +273,7 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                 );
             }
 
-            // ── Feedback log ──────────────────────────────────────────────
+            // Feedback log.
             $sql = 'SELECT fl.*
                       FROM {local_evalia_feedback_log} fl
                       JOIN {local_evalia_exams} e ON e.id = fl.examid
@@ -302,7 +299,6 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────────
     // 4. Data deletion — all users in a context
     // ──────────────────────────────────────────────────────────────────────
 
@@ -336,7 +332,6 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $DB->delete_records('local_evalia_portfolio_notes', ['courseid' => $courseid]);
     }
 
-    // ──────────────────────────────────────────────────────────────────────
     // 5. Data deletion — single user
     // ──────────────────────────────────────────────────────────────────────
 
@@ -396,7 +391,6 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────────
     // 6. Data deletion — multiple users (bulk)
     // ──────────────────────────────────────────────────────────────────────
 

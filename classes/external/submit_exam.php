@@ -96,7 +96,7 @@ class submit_exam extends external_api {
             'timemodified'  => $now,
         ]);
 
-        // ── Notify course teachers via Telegram (non-blocking, best-effort) ──
+        // Notify course teachers via Telegram (non-blocking, best-effort).
         try {
             $student  = $DB->get_record(
                 'user',

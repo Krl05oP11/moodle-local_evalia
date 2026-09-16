@@ -27,7 +27,7 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/evalia/lib.php');
 
-// ── First-run wizard redirect ─────────────────────────────────────────────────
+// First-run wizard redirect.
 // If the AI engine has never been configured && the current user is a site
 // admin, redirect to the setup wizard automatically.
 if (!get_config('local_evalia', 'setup_complete') && has_capability('moodle/site:config', context_system::instance())) {

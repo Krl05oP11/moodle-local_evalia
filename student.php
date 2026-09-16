@@ -61,7 +61,7 @@ $myexams = $DB->get_records_sql(
     ['userid' => $USER->id, 'courseid' => $courseid]
 );
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers.
 
 /**
  * Returns true if the exam window is currently open for the student to take.
@@ -91,7 +91,6 @@ function evalia_window_note(object $ex, int $now): string {
     return '';
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 echo $OUTPUT->header();
 
@@ -191,7 +190,7 @@ echo $OUTPUT->header();
         </div>
         <div class="card-body py-3">
 
-            <?php // ── Meta info row ────────────────────────────────────── ?>
+            <?php // Meta info row. ?>
             <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
                 <?php if ($ex->time_limit_min > 0) : ?>
                     <span><?php echo get_string('student:meta_timelimit', 'local_evalia', (int) $ex->time_limit_min); ?></span>
@@ -206,10 +205,10 @@ echo $OUTPUT->header();
                 <?php endif; ?>
             </div>
 
-            <?php // ── State-specific content ────────────────────────────── ?>
+            <?php // State-specific content. ?>
             <?php echo $statecontent; ?>
 
-            <?php // ── CTA button ─────────────────────────────────────────── ?>
+            <?php // CTA button. ?>
             <?php if ($showbtn) : ?>
                 <div class="mt-3">
                     <a href="<?php echo $detailurl; ?>"

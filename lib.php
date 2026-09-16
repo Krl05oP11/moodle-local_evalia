@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Adds EVAL-IA links to the course navigation.
  *
@@ -215,7 +213,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
             'id,' . implode(',', \core_user\fields::get_name_fields())
         );
 
-        // ── Reconstruct per-question feedback data from stored answers ────────
+        // Reconstruct per-question feedback data from stored answers.
         $questionids = json_decode($se->question_ids ?? '[]', true);
         $answersmap  = json_decode($se->answers ?? '{}', true);
 
@@ -380,7 +378,7 @@ function local_evalia_raw_engine_request(string $endpoint, ?array $data = null, 
     }
 
     try {
-        // securityhelper: Moodle blocks RFC1918/loopback ranges by default
+        // Securityhelper: Moodle blocks RFC1918/loopback ranges by default
         // (curlsecurityblockedhosts), which the engine normally lives on by
         // design. engine_security_helper narrows the exception to exactly
         // this admin-configured host instead of widening Moodle's site-wide

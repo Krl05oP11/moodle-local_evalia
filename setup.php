@@ -44,7 +44,7 @@ $PAGE->set_heading(get_string('wizard_page_heading', 'local_evalia'));
 
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// ── AJAX: real-time health check ─────────────────────────────────────────────
+// AJAX: real-time health check.
 if ($action === 'health') {
     require_sesskey();
     header('Content-Type: application/json');
@@ -60,7 +60,7 @@ if ($action === 'health') {
 
     $url = rtrim($engineurl, '/') . '/health';
     try {
-        // securityhelper: see local_evalia\engine_security_helper docblock —
+        // Securityhelper: see local_evalia\engine_security_helper docblock —
         // narrows Moodle's default private-IP block to exactly this host
         // instead of widening the site-wide blocklist.
         $client   = new \core\http_client([
@@ -101,7 +101,7 @@ if ($action === 'health') {
     die();
 }
 
-// ── POST: save configuration ──────────────────────────────────────────────────
+// POST: save configuration.
 if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
 
@@ -144,7 +144,7 @@ if (empty($cfgurl)) {
 
 // Detect server environment for the requirements screen.
 $phpverok     = version_compare(PHP_VERSION, '8.1.0', '>=');
-$moodleverok  = ($CFG->version >= 2024042200);   // Moodle 4.4
+$moodleverok  = ($CFG->version >= 2024042200);   // Moodle 4.4.
 $curlok        = function_exists('curl_init');
 $phpverstr    = PHP_VERSION;
 $moodleverstr = $CFG->release ?? 'unknown';
@@ -152,7 +152,7 @@ $moodleverstr = $CFG->release ?? 'unknown';
 echo $OUTPUT->header();
 
 // phpcs:disable moodle.Commenting.MissingDocblock.File -- False positive: this sniff
-// re-fires on every reopened PHP tag in the HTML template below, although the
+// Re-fires on every reopened PHP tag in the HTML template below, although the
 // file docblock is present at the top of the file. Re-enabled at end of file.
 ?>
 <style>

@@ -120,7 +120,7 @@ class grade_exam extends external_api {
                 'correct_option_text' => $correctoptions[$qid] ?? '',
                 'correct_answer'      => $q->correct_answer ?? '',
                 'tolerance'           => (float) ($q->tolerance ?? 0.0),
-                // essay-only fields (ignored by engine for other types)
+                // Essay-only fields (ignored by engine for other types).
                 'stem'                => $q->question_type === 'essay' ? ($q->stem ?? '') : '',
                 'topic'               => $q->question_type === 'essay' ? ($q->topic ?? '') : '',
             ];
@@ -185,7 +185,7 @@ class grade_exam extends external_api {
 
         // Persist essay AI feedback inside the answers JSON so it survives to
         // the Telegram feedback && graded-view rendering steps.
-        // Format: answers["__essay_eval__"] = {"qid": {"score": 0.8, "feedback": "..."}}
+        // Format: answers["__essay_eval__"] = {"qid": {"score": 0.8, "feedback": "..."}}.
         $essayevals = [];
         if (!isset($engineresp['error']) && !empty($engineresp['details'])) {
             // Build a weight lookup keyed by question id.
@@ -223,7 +223,7 @@ class grade_exam extends external_api {
                 } else if ($eq['type'] === 'shortanswer') {
                     $correctness[(int)$eq['id']] = ($studentans === strtolower(trim($eq['correct_answer'])));
                 } else {
-                    // essay && unknown types: cannot grade without AI.
+                    // Essay && unknown types: cannot grade without AI.
                     $correctness[(int)$eq['id']] = false;
                 }
             }

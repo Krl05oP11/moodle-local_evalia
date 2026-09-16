@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
 
-    // Teacher capability: can manage rubrics, questions, && exams for a course
+    // Teacher capability: can manage rubrics, questions, && exams for a course.
     'local/evalia:manage' => [
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,
@@ -36,7 +36,7 @@ $capabilities = [
         ],
     ],
 
-    // Student capability: can take assigned exams
+    // Student capability: can take assigned exams.
     'local/evalia:take' => [
         'captype'      => 'read',
         'contextlevel' => CONTEXT_COURSE,

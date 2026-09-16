@@ -29,8 +29,6 @@
 
 namespace local_evalia;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
@@ -169,7 +167,7 @@ final class privacy_provider_test extends \advanced_testcase {
         }
     }
 
-    // ── Metadata ──────────────────────────────────────────────────────────────
+    // Metadata.
 
     /**
      * Metadata declares 4 database tables && 1 external location.
@@ -196,7 +194,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertContains('saipa_engine', $names);
     }
 
-    // ── Context discovery ─────────────────────────────────────────────────────
+    // Context discovery.
 
     /**
      * User with no data returns empty context list.
@@ -223,7 +221,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertContains((int) $expected->id, $contextids);
     }
 
-    // ── User listing ──────────────────────────────────────────────────────────
+    // User listing.
 
     /**
      * Course context with data lists both students.
@@ -253,7 +251,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertEmpty($userlist->get_userids());
     }
 
-    // ── Delete for single user ────────────────────────────────────────────────
+    // Delete for single user.
 
     /**
      * delete_data_for_user removes all data for that user only.
@@ -311,7 +309,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertNotFalse($p2);
     }
 
-    // ── Delete all users in context ───────────────────────────────────────────
+    // Delete all users in context.
 
     /**
      * delete_data_for_all_users_in_context removes everything in the course.
@@ -346,7 +344,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertSame(0, $fl);
     }
 
-    // ── Delete for multiple users (bulk) ──────────────────────────────────────
+    // Delete for multiple users (bulk).
 
     /**
      * delete_data_for_users removes data for specified users only.
@@ -379,7 +377,7 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertSame(1, $se2);
     }
 
-    // ── Export ─────────────────────────────────────────────────────────────────
+    // Export.
 
     /**
      * export_user_data writes data to the privacy writer.

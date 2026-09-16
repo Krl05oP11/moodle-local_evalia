@@ -73,14 +73,14 @@ if (!empty($students)) {
         'userid, note_text, timecreated'
     );
     foreach ($notes as $n) {
-        // get_records_select returns first match; since we order DESC the first = most recent.
+        // Get_records_select returns first match; since we order DESC the first = most recent.
         if (!isset($lastnotebyuser[$n->userid])) {
             $lastnotebyuser[$n->userid] = $n->note_text;
         }
     }
 }
 
-// ── Emit CSV ─────────────────────────────────────────────────────────────────
+// Emit CSV.
 $safecoursename = preg_replace('/[^a-zA-Z0-9_\-]/', '_', format_string($course->shortname));
 $filename        = 'evalia_legajos_' . $safecoursename . '_' . date('Ymd') . '.csv';
 

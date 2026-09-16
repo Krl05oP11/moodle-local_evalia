@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
 
-    // ---- RUBRIC ----
+    // RUBRIC.
 
     'local_evalia_generate_rubric' => [
         'classname'     => 'local_evalia\external\generate_rubric',
@@ -58,7 +58,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- QUESTION BANK ----
+    // QUESTION BANK.
 
     'local_evalia_generate_questions' => [
         'classname'     => 'local_evalia\external\generate_questions',
@@ -90,7 +90,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- EXAMS ----
+    // EXAMS.
 
     'local_evalia_create_exam' => [
         'classname'     => 'local_evalia\external\create_exam',
@@ -122,7 +122,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- PORTFOLIOS (Fase 2) ----
+    // PORTFOLIOS (Fase 2).
 
     'local_evalia_get_student_portfolio' => [
         'classname'     => 'local_evalia\external\get_student_portfolio',
@@ -168,7 +168,7 @@ $functions = [
         'classname'     => 'local_evalia\external\get_student_exam',
         'methodname'    => 'execute',
         'description'   => 'Returns a student\'s assigned exam questions (no correct answers exposed)',
-        'type'          => 'write', // marks exam as started on first load
+        'type'          => 'write', // Marks exam as started on first load.
         'ajax'          => true,
         'capabilities'  => 'local/evalia:take',
         'loginrequired' => true,
@@ -214,7 +214,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- GRADE PUBLISHING ----
+    // GRADE PUBLISHING.
 
     'local_evalia_publish_grade' => [
         'classname'     => 'local_evalia\external\publish_grade',
@@ -236,7 +236,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- STATISTICS ----
+    // STATISTICS.
 
     'local_evalia_get_exam_stats' => [
         'classname'     => 'local_evalia\external\get_exam_stats',
@@ -248,7 +248,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- RAG SOURCES ----
+    // RAG SOURCES.
 
     'local_evalia_get_course_sources' => [
         'classname'     => 'local_evalia\external\get_course_sources',
@@ -260,7 +260,7 @@ $functions = [
         'loginrequired' => true,
     ],
 
-    // ---- RAG INDEXING ----
+    // RAG INDEXING.
 
     'local_evalia_index_course' => [
         'classname'     => 'local_evalia\external\index_course',

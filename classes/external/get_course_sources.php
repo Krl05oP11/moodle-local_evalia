@@ -69,7 +69,7 @@ class get_course_sources extends external_api {
             $sources[] = self::parse_source($rawsource, $params['courseid'], $DB);
         }
 
-        // Sort: pages first, then by label
+        // Sort: pages first, then by label.
         usort($sources, function ($a, $b) {
             if ($a['type'] !== $b['type']) {
                 return $a['type'] === 'page' ? -1 : 1;
@@ -100,11 +100,11 @@ class get_course_sources extends external_api {
         }
 
         if ($type === 'resource' && isset($parts[1])) {
-            // parts[3] = chapter label (optional), parts[2] = filename
+            // Parts[3] = chapter label (optional), parts[2] = filename.
             if (!empty($parts[3])) {
-                $label = $parts[3];   // "Cap5-Grafos"
+                $label = $parts[3];   // Example: "Cap5-Grafos".
             } else if (!empty($parts[2])) {
-                $label = pathinfo($parts[2], PATHINFO_FILENAME);  // strip extension
+                $label = pathinfo($parts[2], PATHINFO_FILENAME);  // Strip extension.
             } else {
                 $label = $raw;
             }

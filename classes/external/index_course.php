@@ -81,14 +81,14 @@ class index_course extends external_api {
         $indexed  = [];
         $errors   = [];
 
-        // ── Retrieve the course's webservice download token ────────────────────
+        // Retrieve the course's webservice download token.
         // If the caller didn't pass a token, try to find a valid WS token for
         // the local_evalia or saipa service so the engine can download files.
         if (empty($token)) {
             $token = self::find_ws_token();
         }
 
-        // ── mod_page ──────────────────────────────────────────────────────────
+        // Mod_page.
         $pages = $DB->get_records_sql(
             'SELECT p.id, p.name, p.intro, p.content
                FROM {page} p
@@ -104,7 +104,7 @@ class index_course extends external_api {
             $text  = preg_replace('/\s+/', ' ', $text);
             $text  = trim($text);
             if (strlen($text) < 20) {
-                continue;   // skip near-empty pages
+                continue;   // Skip near-empty pages.
             }
             $source = 'page:' . $page->id;
             $result = local_evalia_raw_engine_request('/index', [
@@ -124,7 +124,7 @@ class index_course extends external_api {
             }
         }
 
-        // ── mod_resource (PDF files) ──────────────────────────────────────────
+        // Mod_resource (PDF files).
         if (!empty($token)) {
             $resources = $DB->get_records_sql(
                 'SELECT r.id, r.name, cm.id AS cmid
@@ -186,7 +186,7 @@ class index_course extends external_api {
                                     ];
                                 }
                             }
-                            continue;   // skip the generic full-PDF index below
+                            continue;   // Skip the generic full-PDF index below.
                         }
 
                         // No ranges configured — index the full PDF as one source.
@@ -209,7 +209,7 @@ class index_course extends external_api {
                             'source'      => $source,
                         ], 300);
                     } else {
-                        continue;   // unsupported format
+                        continue;   // Unsupported format.
                     }
 
                     if (isset($result['error'])) {

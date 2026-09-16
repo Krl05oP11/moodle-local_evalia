@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Upgrade steps for local_evalia.
  *
@@ -37,7 +35,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     // Fase 1 initial install — all tables are created via install.xml on first install.
     // This block runs only when upgrading from a pre-2026032901 installation.
     if ($oldversion < 2026032901) {
-        // evalia_rubrics
+        // Table: evalia_rubrics.
         if (!$dbman->table_exists('local_evalia_rubrics')) {
             $table = new xmldb_table('local_evalia_rubrics');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -55,7 +53,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_rubric_items
+        // Table: evalia_rubric_items.
         if (!$dbman->table_exists('local_evalia_rubric_items')) {
             $table = new xmldb_table('local_evalia_rubric_items');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -71,7 +69,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_question_bank
+        // Table: evalia_question_bank.
         if (!$dbman->table_exists('local_evalia_question_bank')) {
             $table = new xmldb_table('local_evalia_question_bank');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -97,7 +95,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_question_options
+        // Table: evalia_question_options.
         if (!$dbman->table_exists('local_evalia_question_options')) {
             $table = new xmldb_table('local_evalia_question_options');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -112,7 +110,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_exams
+        // Table: evalia_exams.
         if (!$dbman->table_exists('local_evalia_exams')) {
             $table = new xmldb_table('local_evalia_exams');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -137,7 +135,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_student_exams
+        // Table: evalia_student_exams.
         if (!$dbman->table_exists('local_evalia_student_exams')) {
             $table = new xmldb_table('local_evalia_student_exams');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -159,7 +157,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_portfolio (Fase 2 — created now, populated later)
+        // Table: evalia_portfolio (Fase 2 — created now, populated later).
         if (!$dbman->table_exists('local_evalia_portfolio')) {
             $table = new xmldb_table('local_evalia_portfolio');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -177,7 +175,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_portfolio_notes (Fase 2)
+        // Table: evalia_portfolio_notes (Fase 2).
         if (!$dbman->table_exists('local_evalia_portfolio_notes')) {
             $table = new xmldb_table('local_evalia_portfolio_notes');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -194,7 +192,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
 
-        // evalia_feedback_log (Fase 2)
+        // Table: evalia_feedback_log (Fase 2).
         if (!$dbman->table_exists('local_evalia_feedback_log')) {
             $table = new xmldb_table('local_evalia_feedback_log');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);

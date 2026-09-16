@@ -28,7 +28,7 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_evalia', 'EVAL-IA');
     $ADMIN->add('localplugins', $settings);
 
-    // ── Setup Wizard link ────────────────────────────────────────────────────
+    // Setup Wizard link.
     $setupurl = new moodle_url('/local/evalia/setup.php');
     $settings->add(new admin_setting_heading(
         'local_evalia_wizard_heading',
@@ -41,7 +41,7 @@ if ($hassiteconfig) {
         )
     ));
 
-    // ── AI Engine ────────────────────────────────────────────────────────────
+    // AI Engine.
     $settings->add(new admin_setting_heading(
         'local_evalia_engine_heading',
         get_string('settings:heading_engine', 'local_evalia'),
@@ -63,7 +63,7 @@ if ($hassiteconfig) {
         ''
     ));
 
-    // ── Rubrics ──────────────────────────────────────────────────────────────
+    // Rubrics.
     $settings->add(new admin_setting_heading(
         'local_evalia_rubric_heading',
         get_string('settings:heading_rubric', 'local_evalia'),
@@ -78,7 +78,7 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    // ── Exams ────────────────────────────────────────────────────────────────
+    // Exams.
     $settings->add(new admin_setting_heading(
         'local_evalia_exam_heading',
         get_string('settings:heading_exam', 'local_evalia'),
@@ -117,7 +117,7 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    // ── Difficulty weighting ─────────────────────────────────────────────────
+    // Difficulty weighting.
     $settings->add(new admin_setting_heading(
         'local_evalia_weights_heading',
         get_string('settings:heading_weights', 'local_evalia'),
@@ -148,7 +148,7 @@ if ($hassiteconfig) {
         PARAM_FLOAT
     ));
 
-    // ── Question generation ──────────────────────────────────────────────────
+    // Question generation.
     $settings->add(new admin_setting_heading(
         'local_evalia_questions_heading',
         get_string('settings:heading_questions', 'local_evalia'),
@@ -163,7 +163,7 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    // ── PDF indexing ─────────────────────────────────────────────────────────
+    // PDF indexing.
     $settings->add(new admin_setting_heading(
         'local_evalia_pdf_heading',
         get_string('settings:heading_pdf', 'local_evalia'),
@@ -178,7 +178,7 @@ if ($hassiteconfig) {
         PARAM_RAW
     ));
 
-    // ── Feedback ─────────────────────────────────────────────────────────────
+    // Feedback.
     $settings->add(new admin_setting_heading(
         'local_evalia_feedback_heading',
         get_string('settings:heading_feedback', 'local_evalia'),

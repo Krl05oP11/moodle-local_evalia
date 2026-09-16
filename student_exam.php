@@ -112,7 +112,7 @@ if ($studentexam->status === 'assigned' && $isowner) {
 }
 
 $alreadysubmitted = in_array($studentexam->status, ['submitted', 'graded', 'published']);
-$previewmode      = $isteacher && !$isowner;  // teacher viewing someone else's exam
+$previewmode      = $isteacher && !$isowner;  // Teacher viewing someone else's exam.
 
 // Pre-load stored answers (needed for correctness maps && later rendering).
 $storedanswers = [];
@@ -120,10 +120,10 @@ if ($previewmode && $alreadysubmitted) {
     $storedanswers = json_decode($studentexam->answers ?? '{}', true) ?? [];
 }
 
-// ── Correctness maps for teacher preview of graded exams ────────────────────
-$correctoptionmap = [];   // qid → correct option_text (multichoice / truefalse)
-$correctnessmap    = [];   // qid → bool
-$essayevals        = [];   // qid → ['score' => float, 'feedback' => string]
+// Correctness maps for teacher preview of graded exams.
+$correctoptionmap = [];   // Qid → correct option_text (multichoice / truefalse).
+$correctnessmap    = [];   // Qid → bool.
+$essayevals        = [];   // Qid → ['score' => float, 'feedback' => string].
 if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     // Extract essay AI evals persisted in the answers JSON.
     $essayevals = (array) ($storedanswers['__essay_eval__'] ?? []);
@@ -152,7 +152,6 @@ if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
         }
     }
 }
-// ────────────────────────────────────────────────────────────────────────────
 
 // Load AMD: student gets full timer+submit, teacher in submitted mode gets grade panel.
 if (!$previewmode) {
@@ -179,7 +178,7 @@ $studentuser = $previewmode
 
 echo $OUTPUT->header();
 
-// ── Teacher preview banner ────────────────────────────────────────────────────
+// Teacher preview banner.
 if ($previewmode) {
     $studentname = $studentuser ? fullname($studentuser) : get_string('exam:preview_student_fallback', 'local_evalia');
     $statuslabel = [
@@ -199,7 +198,7 @@ if ($previewmode) {
     echo '</div>';
 }
 
-// ── Student submitted/graded view: simple banner, no questions ────────────────
+// Student submitted/graded view: simple banner, no questions.
 if ($alreadysubmitted && !$previewmode) {
     echo '<div class="alert alert-success mt-3">';
     echo '<h4>' . get_string('exam:submitted_heading', 'local_evalia') . '</h4>';
@@ -214,7 +213,7 @@ if ($alreadysubmitted && !$previewmode) {
     exit;
 }
 
-// ── Teacher preview of graded exam: show score banner then fall through to questions ──
+// Teacher preview of graded exam: show score banner then fall through to questions.
 if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     $score = number_format((float) $studentexam->score, 1);
     echo '<div class="alert alert-success mt-3 mb-2">';
@@ -222,9 +221,9 @@ if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
     echo '</div>';
 }
 
-// $storedanswers already loaded above (before HTML output).
+// Uses $storedanswers, already loaded above (before HTML output).
 
-// ── Active exam ───────────────────────────────────────────────────────────────
+// Active exam.
 
 // Timer bar: only for the student, never for teacher preview.
 if (!$previewmode && $exam->time_limit_min > 0) {
@@ -365,7 +364,7 @@ foreach ($questionsdata as $q) {
                 . $taval . '</textarea>';
         }
     } else {
-        // shortanswer
+        // Shortanswer.
         $val        = $storedanswer !== null ? ' value="' . htmlspecialchars($storedanswer) . '"' : '';
         $qcorrect  = $gradedpreview && ($correctnessmap[$q['id']] ?? false);
         $inpborder = $gradedpreview ? (' border-' . ($qcorrect ? 'success' : 'danger')) : '';
@@ -383,8 +382,8 @@ foreach ($questionsdata as $q) {
         }
     }
 
-    echo '</div>';  // card-body
-    echo '</div>';  // card
+    echo '</div>';  // Card-body.
+    echo '</div>';  // Card.
 }
 
 if ($previewmode) {

@@ -118,8 +118,8 @@ class assign_exam extends external_api {
 
         $now        = time();
         $assigned   = 0;
-        $skipped    = 0;    // student already had an exam for this template
-        $failed     = 0;    // sampler ran but could not build a set for this student
+        $skipped    = 0;    // Student already had an exam for this template.
+        $failed     = 0;    // Sampler ran but could not build a set for this student.
         $enginedown = false;
         $maxscore = (float) ($exam->basic_count + $exam->medium_count + $exam->advanced_count);
 
@@ -131,7 +131,7 @@ class assign_exam extends external_api {
             'basic_count'    => (int) $exam->basic_count,
             'medium_count'   => (int) $exam->medium_count,
             'advanced_count' => (int) $exam->advanced_count,
-            'topic_coverage' => (object) $topiccoverage, // JSON object, not array
+            'topic_coverage' => (object) $topiccoverage, // JSON object, not array.
         ];
 
         foreach ($studentids as $userid) {

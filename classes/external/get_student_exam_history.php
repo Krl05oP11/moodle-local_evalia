@@ -89,7 +89,7 @@ class get_student_exam_history extends external_api {
             $qids  = json_decode($row->question_ids ?? '[]', true);
             $score = ($row->status === 'graded' && $row->max_score > 0)
                    ? round((float) $row->score, 1)
-                   : -1.0;   // -1 = not graded
+                   : -1.0;   // A value of -1 means not graded.
 
             $exams[] = [
                 'student_examid'  => (int) $row->id,

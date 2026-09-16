@@ -67,7 +67,7 @@ final class externallib_test extends \advanced_testcase {
         $generator->enrol_user($this->student->id, $this->course->id, 'student');
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers.
 
     /**
      * Insert a rubric row directly && return its ID.
@@ -85,7 +85,7 @@ final class externallib_test extends \advanced_testcase {
         ]);
     }
 
-    // ── get_rubric ────────────────────────────────────────────────────────────
+    // Get_rubric.
 
     /**
      * get_rubric on a course with no rubric returns rubricid = 0.
@@ -139,7 +139,7 @@ final class externallib_test extends \advanced_testcase {
         \local_evalia\external\get_rubric::execute($this->course->id);
     }
 
-    // ── save_rubric ───────────────────────────────────────────────────────────
+    // Save_rubric.
 
     /**
      * save_rubric updates the rubric name && inserts new items.
@@ -205,7 +205,7 @@ final class externallib_test extends \advanced_testcase {
         \local_evalia\external\save_rubric::execute($rubricid, 'Hacked', false, []);
     }
 
-    // ── create_exam ───────────────────────────────────────────────────────────
+    // Create_exam.
 
     /**
      * create_exam inserts a row in evalia_exams && creates a grade item.
@@ -286,7 +286,7 @@ final class externallib_test extends \advanced_testcase {
         );
     }
 
-    // ── add_portfolio_note ────────────────────────────────────────────────────
+    // Add_portfolio_note.
 
     /**
      * add_portfolio_note inserts a note && returns its ID.
@@ -347,7 +347,7 @@ final class externallib_test extends \advanced_testcase {
         );
     }
 
-    // ── get_student_exams ─────────────────────────────────────────────────────
+    // Get_student_exams.
 
     /**
      * get_student_exams returns students with not_assigned status when no exam is assigned.

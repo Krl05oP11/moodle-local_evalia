@@ -33,8 +33,6 @@
 
 namespace local_evalia\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 use local_evalia\engine_security_helper;
 
 /**

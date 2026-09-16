@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Plugin metadata
+// Plugin metadata.
 $string['calendar_exam_event']        = 'Exam: {$a}';
 $string['difficulty_advanced']        = 'Advanced';
 $string['difficulty_basic']           = 'Basic';

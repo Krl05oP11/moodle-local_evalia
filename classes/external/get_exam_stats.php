@@ -64,7 +64,7 @@ class get_exam_stats extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        // ── 1. Status counts ──────────────────────────────────────────────────
+        // 1. Status counts.
         $all = $DB->get_records('local_evalia_student_exams', ['examid' => $examid], '', 'id, status, score, answers, question_ids');
 
         $counts = ['assigned' => 0, 'started' => 0, 'submitted' => 0, 'graded' => 0];
@@ -80,7 +80,7 @@ class get_exam_stats extends external_api {
             }
         }
 
-        // ── 2. Score distribution (5 bands: 0-2, 2-4, 4-6, 6-8, 8-10) ───────
+        // 2. Score distribution (5 bands: 0-2, 2-4, 4-6, 6-8, 8-10).
         $bands = [
             ['label' => '0–2', 'min' => 0.0, 'max' => 2.0, 'count' => 0],
             ['label' => '2–4', 'min' => 2.0, 'max' => 4.0, 'count' => 0],
@@ -106,9 +106,9 @@ class get_exam_stats extends external_api {
         $maxscore = count($gradedscores) > 0 ? (float) max($gradedscores) : 0.0;
         $passcount = count(array_filter($gradedscores, fn($s) => $s >= 6.0));
 
-        // ── 3. Most-failed questions ──────────────────────────────────────────
+        // 3. Most-failed questions.
         // Scan all graded exams' answers && compare to correct answers.
-        $failcounts = [];   // question_id → fail count
+        $failcounts = [];   // Question_id → fail count.
 
         $gradedrows = array_filter((array) $all, fn($r) => $r->status === 'graded');
 
@@ -152,7 +152,7 @@ class get_exam_stats extends external_api {
         }
 
         // Count failures per question.
-        $failmap = [];   // question_id → fail_count
+        $failmap = [];   // Question_id → fail_count.
         foreach ($gradedrows as $row) {
             $answers = json_decode($row->answers ?? '{}', true);
             $qids   = json_decode($row->question_ids ?? '[]', true);
