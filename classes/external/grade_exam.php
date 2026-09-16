@@ -25,7 +25,6 @@
 namespace local_evalia\external;
 
 use core_external\external_api;
-use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
@@ -34,32 +33,16 @@ use core_external\external_value;
  * Grade_exam.
  */
 class grade_exam extends external_api {
-    /**
-     * Define the parameters for this web service.
-     */
-    public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters([
-            'student_examid' => new external_value(PARAM_INT, 'evalia_student_exams ID'),
-            'answers'        => new external_value(PARAM_TEXT, 'JSON: {"question_id": "answer_text", ...}'),
-        ]);
-    }
+    use student_exam_lookup_trait;
 
     /**
      * Execute the web service.
      */
     public static function execute(int $studentexamid, string $answers): array {
-        global $CFG, $DB, $USER;
+        global $CFG, $DB;
         require_once($CFG->dirroot . '/local/evalia/lib.php');
 
-        $params = self::validate_parameters(self::execute_parameters(), [
-            'student_examid' => $studentexamid,
-            'answers'        => $answers,
-        ]);
-
-        $studentexam = $DB->get_record('local_evalia_student_exams', ['id' => $params['student_examid']], '*', MUST_EXIST);
-        $exam         = $DB->get_record('local_evalia_exams', ['id' => $studentexam->examid], '*', MUST_EXIST);
-        $context      = \context_course::instance($exam->courseid);
-        self::validate_context($context);
+        [$params, $studentexam, $exam, $context] = self::validate_and_load_student_exam($studentexamid, $answers);
         require_capability('local/evalia:manage', $context);
 
         if ($studentexam->status === 'graded') {
