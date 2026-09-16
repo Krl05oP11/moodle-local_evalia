@@ -291,12 +291,30 @@ echo $OUTPUT->header();
 <?php else : /* ─── Wizard ─── */ ?>
   <!-- Progress bar -->
   <div class="evwiz-progress" id="evwiz-progress">
-    <div class="step active" data-step="1"><div class="step-circle">1</div><div class="step-label"><?= get_string('wizard_step_welcome', 'local_evalia') ?></div></div>
-    <div class="step"        data-step="2"><div class="step-circle">2</div><div class="step-label"><?= get_string('wizard_step_requirements', 'local_evalia') ?></div></div>
-    <div class="step"        data-step="3"><div class="step-circle">3</div><div class="step-label"><?= get_string('wizard_step_ai_mode', 'local_evalia') ?></div></div>
-    <div class="step"        data-step="4"><div class="step-circle">4</div><div class="step-label"><?= get_string('wizard_step_connect', 'local_evalia') ?></div></div>
-    <div class="step"        data-step="5"><div class="step-circle">5</div><div class="step-label"><?= get_string('wizard_step_test', 'local_evalia') ?></div></div>
-    <div class="step"        data-step="6"><div class="step-circle">6</div><div class="step-label"><?= get_string('wizard_step_done', 'local_evalia') ?></div></div>
+    <div class="step active" data-step="1">
+      <div class="step-circle">1</div>
+      <div class="step-label"><?= get_string('wizard_step_welcome', 'local_evalia') ?></div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="step-circle">2</div>
+      <div class="step-label"><?= get_string('wizard_step_requirements', 'local_evalia') ?></div>
+    </div>
+    <div class="step" data-step="3">
+      <div class="step-circle">3</div>
+      <div class="step-label"><?= get_string('wizard_step_ai_mode', 'local_evalia') ?></div>
+    </div>
+    <div class="step" data-step="4">
+      <div class="step-circle">4</div>
+      <div class="step-label"><?= get_string('wizard_step_connect', 'local_evalia') ?></div>
+    </div>
+    <div class="step" data-step="5">
+      <div class="step-circle">5</div>
+      <div class="step-label"><?= get_string('wizard_step_test', 'local_evalia') ?></div>
+    </div>
+    <div class="step" data-step="6">
+      <div class="step-circle">6</div>
+      <div class="step-label"><?= get_string('wizard_step_done', 'local_evalia') ?></div>
+    </div>
   </div>
 
   <div class="card shadow-sm">
@@ -435,7 +453,9 @@ echo $OUTPUT->header();
               <span><?= get_string('wizard_req_engine_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
-              <span class="badge bg-warning text-dark" style="font-size:.72rem;"><?= get_string('wizard_req_engine_badge', 'local_evalia') ?></span>
+              <span class="badge bg-warning text-dark" style="font-size:.72rem;">
+                <?= get_string('wizard_req_engine_badge', 'local_evalia') ?>
+              </span>
             </div>
           </div>
 
@@ -455,7 +475,9 @@ echo $OUTPUT->header();
               <span><?= get_string('wizard_req_llm_desc', 'local_evalia') ?></span>
             </div>
             <div class="req-value" style="white-space:normal;max-width:200px;text-align:right;">
-              <span class="badge bg-danger" style="font-size:.72rem;"><?= get_string('wizard_req_llm_badge', 'local_evalia') ?></span>
+              <span class="badge bg-danger" style="font-size:.72rem;">
+                <?= get_string('wizard_req_llm_badge', 'local_evalia') ?>
+              </span>
             </div>
           </div>
 
@@ -478,7 +500,8 @@ echo $OUTPUT->header();
             <div class="ai-pcard pc-local">
               <div class="pc-head">
                 <div class="pc-icon">🖥️</div>
-                <h6><?= get_string('wizard_prov_local_title', 'local_evalia') ?> <span class="mode-badge badge-local">SELF-HOSTED</span></h6>
+                <h6><?= get_string('wizard_prov_local_title', 'local_evalia') ?>
+                    <span class="mode-badge badge-local">SELF-HOSTED</span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_local_desc', 'local_evalia') ?></p>
               <ul>
@@ -491,7 +514,8 @@ echo $OUTPUT->header();
             <div class="ai-pcard pc-cloud">
               <div class="pc-head">
                 <div class="pc-icon">☁️</div>
-                <h6><?= get_string('wizard_prov_cloud_title', 'local_evalia') ?> <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h6>
+                <h6><?= get_string('wizard_prov_cloud_title', 'local_evalia') ?>
+                    <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_cloud_desc', 'local_evalia') ?></p>
               <ul>
@@ -504,7 +528,8 @@ echo $OUTPUT->header();
             <div class="ai-pcard pc-saipa">
               <div class="pc-head">
                 <div class="pc-icon">🌐</div>
-                <h6><?= get_string('wizard_prov_saipa_title', 'local_evalia') ?> <span class="mode-badge badge-soon">COMING SOON</span></h6>
+                <h6><?= get_string('wizard_prov_saipa_title', 'local_evalia') ?>
+                    <span class="mode-badge badge-soon">COMING SOON</span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_saipa_desc', 'local_evalia') ?></p>
               <ul>
@@ -516,7 +541,8 @@ echo $OUTPUT->header();
             <div class="ai-pcard pc-custom">
               <div class="pc-head">
                 <div class="pc-icon">⚙️</div>
-                <h6><?= get_string('wizard_prov_custom_title', 'local_evalia') ?> <span class="mode-badge badge-custom">ADVANCED</span></h6>
+                <h6><?= get_string('wizard_prov_custom_title', 'local_evalia') ?>
+                    <span class="mode-badge badge-custom">ADVANCED</span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_custom_desc', 'local_evalia') ?></p>
               <ul>
@@ -543,7 +569,9 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(1)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(1)">
+            <?= get_string('wizard_btn_back', 'local_evalia') ?>
+        </button>
         <button class="btn btn-primary px-5" id="req-next-btn" disabled
                 onclick="evwizGoto(3)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
@@ -566,7 +594,8 @@ echo $OUTPUT->header();
           <input type="radio" name="engine_mode" id="mode-local" value="local_ollama"
                  <?= ($cfgmode === 'local_ollama') ? 'checked' : '' ?>>
           <div class="mc-icon">🖥️</div>
-          <h5><?= get_string('wizard_mode_local_title', 'local_evalia') ?> <span class="mode-badge badge-local">SELF-HOSTED</span></h5>
+          <h5><?= get_string('wizard_mode_local_title', 'local_evalia') ?>
+              <span class="mode-badge badge-local">SELF-HOSTED</span></h5></h5>
           <p><?= get_string('wizard_mode_local_desc', 'local_evalia') ?></p>
         </label>
 
@@ -574,7 +603,8 @@ echo $OUTPUT->header();
           <input type="radio" name="engine_mode" id="mode-cloud" value="cloud_api"
                  <?= ($cfgmode === 'cloud_api') ? 'checked' : '' ?>>
           <div class="mc-icon">☁️</div>
-          <h5><?= get_string('wizard_mode_cloud_title', 'local_evalia') ?> <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5>
+          <h5><?= get_string('wizard_mode_cloud_title', 'local_evalia') ?>
+              <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5></h5>
           <p><?= get_string('wizard_mode_cloud_desc', 'local_evalia') ?></p>
         </label>
 
@@ -582,7 +612,8 @@ echo $OUTPUT->header();
           <input type="radio" name="engine_mode" id="mode-saipa" value="saipa_cloud"
                  <?= ($cfgmode === 'saipa_cloud') ? 'checked' : '' ?>>
           <div class="mc-icon">🌐</div>
-          <h5><?= get_string('wizard_mode_saipa_title', 'local_evalia') ?> <span class="mode-badge badge-soon">COMING SOON</span></h5>
+          <h5><?= get_string('wizard_mode_saipa_title', 'local_evalia') ?>
+              <span class="mode-badge badge-soon">COMING SOON</span></h5></h5>
           <p><?= get_string('wizard_mode_saipa_desc', 'local_evalia') ?></p>
         </label>
 
@@ -590,14 +621,17 @@ echo $OUTPUT->header();
           <input type="radio" name="engine_mode" id="mode-custom" value="custom"
                  <?= ($cfgmode === 'custom') ? 'checked' : '' ?>>
           <div class="mc-icon">⚙️</div>
-          <h5><?= get_string('wizard_mode_custom_title', 'local_evalia') ?> <span class="mode-badge badge-custom">ADVANCED</span></h5>
+          <h5><?= get_string('wizard_mode_custom_title', 'local_evalia') ?>
+              <span class="mode-badge badge-custom">ADVANCED</span></h5></h5>
           <p><?= get_string('wizard_mode_custom_desc', 'local_evalia') ?></p>
         </label>
 
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(2)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(2)">
+            <?= get_string('wizard_btn_back', 'local_evalia') ?>
+        </button>
         <button class="btn btn-primary px-5" onclick="evwizGoto(4)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 3 -->
@@ -652,7 +686,9 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(3)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(3)">
+            <?= get_string('wizard_btn_back', 'local_evalia') ?>
+        </button>
         <button class="btn btn-primary px-5" onclick="evwizGoto(5)"><?= get_string('wizard_btn_test', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 4 -->
@@ -676,7 +712,9 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(4)"><?= get_string('wizard_btn_back', 'local_evalia') ?></button>
+        <button class="btn btn-outline-secondary" onclick="evwizGoto(4)">
+            <?= get_string('wizard_btn_back', 'local_evalia') ?>
+        </button>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-secondary" id="evwiz-retry-btn" style="display:none"
                   onclick="evwizRunTest()"><?= get_string('wizard_btn_retry', 'local_evalia') ?></button>
