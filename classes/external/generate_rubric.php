@@ -48,7 +48,12 @@ class generate_rubric extends external_api {
             'courseid'      => new external_value(PARAM_INT, 'Course ID'),
             'scope'         => new external_value(PARAM_TEXT, 'Optional topic scope for partial exams', VALUE_DEFAULT, ''),
             'item_count'    => new external_value(PARAM_INT, 'Number of rubric items to generate', VALUE_DEFAULT, 18),
-            'source_filter' => new external_value(PARAM_TEXT, 'JSON array of source IDs to restrict RAG context', VALUE_DEFAULT, ''),
+            'source_filter' => new external_value(
+                PARAM_TEXT,
+                'JSON array of source IDs to restrict RAG context',
+                VALUE_DEFAULT,
+                ''
+            ),
         ]);
     }
 

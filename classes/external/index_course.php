@@ -153,7 +153,8 @@ class index_course extends external_api {
 
                     if ($ext === 'pdf') {
                         // Read PDF bytes directly from Moodle's filestore && send as base64.
-                        // The engine cannot reach Moodle via URL (NAT hairpinning fails && // the internal hostname triggers a Moodle redirect error).
+                        // The engine cannot reach Moodle via URL (NAT hairpinning fails &&
+                        // the internal hostname triggers a Moodle redirect error).
                         $pdfbytes = $file->get_content();
                         if (empty($pdfbytes)) {
                             continue;

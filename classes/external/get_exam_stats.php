@@ -65,7 +65,12 @@ class get_exam_stats extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // 1. Status counts.
-        $all = $DB->get_records('local_evalia_student_exams', ['examid' => $examid], '', 'id, status, score, answers, question_ids');
+        $all = $DB->get_records(
+            'local_evalia_student_exams',
+            ['examid' => $examid],
+            '',
+            'id, status, score, answers, question_ids'
+        );
 
         $counts = ['assigned' => 0, 'started' => 0, 'submitted' => 0, 'graded' => 0];
         $gradedscores = [];
@@ -139,13 +144,25 @@ class get_exam_stats extends external_api {
         $correctoptions = [];
         if (!empty($allqids)) {
             [$insql, $inparams] = $DB->get_in_or_equal(array_keys($allqids), SQL_PARAMS_NAMED, 'q');
-            $qs = $DB->get_records_select('local_evalia_question_bank', "id $insql", $inparams, '', 'id, stem, question_type, correct_answer, topic, difficulty');
+            $qs = $DB->get_records_select(
+                'local_evalia_question_bank',
+                "id $insql",
+                $inparams,
+                '',
+                'id, stem, question_type, correct_answer, topic, difficulty'
+            );
             foreach ($qs as $q) {
                 $questiondata[$q->id] = $q;
             }
             // Load correct option texts for multichoice/truefalse.
             [$oinsql, $oinparams] = $DB->get_in_or_equal(array_keys($allqids), SQL_PARAMS_NAMED, 'oq');
-            $opts = $DB->get_records_select('local_evalia_question_options', "questionid $oinsql AND is_correct = 1", $oinparams, '', 'questionid, option_text');
+            $opts = $DB->get_records_select(
+                'local_evalia_question_options',
+                "questionid $oinsql AND is_correct = 1",
+                $oinparams,
+                '',
+                'questionid, option_text'
+            );
             foreach ($opts as $opt) {
                 $correctoptions[$opt->questionid] = $opt->option_text;
             }

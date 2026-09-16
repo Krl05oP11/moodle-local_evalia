@@ -69,7 +69,10 @@ class publish_grade extends external_api {
         require_capability('local/evalia:manage', $context);
 
         if ($se->status !== 'graded') {
-            return ['success' => false, 'message' => 'El examen no está en estado "calificado" (estado actual: ' . $se->status . ').'];
+            return [
+                'success' => false,
+                'message' => 'El examen no está en estado "calificado" (estado actual: ' . $se->status . ').',
+            ];
         }
 
         $now = time();

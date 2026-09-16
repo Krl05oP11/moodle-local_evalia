@@ -36,7 +36,11 @@ if ($hassiteconfig) {
         html_writer::tag(
             'p',
             get_string('settings:heading_wizard_desc', 'local_evalia') . ' '
-            . html_writer::link($setupurl, get_string('settings:launch_wizard', 'local_evalia'), ['class' => 'btn btn-sm btn-primary ms-2']),
+            . html_writer::link(
+                $setupurl,
+                get_string('settings:launch_wizard', 'local_evalia'),
+                ['class' => 'btn btn-sm btn-primary ms-2']
+            ),
             ['style' => 'margin-top:6px;']
         )
     ));

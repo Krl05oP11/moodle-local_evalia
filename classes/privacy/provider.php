@@ -47,7 +47,10 @@ use core_privacy\local\request\helper;
 /**
  * Privacy provider for local_evalia.
  */
-class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider {
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     // 1. Metadata declaration
     // ──────────────────────────────────────────────────────────────────────
 

@@ -342,7 +342,9 @@ foreach ($questionsdata as $q) {
         if ($gradedpreview) {
             $evalscore  = (float) ($essayevals[(string)$q['id']]['score'] ?? -1.0);
             $aifeedback = $essayevals[(string)$q['id']]['feedback'] ?? '';
-            $bordercls  = ($evalscore < 0) ? '' : (($evalscore >= 0.6) ? ' border-success' : (($evalscore > 0) ? ' border-warning' : ' border-danger'));
+            $bordercls  = ($evalscore < 0)
+                ? ''
+                : (($evalscore >= 0.6) ? ' border-success' : (($evalscore > 0) ? ' border-warning' : ' border-danger'));
             echo '<textarea class="form-control evalia-answer' . $bordercls . '" '
                 . 'name="answer_' . $q['id'] . '" data-qid="' . $q['id'] . '" '
                 . 'rows="5" placeholder="' . get_string('exam:placeholder_essay', 'local_evalia') . '" disabled>'
@@ -391,11 +393,14 @@ if ($previewmode) {
     // Grade panel: only for submitted status (graded already shows score above).
     if ($studentexam->status === 'submitted') {
         echo '<div class="card border-warning mt-3 mb-5" id="evalia-grade-panel">';
-        echo '<div class="card-header bg-warning text-dark fw-bold">' . get_string('exam:grade_panel_title', 'local_evalia') . '</div>';
+        echo '<div class="card-header bg-warning text-dark fw-bold">'
+            . get_string('exam:grade_panel_title', 'local_evalia') . '</div>';
         echo '<div class="card-body">';
-        echo '<p class="text-muted small mb-3">' . get_string('exam:grade_panel_desc', 'local_evalia') . '</p>';
+        echo '<p class="text-muted small mb-3">'
+            . get_string('exam:grade_panel_desc', 'local_evalia') . '</p>';
         echo '<div class="d-flex align-items-center gap-3">';
-        echo '<button id="evalia-btn-grade" class="btn btn-warning btn-lg">' . get_string('exam:btn_grade_ai', 'local_evalia') . '</button>';
+        echo '<button id="evalia-btn-grade" class="btn btn-warning btn-lg">'
+            . get_string('exam:btn_grade_ai', 'local_evalia') . '</button>';
         echo '<span id="evalia-grade-status" class="text-muted small"></span>';
         echo '</div>';
         echo '</div>';
@@ -403,9 +408,11 @@ if ($previewmode) {
     }
 } else {
     echo '</form>';
-    echo '<div class="d-flex justify-content-between align-items-center mb-5 mt-2">';
+    echo '<div class="d-flex justify-content-between align-items-center '
+        . 'mb-5 mt-2">';
     echo '<div id="evalia-submit-status" class="text-muted small"></div>';
-    echo '<button id="evalia-btn-submit-exam" class="btn btn-success btn-lg">' . get_string('exam:btn_submit_exam', 'local_evalia') . '</button>';
+    echo '<button id="evalia-btn-submit-exam" class="btn btn-success btn-lg">'
+        . get_string('exam:btn_submit_exam', 'local_evalia') . '</button>';
     echo '</div>';
 }
 
