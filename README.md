@@ -5,7 +5,7 @@
 [![Moodle 4.4+](https://img.shields.io/badge/Moodle-4.4%2B-orange)](https://moodle.org)
 [![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-blue)](https://php.net)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-green)](LICENSE)
-[![Maturity: Beta](https://img.shields.io/badge/Maturity-Beta-yellow)]()
+[![Maturity: Stable](https://img.shields.io/badge/Maturity-Stable-brightgreen)]()
 
 ---
 
