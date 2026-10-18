@@ -4,7 +4,25 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Removed
+- **Setup wizard: the "SAIPA Cloud" engine option.** It was a "coming soon"
+  card for a hosted engine subscription, with a waitlist at
+  `cloud.saipa.online` (a domain that was never set up). The engine is free
+  and self-hosted (AGPLv3), so the option is gone: the provider cards, the
+  mode radio, the step-4 hint and the 8 lang keys (en/es/pt_br).
+  The wizard now offers local Ollama, an OpenAI-compatible API, or a custom
+  engine. No upgrade step is needed: the mode never worked, and a stored
+  `saipa_cloud` value only means no card is preselected when the wizard is
+  re-run.
+
 ### Fixed
+- **Setup wizard always saved `engine_mode` as `custom`.** The mode was read
+  with `PARAM_ALPHA`, which strips the underscore from `local_ollama` /
+  `cloud_api`, so the value never matched the allowed list. Now read with
+  `PARAM_ALPHANUMEXT`; re-running the wizard preselects the mode actually
+  chosen.
+- **`settings:engine_url_desc`:** the example URL pointed at the retired
+  `engine.saipa.online`; it now uses `https://engine.example.edu`.
 - **A blank exam submission could be silently scored 0.0/10 and marked
   "graded" instead of flagged for teacher attention.** Found live
   2026-09-16 running a real teacher+student pass end to end (rubric →

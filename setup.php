@@ -105,11 +105,11 @@ if ($action === 'health') {
 if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
 
-    $mode         = required_param('engine_mode', PARAM_ALPHA);
+    $mode         = required_param('engine_mode', PARAM_ALPHANUMEXT);
     $engineurl   = required_param('engine_url', PARAM_URL);
     $enginetoken = optional_param('engine_token', '', PARAM_RAW);
 
-    $validmodes = ['local_ollama', 'cloud_api', 'saipa_cloud', 'custom'];
+    $validmodes = ['local_ollama', 'cloud_api', 'custom'];
     if (!in_array($mode, $validmodes)) {
         $mode = 'custom';
     }
@@ -230,7 +230,6 @@ echo $OUTPUT->header();
 
 .pc-local  { border-top: 3px solid #198754; }
 .pc-cloud  { border-top: 3px solid #0d6efd; }
-.pc-saipa  { border-top: 3px solid #fd7e14; }
 .pc-custom { border-top: 3px solid #6c757d; }
 
 /* ── Mode cards (step 3) ── */
@@ -251,7 +250,6 @@ echo $OUTPUT->header();
 }
 .badge-local  { background: #d1e7dd; color: #0a3622; }
 .badge-cloud  { background: #cfe2ff; color: #084298; }
-.badge-soon   { background: #fff3cd; color: #664d03; }
 .badge-custom { background: #e2e3e5; color: #41464b; }
 
 /* ── Health check (step 5) ── */
@@ -525,19 +523,6 @@ echo $OUTPUT->header();
               </ul>
             </div>
 
-            <div class="ai-pcard pc-saipa">
-              <div class="pc-head">
-                <div class="pc-icon">🌐</div>
-                <h6><?= get_string('wizard_prov_saipa_title', 'local_evalia') ?>
-                    <span class="mode-badge badge-soon">COMING SOON</span></h6></h6>
-              </div>
-              <p><?= get_string('wizard_prov_saipa_desc', 'local_evalia') ?></p>
-              <ul>
-                <li><?= get_string('wizard_prov_saipa_li1', 'local_evalia') ?></li>
-                <li><?= get_string('wizard_prov_saipa_li2', 'local_evalia') ?></li>
-              </ul>
-            </div>
-
             <div class="ai-pcard pc-custom">
               <div class="pc-head">
                 <div class="pc-icon">⚙️</div>
@@ -608,15 +593,6 @@ echo $OUTPUT->header();
           <p><?= get_string('wizard_mode_cloud_desc', 'local_evalia') ?></p>
         </label>
 
-        <label class="mode-card <?= ($cfgmode === 'saipa_cloud') ? 'selected' : '' ?>" for="mode-saipa">
-          <input type="radio" name="engine_mode" id="mode-saipa" value="saipa_cloud"
-                 <?= ($cfgmode === 'saipa_cloud') ? 'checked' : '' ?>>
-          <div class="mc-icon">🌐</div>
-          <h5><?= get_string('wizard_mode_saipa_title', 'local_evalia') ?>
-              <span class="mode-badge badge-soon">COMING SOON</span></h5></h5>
-          <p><?= get_string('wizard_mode_saipa_desc', 'local_evalia') ?></p>
-        </label>
-
         <label class="mode-card <?= ($cfgmode === 'custom') ? 'selected' : '' ?>" for="mode-custom">
           <input type="radio" name="engine_mode" id="mode-custom" value="custom"
                  <?= ($cfgmode === 'custom') ? 'checked' : '' ?>>
@@ -655,10 +631,6 @@ echo $OUTPUT->header();
       <div id="hint-cloud_api" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
         <strong><?= get_string('wizard_hint_cloud_title', 'local_evalia') ?></strong>
         <?= get_string('wizard_hint_cloud_body', 'local_evalia') ?>
-      </div>
-      <div id="hint-saipa_cloud" class="alert alert-warning mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
-        <strong><?= get_string('wizard_hint_saipa_title', 'local_evalia') ?></strong>
-        <?= get_string('wizard_hint_saipa_body', 'local_evalia') ?>
       </div>
       <div id="hint-custom" class="alert alert-light border mb-3 py-2 px-3" style="font-size:.82rem;display:none;">
         <strong><?= get_string('wizard_hint_custom_title', 'local_evalia') ?></strong>
@@ -846,7 +818,7 @@ echo $OUTPUT->header();
      */
     function updateHints() {
         var mode  = getSelectedMode();
-        var modes = ['local_ollama', 'cloud_api', 'saipa_cloud', 'custom'];
+        var modes = ['local_ollama', 'cloud_api', 'custom'];
         modes.forEach(function (m) {
             var el = document.getElementById('hint-' + m);
             if (el) el.style.display = (m === mode) ? '' : 'none';
