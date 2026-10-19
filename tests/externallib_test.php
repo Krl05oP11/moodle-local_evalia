@@ -73,6 +73,9 @@ final class externallib_test extends \advanced_testcase {
 
     /**
      * Insert a rubric row directly && return its ID.
+     *
+     * @param string $name Rubric name.
+     * @param string $status Rubric status.
      */
     private function create_rubric(string $name = 'Test Rubric', string $status = 'draft'): int {
         global $DB;
@@ -419,6 +422,10 @@ final class externallib_test extends \advanced_testcase {
     /**
      * Insert a student_exam row directly && return its ID. question_ids can
      * be nonsense here -- the blank-answers guard returns before it's read.
+     *
+     * @param int $examid Exam ID.
+     * @param string $answers JSON-encoded answers.
+     * @param string $status Student exam status.
      */
     private function create_student_exam(int $examid, string $answers, string $status = 'submitted'): int {
         global $DB;

@@ -61,6 +61,11 @@ class save_rubric extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $rubricid Rubric ID to update.
+     * @param string $name Rubric name.
+     * @param bool $activate Set status to active.
+     * @param array $items Items to save.
      */
     public static function execute(int $rubricid, string $name, bool $activate, array $items): array {
         global $DB, $USER;

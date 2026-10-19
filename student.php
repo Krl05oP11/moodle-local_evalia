@@ -66,6 +66,9 @@ $myexams = $DB->get_records_sql(
 /**
  * Returns true if the exam window is currently open for the student to take.
  * Always returns true when there is no window configured.
+ *
+ * @param object $ex Exam record (uses timeopen and timeclose).
+ * @param int $now Current timestamp.
  */
 function evalia_window_open(object $ex, int $now): bool {
     if ($ex->timeopen > 0 && $now < $ex->timeopen) {
@@ -79,6 +82,9 @@ function evalia_window_open(object $ex, int $now): bool {
 
 /**
  * Returns a human-readable window note, or '' if within (or without) window.
+ *
+ * @param object $ex Exam record (uses timeopen and timeclose).
+ * @param int $now Current timestamp.
  */
 function evalia_window_note(object $ex, int $now): string {
     $dateformat = get_string('strftimedatetimeshort', 'langconfig');

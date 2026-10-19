@@ -52,6 +52,8 @@ class get_exam_stats extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $examid evalia_exams ID.
      */
     public static function execute(int $examid): array {
         global $DB;

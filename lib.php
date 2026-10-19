@@ -27,6 +27,10 @@
  *
  * Teachers (manage): link to the teacher panel.
  * Students (take):   link to their own exam list.
+ *
+ * @param \navigation_node $parentnode The course navigation node.
+ * @param \stdClass $course The course record.
+ * @param \context_course $context The context.
  */
 function local_evalia_extend_navigation_course(
     \navigation_node $parentnode,

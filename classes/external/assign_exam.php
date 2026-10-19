@@ -50,6 +50,8 @@ class assign_exam extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $examid Exam template ID to assign.
      */
     public static function execute(int $examid): array {
         global $CFG;

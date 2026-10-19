@@ -50,6 +50,9 @@ class publish_grade extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $studentexamid evalia_student_exams ID.
+     * @param float $overridescore Optional teacher override (0–10).
      */
     public static function execute(int $studentexamid, float $overridescore = -1): array {
         global $CFG;
@@ -108,6 +111,11 @@ class publish_grade extends external_api {
     /**
      * Recalculate avg_grade && total_exams for a student's portfolio
      * based only on published exams.
+     *
+     * @param int $userid User ID.
+     * @param int $courseid Course ID.
+     * @param int $now Timestamp to record as the update time.
+     * @param \moodle_database $DB Database connection.
      */
     public static function recalculate_portfolio(int $userid, int $courseid, int $now, \moodle_database $DB): void {
         $sql = 'SELECT AVG(se.score) AS avg_score, COUNT(se.id) AS total

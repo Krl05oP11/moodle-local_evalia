@@ -46,6 +46,8 @@ class get_student_portfolio extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
      */
     public static function execute(int $courseid): array {
         global $DB;

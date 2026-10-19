@@ -46,6 +46,8 @@ trait student_exam_lookup_trait {
      * Validate parameters and load the student exam, its parent exam, and
      * the course context, validating that context along the way.
      *
+     * @param int $studentexamid Student exam ID (local_evalia_student_exams).
+     * @param string $answers JSON object of answers keyed by question ID.
      * @return array{0: array, 1: \stdClass, 2: \stdClass, 3: \context_course}
      */
     protected static function validate_and_load_student_exam(int $studentexamid, string $answers): array {

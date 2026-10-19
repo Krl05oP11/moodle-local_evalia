@@ -55,6 +55,12 @@ class generate_questions extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
+     * @param int $rubricitemid Rubric item ID.
+     * @param string $difficulty basic|medium|advanced.
+     * @param array $questiontypes Types: multichoice, truefalse, numerical, shortanswer.
+     * @param int $count Number of questions to generate.
      */
     public static function execute(
         int $courseid,

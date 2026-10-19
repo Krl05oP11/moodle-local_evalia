@@ -47,6 +47,8 @@ class get_course_sources extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
      */
     public static function execute(int $courseid): array {
         global $CFG;
@@ -87,6 +89,10 @@ class get_course_sources extends external_api {
      *   page:<page_id>                                → query mdl_page.name
      *   resource:<cmid>:<filename>                    → show filename
      *   resource:<cmid>:<filename>:<chapter_label>    → show chapter_label
+     *
+     * @param string $raw Source identifier as stored in the engine index.
+     * @param int $courseid Course ID.
+     * @param \moodle_database $DB Database connection.
      */
     private static function parse_source(string $raw, int $courseid, \moodle_database $DB): array {
         $parts = explode(':', $raw, 4);

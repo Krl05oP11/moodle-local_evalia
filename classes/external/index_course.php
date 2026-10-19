@@ -57,6 +57,9 @@ class index_course extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID to index.
+     * @param string $token Moodle webservice token used by saipa-engine to download files.
      */
     public static function execute(int $courseid, string $token): array {
         global $CFG, $DB;

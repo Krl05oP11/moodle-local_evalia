@@ -58,6 +58,17 @@ class create_exam extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
+     * @param int $rubricid Rubric ID.
+     * @param string $name Exam name.
+     * @param string $instructions Instructions for students.
+     * @param int $basiccount Number of basic questions.
+     * @param int $mediumcount Number of medium questions.
+     * @param int $advancedcount Number of advanced questions.
+     * @param int $timelimitmin Time limit in minutes.
+     * @param int $timeopen Unix timestamp when exam opens (0=always).
+     * @param int $timeclose Unix timestamp when exam closes (0=never).
      */
     public static function execute(
         int $courseid,

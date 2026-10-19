@@ -49,6 +49,9 @@ class get_student_exam_history extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $userid Student user ID.
+     * @param int $courseid Course ID.
      */
     public static function execute(int $userid, int $courseid): array {
         global $DB;

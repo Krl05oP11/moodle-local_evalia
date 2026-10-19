@@ -59,6 +59,11 @@ class generate_rubric extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
+     * @param string $scope Optional topic scope for partial exams.
+     * @param int $itemcount Number of rubric items to generate.
+     * @param string $sourcefilter JSON array of source IDs to restrict RAG context.
      */
     public static function execute(int $courseid, string $scope = '', int $itemcount = 18, string $sourcefilter = ''): array {
         global $CFG;

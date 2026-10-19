@@ -49,6 +49,11 @@ class get_question_bank extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $courseid Course ID.
+     * @param string $topic Filter by topic (empty = all).
+     * @param string $difficulty Filter by difficulty (empty = all).
+     * @param string $status Filter by status (empty = all).
      */
     public static function execute(int $courseid, string $topic, string $difficulty, string $status): array {
         global $DB;

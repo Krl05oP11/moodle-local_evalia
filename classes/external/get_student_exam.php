@@ -48,6 +48,8 @@ class get_student_exam extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $studentexamid evalia_student_exams ID.
      */
     public static function execute(int $studentexamid): array {
         global $DB, $USER;

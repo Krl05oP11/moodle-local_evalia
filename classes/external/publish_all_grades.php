@@ -49,6 +49,8 @@ class publish_all_grades extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $examid Exam ID.
      */
     public static function execute(int $examid): array {
         global $CFG;

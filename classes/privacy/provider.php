@@ -56,6 +56,8 @@ class provider implements
 
     /**
      * Returns metadata about personal data stored by this plugin.
+     *
+     * @param collection $collection The collection to add metadata to.
      */
     public static function get_metadata(collection $collection): collection {
 
@@ -118,6 +120,8 @@ class provider implements
 
     /**
      * Returns a contextlist of all course contexts in which the user has data.
+     *
+     * @param int $userid User ID.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
         global $DB;
@@ -159,6 +163,8 @@ class provider implements
 
     /**
      * Returns the users with data in the given context (for site admin use).
+     *
+     * @param userlist $userlist The users to delete data for.
      */
     public static function get_users_in_context(userlist $userlist): void {
         $context = $userlist->get_context();
@@ -197,6 +203,8 @@ class provider implements
 
     /**
      * Exports personal data for the specified user in the given approved contexts.
+     *
+     * @param approved_contextlist $contextlist The approved contexts to export or delete.
      */
     public static function export_user_data(approved_contextlist $contextlist): void {
         global $DB;
@@ -307,6 +315,8 @@ class provider implements
 
     /**
      * Deletes all personal data for all users in the given course context.
+     *
+     * @param \context $context The context.
      */
     public static function delete_data_for_all_users_in_context(\context $context): void {
         global $DB;
@@ -340,6 +350,8 @@ class provider implements
 
     /**
      * Deletes personal data for the specified user in the given approved contexts.
+     *
+     * @param approved_contextlist $contextlist The approved contexts to export or delete.
      */
     public static function delete_data_for_user(approved_contextlist $contextlist): void {
         global $DB;
@@ -399,6 +411,8 @@ class provider implements
 
     /**
      * Deletes personal data for a list of users within a single context.
+     *
+     * @param approved_userlist $userlist The users to delete data for.
      */
     public static function delete_data_for_users(approved_userlist $userlist): void {
         global $DB;

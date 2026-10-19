@@ -47,6 +47,10 @@ class add_portfolio_note extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $userid Target student user ID.
+     * @param int $courseid Course ID.
+     * @param string $notetext Note text.
      */
     public static function execute(int $userid, int $courseid, string $notetext): array {
         global $DB, $USER;

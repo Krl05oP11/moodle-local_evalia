@@ -46,6 +46,9 @@ class save_feedback_prompt extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $examid evalia_exams ID.
+     * @param string $prompt Custom system prompt (empty = use default).
      */
     public static function execute(int $examid, string $prompt): array {
         global $DB;

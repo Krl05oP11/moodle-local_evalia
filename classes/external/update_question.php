@@ -50,6 +50,10 @@ class update_question extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $questionid Question ID.
+     * @param string $status New status: draft|approved|rejected.
+     * @param string $stem Updated question text.
      */
     public static function execute(int $questionid, string $status = '', string $stem = ''): array {
         global $DB;

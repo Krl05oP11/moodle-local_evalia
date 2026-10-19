@@ -40,6 +40,9 @@ class submit_exam extends external_api {
 
     /**
      * Execute the web service.
+     *
+     * @param int $studentexamid Student exam ID (local_evalia_student_exams).
+     * @param string $answers JSON object of answers keyed by question ID.
      */
     public static function execute(int $studentexamid, string $answers): array {
         global $CFG, $DB, $USER;
