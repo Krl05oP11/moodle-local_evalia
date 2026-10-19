@@ -4,6 +4,24 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Fixed
+- **Student exam submission showed no confirmation and re-enabled the
+  submit button.** `showToast()` in `evalia_student.js` called the Bootstrap 5
+  global (`bootstrap.Toast`), which does not exist in Moodle 4.x (Bootstrap 4,
+  no global). After a successful submit it threw, so the page never reloaded
+  and the `.fail()` handler re-enabled "Submit" although the exam was saved.
+  The toast is now shown by toggling its `show` class, as `evalia_teacher.js`
+  already did.
+- **Code quality checks the CI used to ignore now pass.** The CI ran
+  `moodle-plugin-ci phpdoc` and `grunt` with `|| true`, hiding real failures:
+  38 functions with an incomplete `@param` list and 74 ESLint errors
+  (mostly missing JSDoc, plus long lines and unused variables). All fixed
+  without behaviour changes; clean stylistic ESLint autofixes applied.
+  `amd/build/*.min.js` (and now their source maps) are built with Moodle
+  4.4's grunt instead of being copies of `amd/src`. The CI no longer ignores
+  `phpdoc` or `grunt` failures.
+  Verified live: teacher panel (4 tabs, student portfolio), no console errors.
+
 ### Removed
 - **Setup wizard: the "SAIPA Cloud" engine option.** It was a "coming soon"
   card for a hosted engine subscription, with a waitlist at

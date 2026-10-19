@@ -29,14 +29,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
     'use strict';
 
     // ─── Module state ────────────────────────────────────────────────────────
-    var courseId                   = 0;
-    var currentRubric              = null;   // { rubricid, status, items[] }
-    var currentExamId              = 0;      // active exam template ID
-    var selectedPortfolioUserId    = 0;
-    var selectedPortfolioFullname  = '';
-    var sourcesLoaded              = false;  // lazy-load guard for source panel
-    var allSources                 = [];     // [{id, label, type}] from WS
-    var defaultQuestionsCount      = 5;      // overridden from config.defaults in init()
+    var courseId = 0;
+    var currentRubric = null; // { rubricid, status, items[] }
+    var currentExamId = 0; // Active exam template ID
+    var selectedPortfolioUserId = 0;
+    var sourcesLoaded = false; // Lazy-load guard for source panel
+    var allSources = []; // [{id, label, type}] from WS
+    var defaultQuestionsCount = 5; // Overridden from config.defaults in init()
 
     // ─── i18n ────────────────────────────────────────────────────────────────
     // Every UI string this module needs, keyed by its local_evalia lang key.
@@ -52,7 +51,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         rubric_status_active:      'Activa',
         rubric_status_draft:       'Borrador',
         error_load_rubric:         'Error al cargar la rúbrica.',
-        rubric_empty_state:        'No hay rúbrica para este curso. Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.',
+        rubric_empty_state:        'No hay rúbrica para este curso. ' +
+            'Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.',
         rubric_no_items:           'La rúbrica no tiene ítems.',
         rubric_item_topic:         'Tema',
         rubric_item_description:   'Descripción',
@@ -83,7 +83,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         error_load_bank:           'Error al cargar el banco.',
         table_question:            'Pregunta',
         table_type:                'Tipo',
-        questions_empty_filtered:  'No hay preguntas con los filtros seleccionados. Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.',
+        questions_empty_filtered:  'No hay preguntas con los filtros seleccionados. ' +
+            'Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.',
         question_approved_ok:      'Pregunta aprobada.',
         question_rejected_ok:      'Pregunta rechazada.',
         error_question_update:     'Error al actualizar la pregunta.',
@@ -132,7 +133,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         table_status:              'Estado',
         table_grade:               'Nota',
         table_action:              'Acción',
-        confirm_grade_all:         '¿Calificar {$a} examen(es) con IA? Esto enviará feedback pedagógico a cada alumno por Telegram.',
+        confirm_grade_all:         '¿Calificar {$a} examen(es) con IA? ' +
+            'Esto enviará feedback pedagógico a cada alumno por Telegram.',
         grading_in_progress:       '⏳ Calificando...',
         grade_all_result:          '✔ {$a->graded} calificado(s)',
         grade_all_skipped_suffix:  ' · {$a} omitido(s)',
@@ -238,6 +240,12 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Toast helper ────────────────────────────────────────────────────────
 
+    /**
+     * Shows a coloured status toast with the given message for a few seconds.
+     *
+     * @param {string} message Text to display in the toast body.
+     * @param {string} type Bootstrap contextual colour suffix (e.g. 'success', 'danger'); defaults to 'info'.
+     */
     function showToast(message, type) {
         var toast = document.getElementById('evalia-toast');
         if (!toast) { return; }
@@ -247,11 +255,23 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         setTimeout(function() { toast.classList.remove('show'); }, 6000);
     }
 
+    /**
+     * Shows or hides a loading indicator element.
+     *
+     * @param {string} elementId ID of the loading indicator element.
+     * @param {boolean} visible True to show it, false to hide it.
+     */
     function setLoading(elementId, visible) {
         var el = document.getElementById(elementId);
         if (el) { el.style.display = visible ? '' : 'none'; }
     }
 
+    /**
+     * Enables or disables a button (or other form control) by ID.
+     *
+     * @param {string} elementId ID of the element.
+     * @param {boolean} disabled True to disable it, false to enable it.
+     */
     function setDisabled(elementId, disabled) {
         var el = document.getElementById(elementId);
         if (el) { el.disabled = disabled; }
@@ -259,13 +279,16 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 1: Rúbrica ──────────────────────────────────────────────────────
 
+    /**
+     * Fetches the course rubric via web service and renders its status badge, items and action buttons.
+     */
     function loadRubric() {
         var container = document.getElementById('evalia-rubric-items-container');
         if (!container) { return; }
 
         Ajax.call([{
             methodname: 'local_evalia_get_rubric',
-            args: { courseid: courseId }
+            args: {courseid: courseId}
         }])[0].then(function(result) {
             currentRubric = result;
 
@@ -296,13 +319,25 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Toggles visibility of the rubric Save and Activate buttons.
+     *
+     * @param {boolean} showSave Whether to show the Save button.
+     * @param {boolean} showActivate Whether to show the Activate button.
+     */
     function showRubricButtons(showSave, showActivate) {
-        var btnSave     = document.getElementById('evalia-btn-save-rubric');
+        var btnSave = document.getElementById('evalia-btn-save-rubric');
         var btnActivate = document.getElementById('evalia-btn-activate-rubric');
-        if (btnSave)     { btnSave.style.display     = showSave     ? '' : 'none'; }
+        if (btnSave) { btnSave.style.display = showSave ? '' : 'none'; }
         if (btnActivate) { btnActivate.style.display = showActivate ? '' : 'none'; }
     }
 
+    /**
+     * Renders the rubric items table, editable when the rubric is still a draft.
+     *
+     * @param {Array} items Rubric items ({id, topic, description, difficulty_weight}).
+     * @param {string} status Rubric status ('draft' or 'active').
+     */
     function renderRubricItems(items, status) {
         var container = document.getElementById('evalia-rubric-items-container');
         if (!items || items.length === 0) {
@@ -340,13 +375,18 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             '<tbody>' + rows + '</tbody></table></div>';
     }
 
+    /**
+     * Reads the current values of the editable rubric table into item objects.
+     *
+     * @returns {Array} Rubric items ready to send to local_evalia_save_rubric.
+     */
     function collectRubricItems() {
         // Read current values from editable fields in the rubric table.
         var items = [];
         var rows = document.querySelectorAll('#evalia-rubric-items-container tbody tr');
         rows.forEach(function(row) {
-            var topicEl  = row.querySelector('[data-field="topic"]');
-            var descEl   = row.querySelector('[data-field="description"]');
+            var topicEl = row.querySelector('[data-field="topic"]');
+            var descEl = row.querySelector('[data-field="description"]');
             var weightEl = row.querySelector('[data-field="difficulty_weight"]');
             if (!topicEl) { return; }
             items.push({
@@ -362,16 +402,24 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Source filter panel ─────────────────────────────────────────────────
 
+    /**
+     * Updates the badge showing how many course sources are selected out of the total.
+     */
     function updateSourcesBadge() {
-        var badge  = document.getElementById('evalia-sources-badge');
+        var badge = document.getElementById('evalia-sources-badge');
         if (!badge || !allSources.length) { return; }
-        var total    = allSources.length;
-        var checked  = document.querySelectorAll('#evalia-sources-list input[type=checkbox]:checked').length;
+        var total = allSources.length;
+        var checked = document.querySelectorAll('#evalia-sources-list input[type=checkbox]:checked').length;
         badge.style.display = '';
-        badge.textContent   = S.sources_badge_count.replace('{$a->checked}', checked).replace('{$a->total}', total);
-        badge.className     = 'badge me-2 ' + (checked < total ? 'bg-warning text-dark' : 'bg-secondary');
+        badge.textContent = S.sources_badge_count.replace('{$a->checked}', checked).replace('{$a->total}', total);
+        badge.className = 'badge me-2 ' + (checked < total ? 'bg-warning text-dark' : 'bg-secondary');
     }
 
+    /**
+     * Renders the list of indexed course sources as checkboxes (all checked) and wires the badge update.
+     *
+     * @param {Array} sources Course sources ({id, label, type}).
+     */
     function renderSources(sources) {
         var list = document.getElementById('evalia-sources-list');
         if (!list) { return; }
@@ -380,10 +428,10 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return;
         }
         var icons = {page: '📄', resource: '📑', unknown: '📎'};
-        var html  = '<div class="d-flex flex-wrap gap-2">';
+        var html = '<div class="d-flex flex-wrap gap-2">';
         sources.forEach(function(s) {
             var icon = icons[s.type] || '📎';
-            var eid  = 'evalia-src-' + s.id.replace(/[^a-zA-Z0-9]/g, '_');
+            var eid = 'evalia-src-' + s.id.replace(/[^a-zA-Z0-9]/g, '_');
             html += '<label class="d-flex align-items-center gap-1 small border rounded px-2 py-1" style="cursor:pointer;">' +
                     '<input type="checkbox" class="evalia-source-cb" id="' + eid + '"' +
                     ' data-source-id="' + s.id.replace(/"/g, '&quot;') + '" checked> ' +
@@ -399,6 +447,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         updateSourcesBadge();
     }
 
+    /**
+     * Loads the indexed course sources via web service once (lazy) and renders them.
+     */
     function loadSources() {
         if (sourcesLoaded) { return; }
         sourcesLoaded = true;
@@ -415,19 +466,27 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Returns the IDs of the checked sources, or an empty list when all (or none were loaded) are checked.
+     *
+     * @returns {Array} Selected source IDs; empty means no filter.
+     */
     function getSelectedSources() {
         // Returns [] if all are checked (= no filter) or if panel was never opened.
         var cbs = document.querySelectorAll('#evalia-sources-list input[type=checkbox]');
         if (!cbs.length) { return []; }
-        var all      = Array.from(cbs);
+        var all = Array.from(cbs);
         var selected = all.filter(function(c) { return c.checked; }).map(function(c) { return c.dataset.sourceId; });
         return (selected.length === all.length) ? [] : selected;
     }
 
+    /**
+     * Wires the toggle that expands/collapses the exam availability window panel.
+     */
     function initExamWindowToggle() {
         var toggle = document.getElementById('evalia-exam-window-toggle');
-        var panel  = document.getElementById('evalia-exam-window-panel');
-        var arrow  = document.getElementById('evalia-exam-window-arrow');
+        var panel = document.getElementById('evalia-exam-window-panel');
+        var arrow = document.getElementById('evalia-exam-window-arrow');
         if (!toggle || !panel) { return; }
         toggle.addEventListener('click', function() {
             var open = panel.style.display !== 'none';
@@ -436,10 +495,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Wires the sources panel toggle (lazy-loading sources) and the select all/none links.
+     */
     function initSourcesPanel() {
         var toggle = document.getElementById('evalia-sources-toggle');
-        var panel  = document.getElementById('evalia-sources-panel');
-        var arrow  = document.getElementById('evalia-sources-arrow');
+        var panel = document.getElementById('evalia-sources-panel');
+        var arrow = document.getElementById('evalia-sources-arrow');
         if (!toggle || !panel) { return; }
 
         toggle.addEventListener('click', function() {
@@ -449,7 +511,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             if (!open) { loadSources(); }
         });
 
-        var selAll  = document.getElementById('evalia-sources-select-all');
+        var selAll = document.getElementById('evalia-sources-select-all');
         var selNone = document.getElementById('evalia-sources-select-none');
         if (selAll) {
             selAll.addEventListener('click', function(e) {
@@ -471,20 +533,23 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Requests AI generation of a rubric for the course using the chosen scope, item count and sources.
+     */
     function handleGenerateRubric() {
         setDisabled('evalia-btn-generate-rubric', true);
         setLoading('evalia-rubric-loading', true);
 
-        var scopeEl       = document.getElementById('evalia-rubric-scope');
-        var countEl       = document.getElementById('evalia-rubric-item-count');
-        var scope         = scopeEl ? scopeEl.value.trim() : '';
-        var item_count    = countEl ? (parseInt(countEl.value, 10) || 18) : 18;
-        var selSources    = getSelectedSources();
+        var scopeEl = document.getElementById('evalia-rubric-scope');
+        var countEl = document.getElementById('evalia-rubric-item-count');
+        var scope = scopeEl ? scopeEl.value.trim() : '';
+        var item_count = countEl ? (parseInt(countEl.value, 10) || 18) : 18;
+        var selSources = getSelectedSources();
         var source_filter = selSources.length ? JSON.stringify(selSources) : '';
 
         Ajax.call([{
             methodname: 'local_evalia_generate_rubric',
-            args: { courseid: courseId, scope: scope, item_count: item_count, source_filter: source_filter }
+            args: {courseid: courseId, scope: scope, item_count: item_count, source_filter: source_filter}
         }])[0].then(function(result) {
             setLoading('evalia-rubric-loading', false);
             setDisabled('evalia-btn-generate-rubric', false);
@@ -502,6 +567,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Saves the edited rubric items, optionally activating the rubric.
+     *
+     * @param {boolean} activate True to also activate the rubric, false to save it as draft.
+     */
     function handleSaveRubric(activate) {
         if (!currentRubric || currentRubric.rubricid === 0) {
             showToast(S.error_no_rubric_to_save, 'danger');
@@ -543,6 +613,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 2: Banco de Preguntas ───────────────────────────────────────────
 
+    /**
+     * Rebuilds the question bank topic filter options from the current rubric items.
+     */
     function refreshTopicFilter() {
         // Rebuild topic dropdown from current rubric items.
         var sel = document.getElementById('evalia-filter-topic');
@@ -561,23 +634,25 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
     }
 
+    /**
+     * Loads the question bank with the current topic/difficulty/status filters and renders it.
+     */
     function loadQuestionBank() {
-        var topicEl    = document.getElementById('evalia-filter-topic');
-        var diffEl     = document.getElementById('evalia-filter-difficulty');
-        var statusEl   = document.getElementById('evalia-filter-status');
-        var loading    = document.getElementById('evalia-questions-loading');
-        var container  = document.getElementById('evalia-questions-table-container');
+        var topicEl = document.getElementById('evalia-filter-topic');
+        var diffEl = document.getElementById('evalia-filter-difficulty');
+        var statusEl = document.getElementById('evalia-filter-status');
+        var container = document.getElementById('evalia-questions-table-container');
 
-        var topic      = topicEl    ? topicEl.value    : '';
-        var difficulty = diffEl     ? diffEl.value     : '';
-        var status     = statusEl   ? statusEl.value   : '';
+        var topic = topicEl ? topicEl.value : '';
+        var difficulty = diffEl ? diffEl.value : '';
+        var status = statusEl ? statusEl.value : '';
 
         setLoading('evalia-questions-loading', true);
         if (container) { container.innerHTML = ''; }
 
         Ajax.call([{
             methodname: 'local_evalia_get_question_bank',
-            args: { courseid: courseId, topic: topic, difficulty: difficulty, status: status }
+            args: {courseid: courseId, topic: topic, difficulty: difficulty, status: status}
         }])[0].then(function(result) {
             setLoading('evalia-questions-loading', false);
             if (!result || result.total === 0) {
@@ -594,6 +669,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the question bank table with approve/reject buttons.
+     *
+     * @param {Array} questions Questions returned by local_evalia_get_question_bank.
+     */
     function renderQuestionsTable(questions) {
         var container = document.getElementById('evalia-questions-table-container');
         var statusMap = {
@@ -619,7 +699,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return '<tr>' +
                 '<td><small class="text-muted">' + q.topic + '</small></td>' +
                 '<td><small>' + stem + '</small></td>' +
-                '<td><span class="badge bg-light text-dark border">' + (typeMap[q.question_type] || q.question_type) + '</span></td>' +
+                '<td><span class="badge bg-light text-dark border">' +
+                    (typeMap[q.question_type] || q.question_type) + '</span></td>' +
                 '<td>' + (diffMap[q.difficulty] || q.difficulty) + '</td>' +
                 '<td>' + (statusMap[q.status] || q.status) + '</td>' +
                 '<td class="text-nowrap">' +
@@ -645,10 +726,16 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Approves or rejects a question and reloads the question bank.
+     *
+     * @param {number} questionId Question ID.
+     * @param {string} status New status ('approved' or 'rejected').
+     */
     function updateQuestion(questionId, status) {
         Ajax.call([{
             methodname: 'local_evalia_update_question',
-            args: { questionid: questionId, status: status }
+            args: {questionid: questionId, status: status}
         }])[0].then(function(result) {
             if (result.success) {
                 showToast(status === 'approved' ? S.question_approved_ok : S.question_rejected_ok, 'success');
@@ -662,6 +749,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Shows the inline form to generate questions with AI for an item of the active rubric.
+     */
     function showGenerateQuestionsForm() {
         // Build inline form inside Tab 2, above the table.
         var container = document.getElementById('evalia-questions-table-container');
@@ -699,10 +789,12 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             '</div>' +
             '<div class="col-md-3">' +
             '<label class="form-label form-label-sm">' + S.gen_questions_count_label + '</label>' +
-            '<input type="number" id="gen-q-count" class="form-control form-control-sm" value="' + defaultQuestionsCount + '" min="1" max="10">' +
+            '<input type="number" id="gen-q-count" class="form-control form-control-sm" value="' +
+            defaultQuestionsCount + '" min="1" max="10">' +
             '</div>' +
             '<div class="col-md-2 d-flex align-items-end">' +
-            '<button id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">' + S.gen_questions_btn + '</button>' +
+            '<button id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">' +
+            S.gen_questions_btn + '</button>' +
             '</div>' +
             '</div>' +
             '<div class="mt-2">' +
@@ -738,11 +830,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Submits the generate-questions form to the web service and reloads the bank showing new drafts.
+     */
     function handleDoGenerateQuestions() {
-        var itemId     = parseInt(document.getElementById('gen-q-item').value, 10);
+        var itemId = parseInt(document.getElementById('gen-q-item').value, 10);
         var difficulty = document.getElementById('gen-q-difficulty').value;
-        var count      = parseInt(document.getElementById('gen-q-count').value, 10) || 5;
-        var types      = [];
+        var count = parseInt(document.getElementById('gen-q-count').value, 10) || 5;
+        var types = [];
 
         ['multichoice', 'truefalse', 'shortanswer', 'essay'].forEach(function(t) {
             var cb = document.getElementById('qt-' + t);
@@ -773,11 +868,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 showToast(S.questions_generated_ok.replace('{$a}', result.generated), 'success');
                 // Reset all filters so the new draft questions are visible
                 var topicFilterEl = document.getElementById('evalia-filter-topic');
-                var diffFilterEl  = document.getElementById('evalia-filter-difficulty');
-                var statusEl      = document.getElementById('evalia-filter-status');
+                var diffFilterEl = document.getElementById('evalia-filter-difficulty');
+                var statusEl = document.getElementById('evalia-filter-status');
                 if (topicFilterEl) { topicFilterEl.value = ''; }
-                if (diffFilterEl)  { diffFilterEl.value  = ''; }
-                if (statusEl)      { statusEl.value      = 'draft'; }
+                if (diffFilterEl) { diffFilterEl.value = ''; }
+                if (statusEl) { statusEl.value = 'draft'; }
                 // Restore the table container (the form replaced it) then load
                 var container = document.getElementById('evalia-questions-table-container');
                 if (container) { container.innerHTML = ''; }
@@ -795,15 +890,18 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 3: Exámenes ─────────────────────────────────────────────────────
 
+    /**
+     * Validates the exam form and creates a new exam template via web service.
+     */
     function handleCreateExam() {
-        var name      = document.getElementById('evalia-exam-name');
-        var instr     = document.getElementById('evalia-exam-instructions');
-        var basic     = document.getElementById('evalia-exam-basic');
-        var medium    = document.getElementById('evalia-exam-medium');
-        var advanced  = document.getElementById('evalia-exam-advanced');
+        var name = document.getElementById('evalia-exam-name');
+        var instr = document.getElementById('evalia-exam-instructions');
+        var basic = document.getElementById('evalia-exam-basic');
+        var medium = document.getElementById('evalia-exam-medium');
+        var advanced = document.getElementById('evalia-exam-advanced');
         var timelimit = document.getElementById('evalia-exam-timelimit');
-        var toEl      = document.getElementById('evalia-exam-timeopen');
-        var tcEl      = document.getElementById('evalia-exam-timeclose');
+        var toEl = document.getElementById('evalia-exam-timeopen');
+        var tcEl = document.getElementById('evalia-exam-timeclose');
 
         if (!name || !name.value.trim()) {
             showToast(S.error_exam_name_required, 'danger');
@@ -815,8 +913,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return;
         }
 
-        var basicCount    = parseInt(basic.value, 10)    || 0;
-        var mediumCount   = parseInt(medium.value, 10)   || 0;
+        var basicCount = parseInt(basic.value, 10) || 0;
+        var mediumCount = parseInt(medium.value, 10) || 0;
         var advancedCount = parseInt(advanced.value, 10) || 0;
 
         if ((basicCount + mediumCount + advancedCount) < 1) {
@@ -825,7 +923,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
 
         // Convert datetime-local values to Unix timestamps (0 = not set).
-        var timeopen  = 0;
+        var timeopen = 0;
         var timeclose = 0;
         if (toEl && toEl.value) {
             timeopen = Math.floor(new Date(toEl.value).getTime() / 1000);
@@ -886,6 +984,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Assigns the current exam to the enrolled students and refreshes the list and stats.
+     */
     function handleAssignExam() {
         if (!currentExamId) {
             showToast(S.error_exam_first, 'danger');
@@ -897,12 +998,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_assign_exam',
-            args: { examid: currentExamId }
+            args: {examid: currentExamId}
         }])[0].then(function(result) {
             setLoading('evalia-exams-loading', false);
             setDisabled('evalia-btn-assign-exam', false);
             if (result.success) {
-                showToast(S.exam_assigned_result.replace('{$a->assigned}', result.assigned).replace('{$a->skipped}', result.skipped), 'success');
+                showToast(S.exam_assigned_result.replace('{$a->assigned}', result.assigned)
+                    .replace('{$a->skipped}', result.skipped), 'success');
                 loadStudentExams(currentExamId);
                 loadExamStats(currentExamId);
             } else {
@@ -916,15 +1018,21 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Loads the per-student status list for an exam and updates the grade/publish all buttons.
+     *
+     * @param {number} examId Exam template ID.
+     */
     function loadStudentExams(examId) {
         var container = document.getElementById('evalia-student-exams-container');
         if (!container || !examId) { return; }
 
-        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-secondary"></div></div>';
+        container.innerHTML = '<div class="text-center py-3">' +
+            '<div class="spinner-border spinner-border-sm text-secondary"></div></div>';
 
         Ajax.call([{
             methodname: 'local_evalia_get_student_exams',
-            args: { examid: examId }
+            args: {examid: examId}
         }])[0].then(function(result) {
             if (!result || result.total === 0) {
                 container.innerHTML = '<p class="text-muted text-center p-4">' + S.students_none_enrolled_exam + '</p>';
@@ -944,14 +1052,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             if (btnGradeAll) {
                 btnGradeAll.style.display = submittedCount > 0 ? '' : 'none';
                 btnGradeAll.dataset.examid = examId;
-                btnGradeAll.dataset.count  = submittedCount;
+                btnGradeAll.dataset.count = submittedCount;
             }
             // Show "publish all" button when there are graded-but-unpublished exams.
             var btnPublishAll = document.getElementById('evalia-btn-publish-all');
             if (btnPublishAll) {
                 btnPublishAll.style.display = gradedCount > 0 ? '' : 'none';
                 btnPublishAll.dataset.examid = examId;
-                btnPublishAll.dataset.count  = gradedCount;
+                btnPublishAll.dataset.count = gradedCount;
                 btnPublishAll.textContent = S.btn_publish_grades_count.replace('{$a}', gradedCount);
             }
         }).fail(function(err) {
@@ -960,16 +1068,22 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the students table for an exam with status badges and view/grade/publish actions.
+     *
+     * @param {Array} students Student exam rows returned by local_evalia_get_student_exams.
+     */
     function renderStudentExamsTable(students) {
         var container = document.getElementById('evalia-student-exams-container');
-        var wwwroot   = (typeof M !== 'undefined' && M.cfg) ? M.cfg.wwwroot : '';
+        var wwwroot = (typeof M !== 'undefined' && M.cfg) ? M.cfg.wwwroot : '';
         var statusMap = {
             'not_assigned': '<span class="badge bg-light text-dark border">' + S.exam_status_not_assigned + '</span>',
             'assigned':     '<span class="badge" style="background-color:#0d6efd;color:#fff">' + S.exam_status_assigned + '</span>',
             'started':      '<span class="badge bg-warning text-dark">' + S.exam_status_started + '</span>',
             'submitted':    '<span class="badge bg-info text-dark">' + S.exam_status_submitted + '</span>',
             'graded':       '<span class="badge bg-success">' + S.exam_status_graded + '</span>',
-            'published':    '<span class="badge" style="background:#198754;color:#fff;">' + S['student:status_published'] + '</span>'
+            'published':    '<span class="badge" style="background:#198754;color:#fff;">' +
+                S['student:status_published'] + '</span>'
         };
 
         var rows = students.map(function(s) {
@@ -1031,6 +1145,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 4: Legajos ──────────────────────────────────────────────────────
 
+    /**
+     * Loads the course student portfolio list via web service and renders it.
+     */
     function loadPortfolio() {
         var container = document.getElementById('evalia-portfolio-list-container');
         if (!container) { return; }
@@ -1040,7 +1157,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_get_student_portfolio',
-            args: { courseid: courseId }
+            args: {courseid: courseId}
         }])[0].then(function(result) {
             setLoading('evalia-portfolio-loading', false);
             if (!result || result.total === 0) {
@@ -1057,6 +1174,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the portfolio students table and wires row selection.
+     *
+     * @param {Array} students Students returned by local_evalia_get_student_portfolio.
+     */
     function renderPortfolioTable(students) {
         var container = document.getElementById('evalia-portfolio-list-container');
 
@@ -1067,7 +1189,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             var examsHtml = s.has_portfolio
                 ? String(s.total_exams)
                 : '<span class="text-muted">0</span>';
-            var isActive  = (s.userid === selectedPortfolioUserId) ? ' table-active' : '';
+            var isActive = (s.userid === selectedPortfolioUserId) ? ' table-active' : '';
             return '<tr class="evalia-portfolio-row' + isActive + '" data-userid="' + s.userid + '"' +
                 '    data-fullname="' + s.fullname.replace(/"/g, '&quot;') + '"' +
                 '    style="cursor:pointer;">' +
@@ -1089,7 +1211,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         container.querySelectorAll('.evalia-portfolio-row').forEach(function(row) {
             row.addEventListener('click', function() {
-                var uid      = parseInt(row.dataset.userid, 10);
+                var uid = parseInt(row.dataset.userid, 10);
                 var fullname = row.dataset.fullname;
                 showStudentDetail(uid, fullname);
                 // Highlight row
@@ -1110,14 +1232,19 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
     }
 
+    /**
+     * Opens the portfolio detail panel for a student and loads their exam history.
+     *
+     * @param {number} userid Student user ID.
+     * @param {string} fullname Student full name.
+     */
     function showStudentDetail(userid, fullname) {
-        selectedPortfolioUserId   = userid;
-        selectedPortfolioFullname = fullname;
+        selectedPortfolioUserId = userid;
 
         var placeholder = document.getElementById('evalia-portfolio-detail-placeholder');
-        var panel       = document.getElementById('evalia-portfolio-detail-panel');
+        var panel = document.getElementById('evalia-portfolio-detail-panel');
         if (placeholder) { placeholder.style.display = 'none'; }
-        if (panel)       { panel.style.display = ''; }
+        if (panel) { panel.style.display = ''; }
 
         var nameEl = document.getElementById('evalia-portfolio-student-name');
         if (nameEl) { nameEl.textContent = fullname; }
@@ -1133,7 +1260,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         // Reset exams panel and load history
         var examsContainer = document.getElementById('evalia-portfolio-exams-container');
         if (examsContainer) {
-            examsContainer.innerHTML = '<p class="text-muted text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>' + S.loading_exam_history + '</p>';
+            examsContainer.innerHTML = '<p class="text-muted text-center py-3">' +
+                '<span class="spinner-border spinner-border-sm me-2"></span>' + S.loading_exam_history + '</p>';
         }
 
         // Update stats header
@@ -1148,15 +1276,22 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         // Notes are loaded by switchPortfolioTab('notes') on demand.
     }
 
+    /**
+     * Clears the selected student and hides the portfolio detail panel.
+     */
     function hideStudentDetail() {
-        selectedPortfolioUserId  = 0;
-        selectedPortfolioFullname = '';
+        selectedPortfolioUserId = 0;
         var placeholder = document.getElementById('evalia-portfolio-detail-placeholder');
-        var panel       = document.getElementById('evalia-portfolio-detail-panel');
+        var panel = document.getElementById('evalia-portfolio-detail-panel');
         if (placeholder) { placeholder.style.display = ''; }
-        if (panel)       { panel.style.display = 'none'; }
+        if (panel) { panel.style.display = 'none'; }
     }
 
+    /**
+     * Fills the detail header stats (exam count, average) from the student's row in the list.
+     *
+     * @param {number} userid Student user ID.
+     */
     function updatePortfolioStats(userid) {
         var statsEl = document.getElementById('evalia-portfolio-student-stats');
         if (!statsEl) { return; }
@@ -1169,7 +1304,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return;
         }
         var cells = row.querySelectorAll('td');
-        // cells[1]=exams, cells[2]=avg grade
+        // Cells[1]=exams, cells[2]=avg grade
         var examsText = cells[1] ? cells[1].textContent.trim() : '0';
         var gradeText = cells[2] ? cells[2].textContent.trim() : '—';
         var examsLabel = (examsText !== '1')
@@ -1180,11 +1315,16 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             '<span class="fw-semibold text-primary">' + S.portfolio_average_label.replace('{$a}', gradeText) + '</span>';
     }
 
+    /**
+     * Switches the portfolio detail between the exams and notes sub-tabs, loading notes on demand.
+     *
+     * @param {string} tab Sub-tab to show ('exams' or 'notes').
+     */
     function switchPortfolioTab(tab) {
         var examsPane = document.getElementById('pdt-exams');
         var notesPane = document.getElementById('pdt-notes');
-        var examsBtn  = document.getElementById('pdt-exams-btn');
-        var notesBtn  = document.getElementById('pdt-notes-btn');
+        var examsBtn = document.getElementById('pdt-exams-btn');
+        var notesBtn = document.getElementById('pdt-notes-btn');
         if (!examsPane || !notesPane) { return; }
 
         if (tab === 'exams') {
@@ -1201,6 +1341,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
     }
 
+    /**
+     * Wires the portfolio detail sub-tab buttons.
+     */
     function initPortfolioTabButtons() {
         var examsBtn = document.getElementById('pdt-exams-btn');
         var notesBtn = document.getElementById('pdt-notes-btn');
@@ -1212,6 +1355,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
     }
 
+    /**
+     * Loads a student's exam history in the course and renders it.
+     *
+     * @param {number} userid Student user ID.
+     */
     function loadPortfolioExams(userid) {
         var container = document.getElementById('evalia-portfolio-exams-container');
         if (!container) { return; }
@@ -1219,7 +1367,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_get_student_exam_history',
-            args: { userid: userid, courseid: courseId }
+            args: {userid: userid, courseid: courseId}
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
@@ -1235,6 +1383,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the student's exam history table.
+     *
+     * @param {Array} exams Exams returned by local_evalia_get_student_exam_history.
+     */
     function renderPortfolioExams(exams) {
         var container = document.getElementById('evalia-portfolio-exams-container');
         if (!container) { return; }
@@ -1249,9 +1402,10 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var rows = exams.map(function(ex) {
             var scoreHtml;
             if (ex.status === 'graded') {
-                var pct   = ex.max_score > 0 ? (ex.score / ex.max_score * 100) : 0;
+                var pct = ex.max_score > 0 ? (ex.score / ex.max_score * 100) : 0;
                 var color = pct >= 60 ? 'success' : (pct >= 40 ? 'warning' : 'danger');
-                scoreHtml = '<span class="fw-bold text-' + color + '">' + ex.score.toFixed(1) + ' / ' + ex.max_score.toFixed(1) + '</span>';
+                scoreHtml = '<span class="fw-bold text-' + color + '">' +
+                    ex.score.toFixed(1) + ' / ' + ex.max_score.toFixed(1) + '</span>';
             } else {
                 scoreHtml = '<span class="text-muted">—</span>';
             }
@@ -1291,6 +1445,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             '</table></div>';
     }
 
+    /**
+     * Loads a student's portfolio observations and renders them.
+     *
+     * @param {number} userid Student user ID.
+     */
     function loadStudentNotes(userid) {
         var container = document.getElementById('evalia-portfolio-notes-container');
         if (!container) { return; }
@@ -1300,7 +1459,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_get_portfolio_notes',
-            args: { userid: userid, courseid: courseId }
+            args: {userid: userid, courseid: courseId}
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
@@ -1316,13 +1475,19 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the list of portfolio observations.
+     *
+     * @param {Array} notes Notes returned by local_evalia_get_portfolio_notes.
+     */
     function renderNotesList(notes) {
         var container = document.getElementById('evalia-portfolio-notes-container');
         if (!container) { return; }
 
         var items = notes.map(function(n) {
             var date = new Date(n.timecreated * 1000);
-            var dateStr = date.toLocaleDateString('es-AR') + ' ' + date.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'});
+            var dateStr = date.toLocaleDateString('es-AR') + ' ' +
+                date.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'});
             return '<div class="border rounded p-2 mb-2 bg-light">' +
                 '<small class="text-muted d-block mb-1">' + n.author_name + ' · ' + dateStr + '</small>' +
                 '<span class="small">' + n.note_text + '</span>' +
@@ -1332,10 +1497,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         container.innerHTML = items;
     }
 
+    /**
+     * Saves a new portfolio observation for the selected student.
+     */
     function handleAddNote() {
         if (!selectedPortfolioUserId) { return; }
         var input = document.getElementById('evalia-portfolio-note-input');
-        var text  = input ? input.value.trim() : '';
+        var text = input ? input.value.trim() : '';
         if (!text) {
             showToast(S.error_note_required, 'danger');
             return;
@@ -1345,7 +1513,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_add_portfolio_note',
-            args: { userid: selectedPortfolioUserId, courseid: courseId, note_text: text }
+            args: {userid: selectedPortfolioUserId, courseid: courseId, note_text: text}
         }])[0].then(function(result) {
             setDisabled('evalia-btn-add-note', false);
             if (result.success) {
@@ -1366,8 +1534,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 3: Calificar todos con IA ───────────────────────────────────────
 
+    /**
+     * Grades all submitted exams of the current exam with AI after confirmation.
+     */
     function handleGradeAll() {
-        var btn      = document.getElementById('evalia-btn-grade-all');
+        var btn = document.getElementById('evalia-btn-grade-all');
         var statusEl = document.getElementById('evalia-grade-all-status');
         if (!btn || !currentExamId) { return; }
 
@@ -1384,7 +1555,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_grade_all_exams',
-            args: { examid: currentExamId }
+            args: {examid: currentExamId}
         }])[0].then(function(result) {
             btn.disabled = false;
             btn.style.display = 'none';
@@ -1410,13 +1581,19 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Publishes one student's exam grade to the gradebook.
+     *
+     * @param {number} studentExamId Student exam ID.
+     * @param {HTMLElement} btn Publish button that was clicked.
+     */
     function handlePublishGrade(studentExamId, btn) {
         if (!studentExamId) { return; }
         if (btn) { btn.disabled = true; btn.textContent = S.publishing_ellipsis; }
 
         Ajax.call([{
             methodname: 'local_evalia_publish_grade',
-            args: { student_examid: studentExamId, override_score: -1 }
+            args: {student_examid: studentExamId, override_score: -1}
         }])[0].then(function(result) {
             if (result.success) {
                 showToast(S.grade_published_ok, 'success');
@@ -1432,8 +1609,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Publishes all graded exams of the current exam to the gradebook after confirmation.
+     */
     function handlePublishAllGrades() {
-        var btn      = document.getElementById('evalia-btn-publish-all');
+        var btn = document.getElementById('evalia-btn-publish-all');
         var statusEl = document.getElementById('evalia-grade-all-status');
         if (!btn || !currentExamId) { return; }
 
@@ -1444,24 +1624,24 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return;
         }
 
-        btn.disabled    = true;
+        btn.disabled = true;
         btn.textContent = S.publishing_all;
         if (statusEl) { statusEl.textContent = ''; }
 
         Ajax.call([{
             methodname: 'local_evalia_publish_all_grades',
-            args: { examid: currentExamId }
+            args: {examid: currentExamId}
         }])[0].then(function(result) {
-            btn.disabled       = false;
-            btn.style.display  = 'none';
+            btn.disabled = false;
+            btn.style.display = 'none';
             var msg = S.grades_published_result.replace('{$a}', result.published);
             if (statusEl) { statusEl.textContent = msg; statusEl.className = 'text-success small'; }
             showToast(msg, 'success');
             loadStudentExams(currentExamId);
             loadExamStats(currentExamId);
         }).fail(function(err) {
-            btn.disabled       = false;
-            btn.textContent    = S.btn_publish_grades_count.replace('{$a}', count);
+            btn.disabled = false;
+            btn.textContent = S.btn_publish_grades_count.replace('{$a}', count);
             Log.error('evalia_teacher: publish_all_grades failed', err);
             if (statusEl) { statusEl.textContent = S.error_publish_all; statusEl.className = 'text-danger small'; }
             showToast(S.error_publish_grades, 'danger');
@@ -1470,6 +1650,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Tab 3: Estadísticas del examen ─────────────────────────────────────
 
+    /**
+     * Loads the statistics of an exam and renders them.
+     *
+     * @param {number} examId Exam template ID.
+     */
     function loadExamStats(examId) {
         var section = document.getElementById('evalia-stats-section');
         if (!section || !examId) { return; }
@@ -1477,7 +1662,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_get_exam_stats',
-            args: { examid: examId }
+            args: {examid: examId}
         }])[0].then(function(r) {
             renderExamStats(r);
         }).fail(function(err) {
@@ -1485,6 +1670,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
+    /**
+     * Renders the exam statistics: summary cards, score bands and most failed questions.
+     *
+     * @param {Object} r Stats returned by local_evalia_get_exam_stats.
+     */
     function renderExamStats(r) {
         // ── Summary cards ────────────────────────────────────────────────────
         var summaryEl = document.getElementById('evalia-stats-summary');
@@ -1492,11 +1682,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             var total = r.counts.assigned + r.counts.started + r.counts.submitted + r.counts.graded;
             var passRate = r.graded > 0 ? Math.round(r.pass_count / r.graded * 100) : 0;
             summaryEl.innerHTML =
-                statCard('👥', S.stat_total, total,           'secondary') +
-                statCard('✅', S.stat_graded, r.graded,   'success') +
-                statCard('📤', S.stat_submitted,   r.counts.submitted, 'info') +
-                statCard('⭐', S.stat_average,   r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—', 'primary') +
-                statCard('🎯', S.stat_passed,  r.graded > 0 ? passRate + '%' : '—', passRate >= 50 ? 'success' : 'warning');
+                statCard('👥', S.stat_total, total, 'secondary') +
+                statCard('✅', S.stat_graded, r.graded, 'success') +
+                statCard('📤', S.stat_submitted, r.counts.submitted, 'info') +
+                statCard('⭐', S.stat_average, r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—', 'primary') +
+                statCard('🎯', S.stat_passed, r.graded > 0 ? passRate + '%' : '—', passRate >= 50 ? 'success' : 'warning');
         }
 
         // ── Score bands ───────────────────────────────────────────────────────
@@ -1525,15 +1715,16 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             } else {
                 // Difficulty badge colors, keyed by the resolved label: basic=teal, medium=blue, advanced=orange.
                 var diffStyle = {};
-                diffStyle[S.difficulty_basic]    = 'background:#0d9488;color:#fff;';
-                diffStyle[S.difficulty_medium]   = 'background:#2563eb;color:#fff;';
+                diffStyle[S.difficulty_basic] = 'background:#0d9488;color:#fff;';
+                diffStyle[S.difficulty_medium] = 'background:#2563eb;color:#fff;';
                 diffStyle[S.difficulty_advanced] = 'background:#ea580c;color:#fff;';
                 var items = r.top_failed.map(function(q, idx) {
-                    var pct  = q.total > 0 ? Math.round(q.fail_count / q.total * 100) : 0;
+                    var pct = q.total > 0 ? Math.round(q.fail_count / q.total * 100) : 0;
                     var stem = q.stem.length > 100 ? q.stem.substring(0, 97) + '…' : q.stem;
                     var badges = '';
                     if (q.topic) {
-                        badges += '<span class="badge me-1" style="background:#6366f1;color:#fff;" title="' + S.stat_topic_title + '">' + q.topic + '</span>';
+                        badges += '<span class="badge me-1" style="background:#6366f1;color:#fff;" title="' +
+                            S.stat_topic_title + '">' + q.topic + '</span>';
                     }
                     if (q.difficulty) {
                         var ds = diffStyle[q.difficulty] || 'background:#6b7280;color:#fff;';
@@ -1556,6 +1747,15 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
     }
 
+    /**
+     * Builds the HTML for a single summary statistic card.
+     *
+     * @param {string} icon Emoji icon.
+     * @param {string} label Card label.
+     * @param {(string|number)} value Value to display.
+     * @param {string} color Bootstrap contextual colour name.
+     * @returns {string} Card HTML.
+     */
     function statCard(icon, label, value, color) {
         return '<div class="col">' +
             '<div class="card text-center border-' + color + '">' +
@@ -1568,8 +1768,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── RAG: Indexar material del curso ────────────────────────────────────
 
+    /**
+     * Indexes the course material for RAG and reports the indexed sources, chunks and errors.
+     */
     function handleIndexCourse() {
-        var btn      = document.getElementById('evalia-btn-index-course');
+        var btn = document.getElementById('evalia-btn-index-course');
         var statusEl = document.getElementById('evalia-index-status');
         if (!btn) { return; }
 
@@ -1579,13 +1782,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_index_course',
-            args: { courseid: courseId, token: '' }
+            args: {courseid: courseId, token: ''}
         }])[0].then(function(result) {
             btn.disabled = false;
             setLoading('evalia-index-loading', false);
-            var indexed  = result.indexed  || [];
-            var errors   = result.errors   || [];
-            var chunks   = result.total_chunks || 0;
+            var indexed = result.indexed || [];
+            var errors = result.errors || [];
+            var chunks = result.total_chunks || 0;
 
             var parts = [];
             if (indexed.length > 0) {
@@ -1700,8 +1903,13 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             }
 
             // ── Feedback prompt editor (Tab 3) ────────────────────────────────
+            /**
+             * Shows the feedback prompt editor for an exam and wires its save and reset buttons.
+             *
+             * @param {number} examId Exam template ID.
+             */
             function loadFeedbackPromptEditor(examId) {
-                var section  = document.getElementById('evalia-feedback-prompt-section');
+                var section = document.getElementById('evalia-feedback-prompt-section');
                 var textarea = document.getElementById('evalia-feedback-prompt-textarea');
                 if (!section || !textarea) { return; }
                 section.style.display = '';
@@ -1715,15 +1923,15 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 textarea.value = saved || defaultPrompt;
 
                 // Save button
-                var btnSave   = document.getElementById('evalia-btn-save-prompt');
-                var statusEl  = document.getElementById('evalia-prompt-save-status');
+                var btnSave = document.getElementById('evalia-btn-save-prompt');
+                var statusEl = document.getElementById('evalia-prompt-save-status');
                 if (btnSave) {
                     btnSave.addEventListener('click', function() {
                         btnSave.disabled = true;
                         if (statusEl) { statusEl.textContent = S.prompt_saving; }
                         Ajax.call([{
                             methodname: 'local_evalia_save_feedback_prompt',
-                            args: { examid: examId, prompt: textarea.value }
+                            args: {examid: examId, prompt: textarea.value}
                         }])[0].then(function(result) {
                             btnSave.disabled = false;
                             if (statusEl) {
@@ -1836,18 +2044,18 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             if (config.startdate || config.enddate) {
                 setTimeout(function() {
                     var startEl = document.getElementById('evalia-start-date');
-                    var endEl   = document.getElementById('evalia-end-date');
+                    var endEl = document.getElementById('evalia-end-date');
                     if (startEl && config.startdate) { startEl.value = config.startdate; }
-                    if (endEl   && config.enddate)   { endEl.value   = config.enddate;   }
+                    if (endEl && config.enddate) { endEl.value = config.enddate; }
                 }, 300);
             }
 
             // ── Modal: Flujo de trabajo ───────────────────────────────────────
             (function() {
-                var modal       = document.getElementById('evalia-workflow-modal');
+                var modal = document.getElementById('evalia-workflow-modal');
                 var btnWorkflow = document.getElementById('evalia-btn-workflow');
-                var closeBtn    = document.getElementById('evalia-workflow-modal-close');
-                var header      = document.getElementById('evalia-workflow-modal-header');
+                var closeBtn = document.getElementById('evalia-workflow-modal-close');
+                var header = document.getElementById('evalia-workflow-modal-header');
                 if (!modal || !btnWorkflow) { return; }
 
                 btnWorkflow.addEventListener('click', function() {
@@ -1858,7 +2066,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 }
 
                 // Drag by header
-                var isDragging = false, startX, startY, origLeft, origTop;
+                var isDragging = false,
+startX, startY, origLeft, origTop;
                 if (header) {
                     header.addEventListener('mousedown', function(e) {
                         if (e.target === closeBtn) { return; }
@@ -1867,10 +2076,10 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                         startY = e.clientY;
                         var rect = modal.getBoundingClientRect();
                         origLeft = rect.left;
-                        origTop  = rect.top;
+                        origTop = rect.top;
                         modal.style.transform = 'none';
                         modal.style.left = origLeft + 'px';
-                        modal.style.top  = origTop  + 'px';
+                        modal.style.top = origTop + 'px';
                         e.preventDefault();
                     });
                 }
@@ -1879,21 +2088,27 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     var dx = e.clientX - startX;
                     var dy = e.clientY - startY;
                     modal.style.left = (origLeft + dx) + 'px';
-                    modal.style.top  = (origTop  + dy) + 'px';
+                    modal.style.top = (origTop + dy) + 'px';
                 });
                 document.addEventListener('mouseup', function() { isDragging = false; });
             }());
 
             // ── FAB: Asistente EVAL-IA ────────────────────────────────────────
             (function() {
-                var fab      = document.getElementById('evalia-fab');
-                var panel    = document.getElementById('evalia-chat-panel');
+                var fab = document.getElementById('evalia-fab');
+                var panel = document.getElementById('evalia-chat-panel');
                 var closeBtn = document.getElementById('evalia-chat-close');
-                var sendBtn  = document.getElementById('evalia-chat-send');
-                var input    = document.getElementById('evalia-chat-input');
+                var sendBtn = document.getElementById('evalia-chat-send');
+                var input = document.getElementById('evalia-chat-input');
                 var messages = document.getElementById('evalia-chat-messages');
                 if (!fab) { return; }
 
+                /**
+                 * Appends a message bubble to the chat panel and scrolls to it.
+                 *
+                 * @param {string} text Message text.
+                 * @param {string} role Message author ('user' or 'assistant').
+                 */
                 function appendMsg(text, role) {
                     if (!messages) { return; }
                     var div = document.createElement('div');
@@ -1903,6 +2118,11 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     messages.scrollTop = messages.scrollHeight;
                 }
 
+                /**
+                 * Appends a typing indicator bubble to the chat panel.
+                 *
+                 * @returns {HTMLElement} The indicator element, so it can be removed later.
+                 */
                 function appendTyping() {
                     var div = document.createElement('div');
                     div.className = 'evalia-msg evalia-msg--assistant evalia-msg--typing';
@@ -1912,6 +2132,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     return div;
                 }
 
+                /**
+                 * Sends the chat input text to the assistant web service and shows the reply.
+                 */
                 function sendMessage() {
                     if (!input) { return; }
                     var text = input.value.trim();
@@ -1923,7 +2146,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
                     Ajax.call([{
                         methodname: 'local_saipa_admin_chat',
-                        args: { message: text, context: 'evalia_teacher' }
+                        args: {message: text, context: 'evalia_teacher'}
                     }])[0].then(function(r) {
                         if (typingEl && typingEl.parentNode) { typingEl.parentNode.removeChild(typingEl); }
                         appendMsg(r.reply || S.fab_no_response, 'assistant');
@@ -1939,30 +2162,50 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
                 // Toggle panel on FAB click (drag detection)
                 var FAB_STORAGE_KEY = 'evalia_fab_pos';
-                var isDragging = false, dragMoved = false;
+                var isDragging = false,
+dragMoved = false;
                 var dragStartX, dragStartY, fabStartLeft, fabStartTop;
 
+                /**
+                 * Moves the FAB to a position clamped to the viewport and repositions the chat panel next to it.
+                 *
+                 * @param {number} left Desired left offset in pixels.
+                 * @param {number} top Desired top offset in pixels.
+                 */
                 function applyFabPos(left, top) {
-                    var w = window.innerWidth, h = window.innerHeight;
-                    var fw = fab.offsetWidth, fh = fab.offsetHeight;
+                    var w = window.innerWidth,
+h = window.innerHeight;
+                    var fw = fab.offsetWidth,
+fh = fab.offsetHeight;
                     left = Math.max(0, Math.min(left, w - fw));
-                    top  = Math.max(0, Math.min(top,  h - fh));
-                    fab.style.left   = left + 'px';
-                    fab.style.top    = top  + 'px';
-                    fab.style.right  = 'auto';
+                    top = Math.max(0, Math.min(top, h - fh));
+                    fab.style.left = left + 'px';
+                    fab.style.top = top + 'px';
+                    fab.style.right = 'auto';
                     fab.style.bottom = 'auto';
                     if (panel) {
-                        panel.style.left   = Math.max(0, Math.min(left + fw - 360, w - 364)) + 'px';
-                        panel.style.top    = Math.max(0, top - 470) + 'px';
-                        panel.style.right  = 'auto';
+                        panel.style.left = Math.max(0, Math.min(left + fw - 360, w - 364)) + 'px';
+                        panel.style.top = Math.max(0, top - 470) + 'px';
+                        panel.style.right = 'auto';
                         panel.style.bottom = 'auto';
                     }
                 }
 
+                /**
+                 * Persists the FAB position in localStorage (errors ignored).
+                 *
+                 * @param {number} l Left offset in pixels.
+                 * @param {number} t Top offset in pixels.
+                 */
                 function saveFabPos(l, t) {
-                    try { localStorage.setItem(FAB_STORAGE_KEY, JSON.stringify({l:l, t:t})); } catch(e) {}
+                    try { localStorage.setItem(FAB_STORAGE_KEY, JSON.stringify({l: l, t: t})); } catch (e) {}
                 }
 
+                /**
+                 * Restores the FAB position saved in localStorage, if any.
+                 *
+                 * @returns {boolean} True if a saved position was applied.
+                 */
                 function restoreFabPos() {
                     try {
                         var raw = localStorage.getItem(FAB_STORAGE_KEY);
@@ -1970,7 +2213,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                         var pos = JSON.parse(raw);
                         applyFabPos(pos.l, pos.t);
                         return true;
-                    } catch(e) { return false; }
+                    } catch (e) { return false; }
                 }
 
                 restoreFabPos();
@@ -1978,12 +2221,12 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 fab.addEventListener('mousedown', function(e) {
                     if (e.button !== 0) { return; }
                     isDragging = true;
-                    dragMoved  = false;
+                    dragMoved = false;
                     dragStartX = e.clientX;
                     dragStartY = e.clientY;
-                    var rect   = fab.getBoundingClientRect();
+                    var rect = fab.getBoundingClientRect();
                     fabStartLeft = rect.left;
-                    fabStartTop  = rect.top;
+                    fabStartTop = rect.top;
                     fab.classList.add('evalia-fab--dragging');
                     e.preventDefault();
                 });
@@ -1996,7 +2239,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     if (dragMoved) { applyFabPos(fabStartLeft + dx, fabStartTop + dy); }
                 });
 
-                document.addEventListener('mouseup', function(e) {
+                document.addEventListener('mouseup', function() {
                     if (!isDragging) { return; }
                     isDragging = false;
                     fab.classList.remove('evalia-fab--dragging');
@@ -2024,7 +2267,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     });
                 }
 
-                if (sendBtn)  { sendBtn.addEventListener('click', sendMessage); }
+                if (sendBtn) { sendBtn.addEventListener('click', sendMessage); }
                 if (input) {
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }

@@ -32,30 +32,46 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
     'use strict';
 
-    var _studentExamId  = 0;
-    var _timeLimitMin   = 0;
-    var _submitted      = false;   // guard against double-submit
-    var _timerInterval  = null;
-    var _secondsLeft    = 0;
+    var _studentExamId = 0;
+    var _timeLimitMin = 0;
+    var _submitted = false; // Guard against double-submit
+    var _timerInterval = null;
+    var _secondsLeft = 0;
 
     // ─── Toast ───────────────────────────────────────────────────────────────
 
+    /**
+     * Shows a coloured status toast with the given message.
+     *
+     * @param {string} message Text to display in the toast body.
+     * @param {string} type Bootstrap contextual colour suffix (e.g. 'success', 'danger'); defaults to 'info'.
+     */
     function showToast(message, type) {
         var toast = document.getElementById('evalia-toast');
         if (!toast) { return; }
         toast.className = 'toast align-items-center text-white border-0 bg-' + (type || 'info');
         document.getElementById('evalia-toast-body').textContent = message;
-        var bsToast = bootstrap.Toast.getOrCreateInstance(toast, {delay: 5000});
-        bsToast.show();
+        // Moodle 4.x ships Bootstrap 4 without a global `bootstrap` object, so the
+        // toast is shown and hidden by toggling its class (same as evalia_teacher.js).
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 5000);
     }
 
     // ─── Timer ───────────────────────────────────────────────────────────────
 
+    /**
+     * Starts the countdown timer display and auto-submits the exam when it reaches zero.
+     *
+     * @param {number} minutes Exam time limit in minutes.
+     */
     function startTimer(minutes) {
         _secondsLeft = minutes * 60;
-        var display  = document.getElementById('evalia-timer-display');
+        var display = document.getElementById('evalia-timer-display');
         if (!display) { return; }
 
+        /**
+         * Updates the timer display once per second and triggers auto-submit at zero.
+         */
         function tick() {
             if (_submitted) {
                 clearInterval(_timerInterval);
@@ -65,7 +81,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             var s = _secondsLeft % 60;
             display.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 
-            if (_secondsLeft <= 300) {   // last 5 minutes — warning color
+            if (_secondsLeft <= 300) { // Last 5 minutes — warning color
                 var bar = document.getElementById('evalia-timer-bar');
                 if (bar) { bar.className = bar.className.replace('alert-warning', 'alert-danger'); }
             }
@@ -88,6 +104,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
     // ─── Collect answers ─────────────────────────────────────────────────────
 
+    /**
+     * Collects the student's answers from all answer inputs in the exam form.
+     *
+     * @returns {Object} Map of question ID to answer value.
+     */
     function collectAnswers() {
         var answers = {};
         // Radio / checkbox inputs
@@ -111,6 +132,11 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
 
     // ─── Submit ──────────────────────────────────────────────────────────────
 
+    /**
+     * Submits the collected answers via the local_evalia_submit_exam web service, guarding against double submits.
+     *
+     * @param {boolean} isAutomatic True when triggered by the timer expiring, false for a manual submit.
+     */
     function doSubmit(isAutomatic) {
         if (_submitted) { return; }
         _submitted = true;
@@ -144,7 +170,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                     window.location.reload();
                 }, 2000);
             } else {
-                _submitted = false;   // allow retry on error
+                _submitted = false; // Allow retry on error
                 if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar examen'; }
                 showToast('Error: ' + result.message, 'danger');
                 Log.error('evalia_student: submit_exam returned failure', result.message);
@@ -162,7 +188,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     return {
         init: function(config) {
             _studentExamId = config.student_examid;
-            _timeLimitMin  = config.time_limit_min || 0;
+            _timeLimitMin = config.time_limit_min || 0;
 
             if (config.already_submitted) {
                 _submitted = true;
@@ -179,7 +205,8 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             if (btn) {
                 btn.addEventListener('click', function() {
                     if (_submitted) { return; }
-                    if (!window.confirm('¿Estás seguro de que querés enviar el examen? No podrás modificar tus respuestas después.')) {
+                    if (!window.confirm('¿Estás seguro de que querés enviar el examen? ' +
+                            'No podrás modificar tus respuestas después.')) {
                         return;
                     }
                     doSubmit(false);
