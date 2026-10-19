@@ -39,8 +39,8 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── i18n ────────────────────────────────────────────────────────────────
     // Every UI string this module needs, keyed by its local_evalia lang key.
-    // Values below are the Spanish fallback (identical to the hardcoded text
-    // this module used before this pass) shown until loadStrings() resolves —
+    // Values below are the English fallback (identical to lang/en/local_evalia.php)
+    // shown until loadStrings() resolves —
     // Str.get_strings() is fast (cached) but async, so init() does not block on it.
     // Strings containing "{$a}" / "{$a->prop}" are Moodle placeholders Moodle's
     // get_string() leaves untouched when called with no $a — resolved here via
@@ -48,183 +48,188 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
     // at each call site. This lets every render function stay synchronous.
     var S = {
         // Rubric tab (Tab 1)
-        rubric_status_active:      'Activa',
-        rubric_status_draft:       'Borrador',
-        error_load_rubric:         'Error al cargar la rúbrica.',
-        rubric_empty_state:        'No hay rúbrica para este curso. ' +
-            'Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.',
-        rubric_no_items:           'La rúbrica no tiene ítems.',
-        rubric_item_topic:         'Tema',
-        rubric_item_description:   'Descripción',
-        rubric_item_weight_short:  'Peso',
-        error_no_rubric_to_save:   'No hay rúbrica para guardar.',
-        error_rubric_needs_item:   'La rúbrica debe tener al menos un ítem.',
-        default_rubric_name:       'Rúbrica curso {$a}',
-        rubric_generated_ok:       'Rúbrica generada. Revísela y active cuando esté lista.',
-        error_rubric_generate_failed: 'No se pudo generar: {$a}',
-        error_rubric_generate:     'Error al generar la rúbrica.',
-        error_rubric_save:         'Error: {$a}',
-        error_rubric_save_generic: 'Error al guardar.',
+        rubric_status_active:       'Active',
+        rubric_status_draft:        'Draft',
+        error_load_rubric:          'Error loading the rubric.',
+        rubric_empty_state:         'No rubric for this course yet. Click <strong>Generate Rubric with AI</strong> to get started.',
+        rubric_no_items:            'The rubric has no items.',
+        rubric_item_topic:          'Topic',
+        rubric_item_description:    'Description',
+        rubric_item_weight_short:   'Weight',
+        weight_low:                 'Low',
+        weight_medium:              'Medium',
+        weight_high:                'High',
+        error_no_rubric_to_save:    'No rubric to save.',
+        error_rubric_needs_item:    'The rubric must have at least one item.',
+        default_rubric_name:        'Course {$a} rubric',
+        rubric_generated_ok:        'Rubric generated. Review it and activate when ready.',
+        error_rubric_generate_failed: 'Could not generate: {$a}',
+        error_rubric_generate:      'Error generating the rubric.',
+        error_rubric_save:          'Error: {$a}',
+        error_rubric_save_generic:  'Error saving.',
 
         // Question bank (Tab 2)
-        difficulty_basic:          'Básica',
-        difficulty_medium:         'Media',
-        difficulty_advanced:       'Avanzada',
-        questions_status_draft:    'Pendiente',
-        questions_status_approved: 'Aprobada',
-        questions_status_rejected: 'Rechazada',
-        qtype_table_multichoice:   'OM',
-        qtype_short_truefalse:     'V/F',
-        qtype_table_numerical:     'Núm',
-        qtype_table_shortanswer:   'Corta',
-        qtype_essay:               'Ensayo',
-        qtype_multichoice:         'Opción múltiple',
-        qtype_shortanswer:         'Respuesta corta',
-        error_load_bank:           'Error al cargar el banco.',
-        table_question:            'Pregunta',
-        table_type:                'Tipo',
-        questions_empty_filtered:  'No hay preguntas con los filtros seleccionados. ' +
-            'Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.',
-        question_approved_ok:      'Pregunta aprobada.',
-        question_rejected_ok:      'Pregunta rechazada.',
-        error_question_update:     'Error al actualizar la pregunta.',
-        error_rubric_first:        'Primero genere y active una rúbrica.',
-        error_rubric_must_be_active: 'Active la rúbrica antes de generar preguntas.',
-        gen_questions_title:       '✨ Generar Preguntas con IA',
-        gen_questions_item_label:  'Ítem de rúbrica',
-        gen_questions_difficulty_label: 'Dificultad',
-        gen_questions_count_label: 'Cantidad',
-        gen_questions_btn:         'Generar',
-        gen_questions_types_label: 'Tipos de pregunta',
-        gen_questions_loading:     'Generando preguntas desde el material del curso...',
-        error_select_qtype:        'Seleccione al menos un tipo de pregunta.',
-        questions_generated_ok:    'Se generaron {$a} pregunta(s). Apruebe las que considere correctas.',
-        error_questions_generate:  'Error al generar preguntas.',
+        difficulty_basic:           'Basic',
+        difficulty_medium:          'Medium',
+        difficulty_advanced:        'Advanced',
+        questions_status_draft:     'Pending review',
+        questions_status_approved:  'Approved',
+        questions_status_rejected:  'Rejected',
+        qtype_table_multichoice:    'MC',
+        qtype_short_truefalse:      'T/F',
+        qtype_table_numerical:      'Num',
+        qtype_table_shortanswer:    'Short',
+        qtype_essay:                'Essay',
+        qtype_multichoice:          'Multiple choice',
+        qtype_shortanswer:          'Short answer',
+        error_load_bank:            'Error loading the question bank.',
+        table_question:             'Question',
+        table_type:                 'Type',
+        questions_approve:          'Approve',
+        questions_reject:           'Reject',
+        questions_empty_filtered:   'No questions match the selected filters. Activate a rubric and use <strong>Generate ' +
+            'Questions</strong> per item.',
+        question_approved_ok:       'Question approved.',
+        question_rejected_ok:       'Question rejected.',
+        error_question_update:      'Error updating the question.',
+        error_rubric_first:         'First generate and activate a rubric.',
+        error_rubric_must_be_active: 'Activate the rubric before generating questions.',
+        gen_questions_title:        '✨ Generate Questions with AI',
+        gen_questions_item_label:   'Rubric item',
+        gen_questions_difficulty_label: 'Difficulty',
+        gen_questions_count_label:  'Count',
+        gen_questions_btn:          'Generate',
+        gen_questions_types_label:  'Question types',
+        gen_questions_loading:      'Generating questions from the course material...',
+        error_select_qtype:         'Select at least one question type.',
+        questions_generated_ok:     '{$a} question(s) generated. Approve the ones you consider correct.',
+        error_questions_generate:   'Error generating questions.',
 
         // Exams (Tab 3)
-        error_exam_name_required:  'Ingrese un nombre para el examen.',
-        error_exam_min_questions:  'El examen debe tener al menos 1 pregunta.',
-        error_exam_window_order:   'El cierre debe ser posterior a la apertura.',
-        exam_created_ok:           'Examen creado. Asígnelo a los alumnos cuando el banco esté listo.',
-        error_exam_create:         'Error al crear el examen.',
-        error_exam_first:          'Primero cree un examen.',
-        exam_assigned_result:      'Asignados: {$a->assigned} alumno(s). Omitidos: {$a->skipped}.',
-        error_exam_assign:         'Error al asignar exámenes.',
-        students_none_enrolled_exam: 'No hay alumnos inscriptos.',
-        error_load_students:       'Error al cargar alumnos.',
-        btn_publish_grades_count:  '✅ Publicar notas ({$a})',
-        exam_status_not_assigned:  'Sin asignar',
-        'student:status_published': '✅ Publicado',
-        exam_status_assigned:      'Asignado',
-        exam_status_started:       'En progreso',
-        exam_status_submitted:     'Enviado',
-        exam_status_graded:        'Calificado',
-        exam_preview_link_title:   'Previsualizar examen asignado',
-        exam_watching_link_title:  'El alumno está rindiendo',
-        exam_grade_link_title:     'Calificar examen enviado',
-        exam_view_graded_title:    'Ver examen calificado',
-        exam_publish_single_title: 'Publicar nota en el gradebook',
-        exam_view_published_title: 'Ver examen publicado',
-        link_view:                 '👁 Ver',
-        link_grade:                '📝 Calificar',
-        link_view_star:            '★ Ver',
-        btn_publish_single:        '✅ Publicar',
-        table_student:             'Alumno',
-        table_status:              'Estado',
-        table_grade:               'Nota',
-        table_action:              'Acción',
-        confirm_grade_all:         '¿Calificar {$a} examen(es) con IA? ' +
-            'Esto enviará feedback pedagógico a cada alumno por Telegram.',
-        grading_in_progress:       '⏳ Calificando...',
-        grade_all_result:          '✔ {$a->graded} calificado(s)',
-        grade_all_skipped_suffix:  ' · {$a} omitido(s)',
-        btn_grade_all_with_ai:     '⚡ Calificar todos con IA',
-        error_grade_all:           'Error al calificar.',
-        error_grade_exams:         'Error al calificar los exámenes.',
-        publishing_ellipsis:       '⏳...',
-        grade_published_ok:        'Nota publicada en el libro de calificaciones.',
-        error_publish_grade:       'Error al publicar la nota.',
-        confirm_publish_all:       '¿Publicar las notas de {$a} alumno(s) en el libro de calificaciones?',
-        publishing_all:            '⏳ Publicando...',
-        grades_published_result:   '✅ {$a} nota(s) publicada(s) en el gradebook.',
-        error_publish_all:         'Error al publicar.',
-        error_publish_grades:      'Error al publicar las notas.',
+        error_exam_name_required:   'Enter a name for the exam.',
+        error_exam_min_questions:   'The exam must have at least 1 question.',
+        error_exam_window_order:    'The close date must be after the open date.',
+        exam_created_ok:            'Exam created. Assign it to students once the question bank is ready.',
+        error_exam_create:          'Error creating the exam.',
+        error_exam_first:           'First create an exam.',
+        exam_assigned_result:       'Assigned: {$a->assigned} student(s). Skipped: {$a->skipped}.',
+        error_exam_assign:          'Error assigning exams.',
+        students_none_enrolled_exam: 'No students enrolled.',
+        error_load_students:        'Error loading students.',
+        btn_publish_grades_count:   '✅ Publish grades ({$a})',
+        exam_status_not_assigned:   'Not assigned',
+        'student:status_published': '✅ Published',
+        exam_status_assigned:       'Assigned',
+        exam_status_started:        'In progress',
+        exam_status_submitted:      'Submitted',
+        exam_status_graded:         'Graded',
+        exam_preview_link_title:    'Preview assigned exam',
+        exam_watching_link_title:   'Student is taking the exam',
+        exam_grade_link_title:      'Grade submitted exam',
+        exam_view_graded_title:     'View graded exam',
+        exam_publish_single_title:  'Publish grade to the gradebook',
+        exam_view_published_title:  'View published exam',
+        link_view:                  '👁 View',
+        link_grade:                 '📝 Grade',
+        link_view_star:             '★ View',
+        btn_publish_single:         '✅ Publish',
+        table_student:              'Student',
+        table_status:               'Status',
+        table_grade:                'Grade',
+        table_action:               'Action',
+        confirm_grade_all:          'Grade {$a} exam(s) with AI? This will send pedagogical feedback to each student via Telegram.',
+        grading_in_progress:        '⏳ Grading...',
+        grade_all_result:           '✔ {$a->graded} graded',
+        grade_all_skipped_suffix:   ' · {$a} skipped',
+        btn_grade_all_with_ai:      '⚡ Grade all with AI',
+        error_grade_all:            'Error grading.',
+        error_grade_exams:          'Error grading the exams.',
+        publishing_ellipsis:        '⏳...',
+        grade_published_ok:         'Grade published to the gradebook.',
+        error_publish_grade:        'Error publishing the grade.',
+        confirm_publish_all:        'Publish the grades of {$a} student(s) to the gradebook?',
+        publishing_all:             '⏳ Publishing...',
+        grades_published_result:    '✅ {$a} grade(s) published to the gradebook.',
+        error_publish_all:          'Error publishing.',
+        error_publish_grades:       'Error publishing the grades.',
 
         // Exam stats (Tab 3)
-        stat_total:                'Total',
-        stat_graded:                'Calificados',
-        stat_submitted:             'Enviados',
-        stat_average:                'Promedio',
-        stat_passed:                 'Aprobados',
-        stats_no_data:              'Sin datos aún.',
-        stat_topic_title:           'Tema',
-        stat_pct_failed:            '{$a}% fallaron',
+        stat_total:                 'Total',
+        stat_graded:                'Graded',
+        stat_submitted:             'Submitted',
+        stat_average:               'Average',
+        stat_passed:                'Passed',
+        stats_no_data:              'No data yet.',
+        stat_topic_title:           'Topic',
+        stat_pct_failed:            '{$a}% failed',
 
         // Portfolio (Tab 4)
-        students_none_enrolled_course: 'No hay alumnos inscriptos en este curso.',
-        error_load_portfolio:      'Error al cargar legajos.',
-        tab_exams:                  'Exámenes',
-        portfolio_avg_grade:        'Nota prom.',
-        loading_ellipsis:           'Cargando...',
-        loading_exam_history:       'Cargando historial...',
-        exam_count_singular:        '{$a} examen',
-        exam_count_plural:          '{$a} exámenes',
-        portfolio_average_label:    'Promedio: {$a}',
-        no_exams_assigned_yet:      'Este alumno no tiene exámenes asignados aún.',
-        error_load_exam_history:    'Error al cargar el historial de exámenes.',
-        table_exam:                 'Examen',
-        table_date:                 'Fecha',
-        table_questions:            'Preguntas',
-        view_exam_title:            'Ver examen',
-        loading_observations:       'Cargando observaciones...',
-        error_load_notes:           'Error al cargar observaciones.',
-        portfolio_note_empty:       'Sin observaciones registradas.',
-        error_note_required:        'Escriba una observación antes de guardar.',
-        error_note_save:            'Error al guardar la observación.',
-        portfolio_note_saved:       'Observación guardada.',
+        students_none_enrolled_course: 'No students enrolled in this course.',
+        error_load_portfolio:       'Error loading portfolios.',
+        tab_exams:                  'Exams',
+        portfolio_avg_grade:        'Avg. grade',
+        loading_ellipsis:           'Loading...',
+        loading_exam_history:       'Loading history...',
+        exam_count_singular:        '{$a} exam',
+        exam_count_plural:          '{$a} exams',
+        portfolio_average_label:    'Average: {$a}',
+        no_exams_assigned_yet:      'This student has no exams assigned yet.',
+        error_load_exam_history:    'Error loading the exam history.',
+        table_exam:                 'Exam',
+        table_date:                 'Date',
+        table_questions:            'Questions',
+        view_exam_title:            'View exam',
+        loading_observations:       'Loading observations...',
+        error_load_notes:           'Error loading observations.',
+        portfolio_note_empty:       'No observations recorded.',
+        error_note_required:        'Write an observation before saving.',
+        error_note_save:            'Error saving the observation.',
+        portfolio_note_saved:       'Observation saved.',
 
         // RAG indexing
-        index_result_sources_chunks: '{$a->sources} fuente(s), {$a->chunks} fragmentos indexados',
-        index_result_errors:        '{$a} error(es)',
-        index_result_nothing:       'No se encontró material para indexar',
-        error_index_generic:        'Error al indexar.',
-        error_index_course:         'Error al indexar el material del curso.',
+        index_result_sources_chunks: '{$a->sources} source(s), {$a->chunks} chunks indexed',
+        index_result_errors:        '{$a} error(s)',
+        index_result_nothing:       'No material found to index',
+        error_index_generic:        'Error indexing.',
+        error_index_course:         'Error indexing the course material.',
 
         // Feedback prompt editor
-        prompt_saving:              'Guardando...',
-        prompt_saved_ok:            '✔ Guardado',
-        error_prompt_save:          'Error al guardar.',
-        confirm_reset_prompt:       '¿Restaurar el prompt predeterminado? Se perderán los cambios guardados.',
+        prompt_saving:              'Saving...',
+        prompt_saved_ok:            '✔ Saved',
+        error_prompt_save:          'Error saving.',
+        confirm_reset_prompt:       'Restore the default prompt? Saved changes will be lost.',
         default_feedback_prompt:
-            'Eres SAIPA, asistente pedagógico de acompañamiento universitario.\n' +
-            'Acabas de conocer el resultado del examen de un alumno y tu misión es enviarle\n' +
-            'un mensaje personal, cálido y educativo por Telegram.\n\n' +
-            'El mensaje debe:\n' +
-            '1. Saludar al alumno por su nombre de pila\n' +
-            '2. Comunicar la nota de forma clara y honesta\n' +
-            '3. Por cada pregunta INCORRECTA: explicar brevemente qué respondió el alumno,\n' +
-            '   cuál era la respuesta correcta y POR QUÉ esa respuesta es la correcta\n' +
-            '4. Si todas fueron correctas: felicitarlo genuinamente\n' +
-            '5. Indicar en qué temas conviene profundizar según los errores\n' +
-            '6. Cerrar con una frase motivadora: los errores son oportunidades de aprendizaje\n\n' +
-            'Formato: HTML de Telegram (<b>negrita</b>, <i>cursiva</i>). Máximo ~600 palabras.\n' +
-            'Tono: cálido, directo, universitario. No paternalista.\n' +
-            'Responde ÚNICAMENTE con el mensaje, sin JSON ni comentarios.',
+            'You are SAIPA, a pedagogical assistant for university mentoring.\n' +
+            'You have just learned a student\'s exam result, and your mission is to send them\n' +
+            'a personal, warm, and educational message via Telegram.\n' +
+            '\n' +
+            'The message must:\n' +
+            '1. Greet the student by their first name\n' +
+            '2. Communicate the grade clearly and honestly\n' +
+            '3. For each INCORRECT question: briefly explain what the student answered,\n' +
+            '   what the correct answer was, and WHY that answer is correct\n' +
+            '4. If everything was correct: congratulate them genuinely\n' +
+            '5. Indicate which topics are worth reviewing based on the mistakes\n' +
+            '6. Close with a motivating phrase: mistakes are learning opportunities\n' +
+            '\n' +
+            'Format: Telegram HTML (<b>bold</b>, <i>italics</i>). Maximum ~600 words.\n' +
+            'Tone: warm, direct, university-level. Not patronizing.\n' +
+            'Respond ONLY with the message, no JSON or comments.',
 
         // FAB chat assistant
-        fab_no_response:            'Sin respuesta.',
-        fab_connect_error:          'Error al conectar con el asistente.',
+        fab_no_response:            'No response.',
+        fab_connect_error:          'Error connecting to the assistant.',
 
         // Sources panel
-        sources_badge_count:        '{$a->checked}/{$a->total} fuentes',
-        sources_none_indexed:       'No hay material indexado para este curso.',
-        error_load_sources:         'Error al cargar fuentes.'
+        sources_badge_count:        '{$a->checked}/{$a->total} sources',
+        sources_none_indexed:       'No material indexed for this course.',
+        error_load_sources:         'Error loading sources.'
     };
 
     /**
      * Resolves every string in S against the current language pack, in one
-     * batch request. Until this resolves, S already holds the Spanish text
-     * this module always showed, so rendering never blocks on it.
+     * batch request. Until this resolves, S already holds the English
+     * fallback text, so rendering never blocks on it.
      */
     function loadStrings() {
         var keys = Object.keys(S);
@@ -277,7 +282,17 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (el) { el.disabled = disabled; }
     }
 
-    // ─── Tab 1: Rúbrica ──────────────────────────────────────────────────────
+    // ─── Tab 1: Rubric ───────────────────────────────────────────────────────
+
+    /**
+     * Returns the localised label for a rubric item difficulty weight.
+     *
+     * @param {string} weight Weight value ('low', 'medium' or 'high').
+     * @returns {string} Localised label, or the raw value when unknown.
+     */
+    function weightLabel(weight) {
+        return S['weight_' + weight] || weight;
+    }
 
     /**
      * Fetches the course rubric via web service and renders its status badge, items and action buttons.
@@ -352,11 +367,12 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                     '<td>' + (idx + 1) + '</td>' +
                     '<td>' + item.topic + '</td>' +
                     '<td><small class="text-muted">' + (item.description || '') + '</small></td>' +
-                    '<td><span class="badge bg-secondary">' + item.difficulty_weight + '</span></td>' +
+                    '<td><span class="badge bg-secondary">' + weightLabel(item.difficulty_weight) + '</span></td>' +
                     '</tr>';
             }
             var weightOpts = ['low', 'medium', 'high'].map(function(w) {
-                return '<option value="' + w + '"' + (item.difficulty_weight === w ? ' selected' : '') + '>' + w + '</option>';
+                return '<option value="' + w + '"' + (item.difficulty_weight === w ? ' selected' : '') + '>' +
+                    weightLabel(w) + '</option>';
             }).join('');
             return '<tr>' +
                 '<td>' + (idx + 1) + '</td>' +
@@ -611,7 +627,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
-    // ─── Tab 2: Banco de Preguntas ───────────────────────────────────────────
+    // ─── Tab 2: Question Bank ────────────────────────────────────────────────
 
     /**
      * Rebuilds the question bank topic filter options from the current rubric items.
@@ -621,7 +637,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var sel = document.getElementById('evalia-filter-topic');
         if (!sel) { return; }
         var current = sel.value;
-        // Keep only the "Todos los temas" option, then re-add from rubric
+        // Keep only the "All topics" option, then re-add from rubric
         while (sel.options.length > 1) { sel.remove(1); }
         if (currentRubric && currentRubric.items) {
             currentRubric.items.forEach(function(it) {
@@ -705,9 +721,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 '<td>' + (statusMap[q.status] || q.status) + '</td>' +
                 '<td class="text-nowrap">' +
                     '<button class="btn btn-sm btn-outline-success py-0 me-1 evalia-approve-btn" ' +
-                        'data-id="' + q.id + '" title="Aprobar">✓</button>' +
+                        'data-id="' + q.id + '" title="' + S.questions_approve + '">✓</button>' +
                     '<button class="btn btn-sm btn-outline-danger py-0 evalia-reject-btn" ' +
-                        'data-id="' + q.id + '" title="Rechazar">✗</button>' +
+                        'data-id="' + q.id + '" title="' + S.questions_reject + '">✗</button>' +
                 '</td>' +
                 '</tr>';
         }).join('');
@@ -765,7 +781,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }
 
         var itemOptions = currentRubric.items.map(function(it) {
-            return '<option value="' + it.id + '">' + it.topic + ' (' + it.difficulty_weight + ')</option>';
+            return '<option value="' + it.id + '">' + it.topic + ' (' + weightLabel(it.difficulty_weight) + ')</option>';
         }).join('');
 
         var formHtml = '<div class="card border-primary mb-3" id="evalia-gen-q-form">' +
@@ -888,7 +904,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
-    // ─── Tab 3: Exámenes ─────────────────────────────────────────────────────
+    // ─── Tab 3: Exams ────────────────────────────────────────────────────────
 
     /**
      * Validates the exam form and creates a new exam template via web service.
@@ -1143,7 +1159,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
-    // ─── Tab 4: Legajos ──────────────────────────────────────────────────────
+    // ─── Tab 4: Portfolios ───────────────────────────────────────────────────
 
     /**
      * Loads the course student portfolio list via web service and renders it.
@@ -1267,7 +1283,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         // Update stats header
         updatePortfolioStats(userid);
 
-        // Switch to Historial tab
+        // Switch to the exam history tab
         switchPortfolioTab('exams');
 
         // Load exam history
@@ -1411,7 +1427,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             }
 
             var dateHtml = ex.timesubmitted > 0
-                ? new Date(ex.timesubmitted * 1000).toLocaleDateString('es-AR')
+                ? new Date(ex.timesubmitted * 1000).toLocaleDateString(document.documentElement.lang || undefined)
                 : '—';
 
             var sc = statusClasses[ex.status] || 'secondary';
@@ -1486,8 +1502,9 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         var items = notes.map(function(n) {
             var date = new Date(n.timecreated * 1000);
-            var dateStr = date.toLocaleDateString('es-AR') + ' ' +
-                date.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'});
+            var locale = document.documentElement.lang || undefined;
+            var dateStr = date.toLocaleDateString(locale) + ' ' +
+                date.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'});
             return '<div class="border rounded p-2 mb-2 bg-light">' +
                 '<small class="text-muted d-block mb-1">' + n.author_name + ' · ' + dateStr + '</small>' +
                 '<span class="small">' + n.note_text + '</span>' +
@@ -1532,7 +1549,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
-    // ─── Tab 3: Calificar todos con IA ───────────────────────────────────────
+    // ─── Tab 3: Grade all with AI ────────────────────────────────────────────
 
     /**
      * Grades all submitted exams of the current exam with AI after confirmation.
@@ -1648,7 +1665,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         });
     }
 
-    // ─── Tab 3: Estadísticas del examen ─────────────────────────────────────
+    // ─── Tab 3: Exam statistics ─────────────────────────────────────────────
 
     /**
      * Loads the statistics of an exam and renders them.
@@ -1766,7 +1783,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             '</div></div></div>';
     }
 
-    // ─── RAG: Indexar material del curso ────────────────────────────────────
+    // ─── RAG: Index course material ─────────────────────────────────────────
 
     /**
      * Indexes the course material for RAG and reports the indexed sources, chunks and errors.
@@ -1824,7 +1841,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 defaultQuestionsCount = parseInt(config.defaults.questions_default_count, 10) || 5;
             }
 
-            // Tab 1 — Rúbrica + indexación de material
+            // Tab 1 — Rubric + material indexing
             loadRubric();
 
             var btnIndex = document.getElementById('evalia-btn-index-course');
@@ -1839,7 +1856,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             var btnActivate = document.getElementById('evalia-btn-activate-rubric');
             if (btnActivate) { btnActivate.addEventListener('click', function() { handleSaveRubric(true); }); }
 
-            // Tab 2 — Banco de preguntas (lazy load on first click)
+            // Tab 2 — Question bank (lazy load on first click)
             var questionsLoaded = false;
             var tabQuestionsBtn = document.getElementById('tab-questions-btn');
             if (tabQuestionsBtn) {
@@ -1860,7 +1877,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             var btnGenQ = document.getElementById('evalia-btn-generate-questions');
             if (btnGenQ) { btnGenQ.addEventListener('click', showGenerateQuestionsForm); }
 
-            // Tab 3 — Exámenes (lazy load on first click)
+            // Tab 3 — Exams (lazy load on first click)
             // If teacher.php found an existing exam, pre-populate state so the
             // assign button and student list work without creating a new exam.
             if (config.examid > 0) {
@@ -1974,7 +1991,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 });
             }
 
-            // Tab 4 — Legajos (lazy load on first click)
+            // Tab 4 — Portfolios (lazy load on first click)
             var portfolioLoaded = false;
             var tabPortfolioBtn = document.getElementById('tab-portfolio-btn');
             if (tabPortfolioBtn) {
@@ -2050,7 +2067,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 }, 300);
             }
 
-            // ── Modal: Flujo de trabajo ───────────────────────────────────────
+            // ── Modal: Workflow ───────────────────────────────────────────────
             (function() {
                 var modal = document.getElementById('evalia-workflow-modal');
                 var btnWorkflow = document.getElementById('evalia-btn-workflow');
@@ -2093,7 +2110,7 @@ startX, startY, origLeft, origTop;
                 document.addEventListener('mouseup', function() { isDragging = false; });
             }());
 
-            // ── FAB: Asistente EVAL-IA ────────────────────────────────────────
+            // ── FAB: EVAL-IA Assistant ────────────────────────────────────────
             (function() {
                 var fab = document.getElementById('evalia-fab');
                 var panel = document.getElementById('evalia-chat-panel');

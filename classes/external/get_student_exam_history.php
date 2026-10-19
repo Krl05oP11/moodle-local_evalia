@@ -17,7 +17,7 @@
 /**
  * WS: get_student_exam_history — returns all exams for a student in a course.
  *
- * Used by the Legajos panel to show a student's exam history.
+ * Used by the Portfolios panel to show a student's exam history.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -81,10 +81,11 @@ class get_student_exam_history extends external_api {
         ]);
 
         $statuslabels = [
-            'assigned'  => 'Asignado',
-            'started'   => 'En progreso',
-            'submitted' => 'Enviado',
-            'graded'    => 'Calificado',
+            'assigned'  => get_string('exam_status_assigned', 'local_evalia'),
+            'started'   => get_string('exam_status_started', 'local_evalia'),
+            'submitted' => get_string('exam_status_submitted', 'local_evalia'),
+            'graded'    => get_string('exam_status_graded', 'local_evalia'),
+            'published' => get_string('student:status_published', 'local_evalia'),
         ];
 
         $exams = [];

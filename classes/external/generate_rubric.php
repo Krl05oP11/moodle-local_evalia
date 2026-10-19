@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: generate_rubric — calls /eval/rubric/generate && saves to evalia_rubrics.
+ * WS: generate_rubric — calls /eval/rubric/generate and saves to evalia_rubrics.
  *
  * One rubric per course (UNIQUE constraint on courseid).
- * If a rubric already exists it is updated in-place && reset to draft.
- * Existing items are wiped && replaced by the newly generated ones.
+ * If a rubric already exists it is updated in-place and reset to draft.
+ * Existing items are wiped and replaced by the newly generated ones.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -106,7 +106,7 @@ class generate_rubric extends external_api {
         }
 
         $now  = time();
-        $name = $response['name'] ?? ('Rúbrica del curso ' . $params['courseid']);
+        $name = $response['name'] ?? get_string('default_rubric_name', 'local_evalia', $params['courseid']);
         $desc = $response['description'] ?? '';
         $rawitems = $response['items'] ?? [];
 
@@ -141,7 +141,7 @@ class generate_rubric extends external_api {
         foreach ($rawitems as $idx => $it) {
             $itemid = (int) $DB->insert_record('local_evalia_rubric_items', (object) [
                 'rubricid'          => $rubricid,
-                'topic'             => $it['topic'] ?? 'Tema ' . ($idx + 1),
+                'topic'             => $it['topic'] ?? get_string('rubric_default_topic', 'local_evalia', $idx + 1),
                 'description'       => $it['description'] ?? '',
                 'difficulty_weight' => $it['difficulty_weight'] ?? 'medium',
                 'sortorder'         => $it['sortorder'] ?? ($idx + 1),
@@ -159,7 +159,7 @@ class generate_rubric extends external_api {
         return [
             'success'  => true,
             'rubricid' => $rubricid,
-            'message'  => 'Rúbrica generada correctamente.',
+            'message'  => get_string('rubric_generated_ok', 'local_evalia'),
             'items'    => $saveditems,
         ];
     }
@@ -171,7 +171,7 @@ class generate_rubric extends external_api {
         return new external_single_structure([
             'success'  => new external_value(PARAM_BOOL, 'Whether generation succeeded'),
             'rubricid' => new external_value(PARAM_INT, 'ID of the created/updated rubric'),
-            'message'  => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message'  => new external_value(PARAM_TEXT, 'Status or error message'),
             'items'    => new external_multiple_structure(
                 new external_single_structure([
                     'id'                => new external_value(PARAM_INT, 'Item ID'),

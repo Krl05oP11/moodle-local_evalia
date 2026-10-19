@@ -60,7 +60,7 @@ if (!empty($students)) {
     }
 }
 
-// Load the most recent docente note per student.
+// Load the most recent teacher note per student.
 $lastnotebyuser = [];
 if (!empty($students)) {
     $studentids = array_keys($students);
@@ -96,12 +96,12 @@ fwrite($out, "\xEF\xBB\xBF");
 
 // Header row.
 fputcsv($out, [
-    'Apellido y Nombre',
-    'Email',
-    'Exámenes Tomados',
-    'Nota Promedio (0-10)',
-    'Última Actividad',
-    'Última Observación del Docente',
+    get_string('portfolio_csv_fullname', 'local_evalia'),
+    get_string('portfolio_csv_email', 'local_evalia'),
+    get_string('portfolio_csv_total_exams', 'local_evalia'),
+    get_string('portfolio_csv_avg_grade', 'local_evalia'),
+    get_string('portfolio_csv_last_activity', 'local_evalia'),
+    get_string('portfolio_csv_last_note', 'local_evalia'),
 ]);
 
 // Data rows — sorted alphabetically.
@@ -115,7 +115,7 @@ foreach ($studentlist as $u) {
     $totalexams   = $p ? (int) $p->total_exams : 0;
     $avggrade     = $p ? number_format((float) $p->avg_grade, 2, '.', '') : '';
     $lastactivity = ($p && $p->last_activity > 0)
-        ? date('d/m/Y H:i', $p->last_activity)
+        ? userdate($p->last_activity, get_string('strftimedatetimeshort', 'langconfig'))
         : '';
     $lastnote     = $lastnotebyuser[$u->id] ?? '';
 

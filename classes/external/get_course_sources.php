@@ -101,7 +101,7 @@ class get_course_sources extends external_api {
         if ($type === 'page' && isset($parts[1])) {
             $pageid = (int) $parts[1];
             $page    = $DB->get_record('page', ['id' => $pageid], 'name', IGNORE_MISSING);
-            $label   = $page ? format_string($page->name) : "Página $pageid";
+            $label   = $page ? format_string($page->name) : get_string('sources_page_fallback', 'local_evalia', $pageid);
             return ['id' => $raw, 'label' => $label, 'type' => 'page'];
         }
 

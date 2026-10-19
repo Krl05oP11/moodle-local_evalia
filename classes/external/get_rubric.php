@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: get_rubric — returns the active (or draft) rubric && its items for a course.
+ * WS: get_rubric — returns the active (or draft) rubric and its items for a course.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>

@@ -215,7 +215,7 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
     if ($oldversion < 2026040101) {
         // Phase 2A: Portfolio Tab — 4 new WS, Tab 4 UI.
         // No DB schema changes: evalia_portfolio, evalia_portfolio_notes,
-        // && evalia_feedback_log were already created in 2026032901.
+        // and evalia_feedback_log were already created in 2026032901.
         upgrade_plugin_savepoint(true, 2026040101, 'local', 'evalia');
     }
 

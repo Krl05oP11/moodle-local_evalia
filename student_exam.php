@@ -18,7 +18,7 @@
  * EVAL-IA Student Exam Page.
  *
  * URL: /local/evalia/student_exam.php?student_examid=X
- * Renders the student's assigned questions && handles submission via AMD AJAX.
+ * Renders the student's assigned questions and handles submission via AMD AJAX.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -114,7 +114,7 @@ if ($studentexam->status === 'assigned' && $isowner) {
 $alreadysubmitted = in_array($studentexam->status, ['submitted', 'graded', 'published']);
 $previewmode      = $isteacher && !$isowner;  // Teacher viewing someone else's exam.
 
-// Pre-load stored answers (needed for correctness maps && later rendering).
+// Pre-load stored answers (needed for correctness maps and later rendering).
 $storedanswers = [];
 if ($previewmode && $alreadysubmitted) {
     $storedanswers = json_decode($studentexam->answers ?? '{}', true) ?? [];
@@ -186,6 +186,7 @@ if ($previewmode) {
         'started'   => get_string('exam:status_started', 'local_evalia'),
         'submitted' => get_string('exam:status_submitted_review', 'local_evalia'),
         'graded'    => get_string('exam:status_graded', 'local_evalia'),
+        'published' => get_string('student:status_published', 'local_evalia'),
     ][$studentexam->status] ?? $studentexam->status;
     echo '<div class="alert alert-secondary d-flex align-items-center gap-3 mt-3 mb-0">';
     echo '<span style="font-size:1.5rem;">🔍</span>';
@@ -262,8 +263,11 @@ foreach ($questionsdata as $q) {
     echo '<span><strong>' . get_string('exam:question_num', 'local_evalia', $q['num'])
         . '</strong> — <small class="text-muted">' . htmlspecialchars($q['topic']) . '</small></span>';
     echo '<span class="d-flex gap-1 align-items-center">';
-    // Difficulty badge.
-    echo '<span class="badge bg-' . $diffclass . '">' . htmlspecialchars($q['difficulty']) . '</span>';
+    // Difficulty badge (localised label; unknown values are shown as stored).
+    $difflabel = isset($diffmap[$q['difficulty']])
+        ? get_string('difficulty_' . $q['difficulty'], 'local_evalia')
+        : $q['difficulty'];
+    echo '<span class="badge bg-' . $diffclass . '">' . htmlspecialchars($difflabel) . '</span>';
     // Points badge: plain in active exam; score obtained in graded preview.
     if ($previewmode && in_array($studentexam->status, ['graded', 'published'])) {
         if ($q['question_type'] === 'essay') {

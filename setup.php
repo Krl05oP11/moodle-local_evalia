@@ -94,7 +94,7 @@ if ($action === 'health') {
         'ok'      => true,
         'version' => $decoded['version'] ?? '?',
         'uptime'  => isset($decoded['uptime_seconds'])
-            ? round($decoded['uptime_seconds'] / 60, 1) . ' min'
+            ? round($decoded['uptime_seconds'] / 60, 1) . ' ' . get_string('min')
             : '?',
         'message' => $decoded['message'] ?? 'Running',
     ]);
@@ -499,7 +499,8 @@ echo $OUTPUT->header();
               <div class="pc-head">
                 <div class="pc-icon">🖥️</div>
                 <h6><?= get_string('wizard_prov_local_title', 'local_evalia') ?>
-                    <span class="mode-badge badge-local">SELF-HOSTED</span></h6></h6>
+                    <span class="mode-badge badge-local"><?=
+                        get_string('wizard_badge_selfhosted', 'local_evalia') ?></span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_local_desc', 'local_evalia') ?></p>
               <ul>
@@ -513,7 +514,8 @@ echo $OUTPUT->header();
               <div class="pc-head">
                 <div class="pc-icon">☁️</div>
                 <h6><?= get_string('wizard_prov_cloud_title', 'local_evalia') ?>
-                    <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h6></h6>
+                    <span class="mode-badge badge-cloud"><?=
+                        get_string('wizard_badge_openai', 'local_evalia') ?></span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_cloud_desc', 'local_evalia') ?></p>
               <ul>
@@ -527,7 +529,8 @@ echo $OUTPUT->header();
               <div class="pc-head">
                 <div class="pc-icon">⚙️</div>
                 <h6><?= get_string('wizard_prov_custom_title', 'local_evalia') ?>
-                    <span class="mode-badge badge-custom">ADVANCED</span></h6></h6>
+                    <span class="mode-badge badge-custom"><?=
+                        get_string('wizard_badge_advanced', 'local_evalia') ?></span></h6></h6>
               </div>
               <p><?= get_string('wizard_prov_custom_desc', 'local_evalia') ?></p>
               <ul>
@@ -580,7 +583,8 @@ echo $OUTPUT->header();
                  <?= ($cfgmode === 'local_ollama') ? 'checked' : '' ?>>
           <div class="mc-icon">🖥️</div>
           <h5><?= get_string('wizard_mode_local_title', 'local_evalia') ?>
-              <span class="mode-badge badge-local">SELF-HOSTED</span></h5></h5>
+              <span class="mode-badge badge-local"><?=
+                  get_string('wizard_badge_selfhosted', 'local_evalia') ?></span></h5></h5>
           <p><?= get_string('wizard_mode_local_desc', 'local_evalia') ?></p>
         </label>
 
@@ -589,7 +593,8 @@ echo $OUTPUT->header();
                  <?= ($cfgmode === 'cloud_api') ? 'checked' : '' ?>>
           <div class="mc-icon">☁️</div>
           <h5><?= get_string('wizard_mode_cloud_title', 'local_evalia') ?>
-              <span class="mode-badge badge-cloud">OPENAI-COMPATIBLE</span></h5></h5>
+              <span class="mode-badge badge-cloud"><?=
+                  get_string('wizard_badge_openai', 'local_evalia') ?></span></h5></h5>
           <p><?= get_string('wizard_mode_cloud_desc', 'local_evalia') ?></p>
         </label>
 
@@ -598,7 +603,8 @@ echo $OUTPUT->header();
                  <?= ($cfgmode === 'custom') ? 'checked' : '' ?>>
           <div class="mc-icon">⚙️</div>
           <h5><?= get_string('wizard_mode_custom_title', 'local_evalia') ?>
-              <span class="mode-badge badge-custom">ADVANCED</span></h5></h5>
+              <span class="mode-badge badge-custom"><?=
+                  get_string('wizard_badge_advanced', 'local_evalia') ?></span></h5></h5>
           <p><?= get_string('wizard_mode_custom_desc', 'local_evalia') ?></p>
         </label>
 

@@ -18,8 +18,8 @@
  * PHPUnit tests for the local_evalia Privacy API provider.
  *
  * Verifies GDPR compliance: metadata declaration, context discovery,
- * user listing, data export, && data deletion (single user, all users,
- * && bulk user deletion).
+ * user listing, data export, and data deletion (single user, all users,
+ * and bulk user deletion).
  *
  * @package    local_evalia
  * @category   test
@@ -170,7 +170,7 @@ final class privacy_provider_test extends \advanced_testcase {
     // Metadata.
 
     /**
-     * Metadata declares 4 database tables && 1 external location.
+     * Metadata declares 4 database tables and 1 external location.
      *
      * @covers \local_evalia\privacy\provider::get_metadata
      */

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: save_rubric — persists manual edits to a rubric && optionally activates it.
+ * WS: save_rubric — persists manual edits to a rubric and optionally activates it.
  *
  * Items with id > 0 are updated; items with id = 0 are inserted as new.
  * Activating a rubric sets its status to 'active' (prerequisite for question generation).
@@ -139,7 +139,7 @@ class save_rubric extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether save succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

@@ -28,7 +28,7 @@
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/log'], function(Ajax, Log) {
+define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     'use strict';
 
@@ -37,6 +37,48 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     var _submitted = false; // Guard against double-submit
     var _timerInterval = null;
     var _secondsLeft = 0;
+    var _stringsRequested = false;
+
+    // ─── i18n ────────────────────────────────────────────────────────────────
+    // Every UI string this module needs, keyed by its local_evalia lang key.
+    // Values below are the English fallback (identical to lang/en) shown until
+    // loadStrings() resolves, so every call site stays synchronous. Strings
+    // containing "{$a}" are substituted at the call site with String.replace().
+    var S = {
+        'exam:submitting_auto':      '⏳ Submitting automatically...',
+        'exam:submitting':           '⏳ Submitting...',
+        'exam:submit_status_auto':   'Time is up — submitting your answers...',
+        'exam:submit_status':        'Submitting your answers...',
+        'exam:submit_success':       '✅ Exam submitted successfully.',
+        'exam:btn_submit_exam':      '📤 Submit exam',
+        'exam:submit_network_error': 'Network error while submitting the exam. Please try again.',
+        'exam:submit_confirm':       'Are you sure you want to submit the exam? ' +
+            'You will not be able to change your answers afterwards.',
+        'exam:grade_confirm':        'Grade this student\'s exam with AI?',
+        'exam:graded_heading':       '✅ Exam graded',
+        'exam:grade_label':          'Grade:',
+        'exam:connection_error':     'Connection error.',
+        grading_in_progress:         '⏳ Grading...',
+        error_rubric_save:           'Error: {$a}'
+    };
+
+    /**
+     * Resolves every string in S against the current language pack, once, in a
+     * single batch request. Until it resolves, S holds the English fallback.
+     */
+    function loadStrings() {
+        if (_stringsRequested) { return; }
+        _stringsRequested = true;
+        var keys = Object.keys(S);
+        Str.get_strings(keys.map(function(k) {
+            return {key: k, component: 'local_evalia'};
+        })).then(function(values) {
+            keys.forEach(function(k, i) { S[k] = values[i]; });
+            return values;
+        }).catch(function(err) {
+            Log.error('evalia_student: string load error', err);
+        });
+    }
 
     // ─── Toast ───────────────────────────────────────────────────────────────
 
@@ -144,14 +186,12 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
         var btn = document.getElementById('evalia-btn-submit-exam');
         if (btn) {
             btn.disabled = true;
-            btn.textContent = isAutomatic ? '⏳ Enviando automáticamente...' : '⏳ Enviando...';
+            btn.textContent = isAutomatic ? S['exam:submitting_auto'] : S['exam:submitting'];
         }
 
         var statusEl = document.getElementById('evalia-submit-status');
         if (statusEl) {
-            statusEl.textContent = isAutomatic
-                ? 'Tiempo agotado — enviando tus respuestas...'
-                : 'Enviando tus respuestas...';
+            statusEl.textContent = isAutomatic ? S['exam:submit_status_auto'] : S['exam:submit_status'];
         }
 
         var answers = collectAnswers();
@@ -164,21 +204,21 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             }
         }])[0].then(function(result) {
             if (result.success) {
-                showToast('✅ Examen enviado correctamente.', 'success');
+                showToast(S['exam:submit_success'], 'success');
                 // Reload after 2 seconds to show the submitted state.
                 setTimeout(function() {
                     window.location.reload();
                 }, 2000);
             } else {
                 _submitted = false; // Allow retry on error
-                if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar examen'; }
-                showToast('Error: ' + result.message, 'danger');
+                if (btn) { btn.disabled = false; btn.textContent = S['exam:btn_submit_exam']; }
+                showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
                 Log.error('evalia_student: submit_exam returned failure', result.message);
             }
         }).fail(function(err) {
             _submitted = false;
-            if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar examen'; }
-            showToast('Error de red al enviar el examen. Intentá de nuevo.', 'danger');
+            if (btn) { btn.disabled = false; btn.textContent = S['exam:btn_submit_exam']; }
+            showToast(S['exam:submit_network_error'], 'danger');
             Log.error('evalia_student: submit_exam AJAX failed', err);
         });
     }
@@ -186,7 +226,13 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
     // ─── Init ────────────────────────────────────────────────────────────────
 
     return {
+        /**
+         * Initialises the student exam page: timer, submit button and strings.
+         *
+         * @param {Object} config Page config ({student_examid, time_limit_min, already_submitted}).
+         */
         init: function(config) {
+            loadStrings();
             _studentExamId = config.student_examid;
             _timeLimitMin = config.time_limit_min || 0;
 
@@ -205,8 +251,7 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             if (btn) {
                 btn.addEventListener('click', function() {
                     if (_submitted) { return; }
-                    if (!window.confirm('¿Estás seguro de que querés enviar el examen? ' +
-                            'No podrás modificar tus respuestas después.')) {
+                    if (!window.confirm(S['exam:submit_confirm'])) {
                         return;
                     }
                     doSubmit(false);
@@ -216,16 +261,21 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
             Log.debug('evalia_student: init complete, exam=' + _studentExamId + ' timer=' + _timeLimitMin + 'min');
         },
 
-        // Teacher grading panel — called when teacher views a submitted exam.
+        /**
+         * Teacher grading panel — called when a teacher views a submitted exam.
+         *
+         * @param {Object} config Page config ({student_examid, answers_json}).
+         */
         initGradePanel: function(config) {
+            loadStrings();
             var btn = document.getElementById('evalia-btn-grade');
             if (!btn) { return; }
 
             btn.addEventListener('click', function() {
-                if (!window.confirm('¿Calificar el examen de este alumno con IA?')) { return; }
+                if (!window.confirm(S['exam:grade_confirm'])) { return; }
                 btn.disabled = true;
                 var statusEl = document.getElementById('evalia-grade-status');
-                if (statusEl) { statusEl.textContent = 'Calificando...'; }
+                if (statusEl) { statusEl.textContent = S.grading_in_progress; }
 
                 Ajax.call([{
                     methodname: 'local_evalia_grade_exam',
@@ -239,19 +289,19 @@ define(['core/ajax', 'core/log'], function(Ajax, Log) {
                         if (panel) {
                             panel.className = 'card border-success mt-3 mb-5';
                             panel.querySelector('.card-header').className = 'card-header bg-success text-white fw-bold';
-                            panel.querySelector('.card-header').textContent = '✅ Examen calificado';
+                            panel.querySelector('.card-header').textContent = S['exam:graded_heading'];
                             panel.querySelector('.card-body').innerHTML =
-                                '<p class="mb-0 fs-5">Nota: <strong>' +
+                                '<p class="mb-0 fs-5">' + S['exam:grade_label'] + ' <strong>' +
                                 result.score.toFixed(1) + ' / ' + result.max_score.toFixed(1) +
                                 '</strong> &nbsp;(' + result.percent.toFixed(0) + '%)</p>';
                         }
                     } else {
                         btn.disabled = false;
-                        if (statusEl) { statusEl.textContent = 'Error: ' + result.message; }
+                        if (statusEl) { statusEl.textContent = S.error_rubric_save.replace('{$a}', result.message); }
                     }
                 }).fail(function(err) {
                     btn.disabled = false;
-                    if (statusEl) { statusEl.textContent = 'Error de conexión.'; }
+                    if (statusEl) { statusEl.textContent = S['exam:connection_error']; }
                     Log.error('evalia_student: grade_exam failed', err);
                 });
             });

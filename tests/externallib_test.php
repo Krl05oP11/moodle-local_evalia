@@ -18,11 +18,11 @@
  * PHPUnit tests for local_evalia web services (engine-free operations).
  *
  * Tests cover: rubric CRUD, exam creation, portfolio notes,
- * student exam listing, && capability enforcement.
+ * student exam listing, and capability enforcement.
  *
  * Engine-dependent WS (generate_rubric, generate_questions, grade_exam,
  * publish_grade, index_course) are excluded — they require a live AI
- * engine && are covered by integration tests. Exception: grade_exam's
+ * engine and are covered by integration tests. Exception: grade_exam's
  * blank-answers guard (below) returns before any engine call, so it's
  * genuinely engine-free and tested here.
  *
@@ -72,7 +72,7 @@ final class externallib_test extends \advanced_testcase {
     // Helpers.
 
     /**
-     * Insert a rubric row directly && return its ID.
+     * Insert a rubric row directly and return its ID.
      *
      * @param string $name Rubric name.
      * @param string $status Rubric status.
@@ -106,7 +106,7 @@ final class externallib_test extends \advanced_testcase {
     }
 
     /**
-     * get_rubric returns the rubric && its items.
+     * get_rubric returns the rubric and its items.
      *
      * @covers \local_evalia\external\get_rubric::execute
      */
@@ -147,7 +147,7 @@ final class externallib_test extends \advanced_testcase {
     // Save_rubric.
 
     /**
-     * save_rubric updates the rubric name && inserts new items.
+     * save_rubric updates the rubric name and inserts new items.
      *
      * @covers \local_evalia\external\save_rubric::execute
      */
@@ -213,7 +213,7 @@ final class externallib_test extends \advanced_testcase {
     // Create_exam.
 
     /**
-     * create_exam inserts a row in evalia_exams && creates a grade item.
+     * create_exam inserts a row in evalia_exams and creates a grade item.
      *
      * @covers \local_evalia\external\create_exam::execute
      */
@@ -294,7 +294,7 @@ final class externallib_test extends \advanced_testcase {
     // Add_portfolio_note.
 
     /**
-     * add_portfolio_note inserts a note && returns its ID.
+     * add_portfolio_note inserts a note and returns its ID.
      *
      * @covers \local_evalia\external\add_portfolio_note::execute
      */
@@ -420,7 +420,7 @@ final class externallib_test extends \advanced_testcase {
     // of grade_exam needs a live engine and isn't covered here).
 
     /**
-     * Insert a student_exam row directly && return its ID. question_ids can
+     * Insert a student_exam row directly and return its ID. question_ids can
      * be nonsense here -- the blank-answers guard returns before it's read.
      *
      * @param int $examid Exam ID.
@@ -460,7 +460,7 @@ final class externallib_test extends \advanced_testcase {
         $result = \local_evalia\external\grade_exam::execute($studentexamid, '[]');
 
         $this->assertFalse($result['success']);
-        $this->assertSame('Sin respuestas guardadas.', $result['message']);
+        $this->assertSame(get_string('error_no_answers', 'local_evalia'), $result['message']);
 
         global $DB;
         $after = $DB->get_record('local_evalia_student_exams', ['id' => $studentexamid]);
@@ -486,7 +486,7 @@ final class externallib_test extends \advanced_testcase {
         $result = \local_evalia\external\grade_exam::execute($studentexamid, '{}');
 
         $this->assertFalse($result['success']);
-        $this->assertSame('Sin respuestas guardadas.', $result['message']);
+        $this->assertSame(get_string('error_no_answers', 'local_evalia'), $result['message']);
     }
 
     /**
@@ -504,6 +504,6 @@ final class externallib_test extends \advanced_testcase {
 
         $result = \local_evalia\external\grade_exam::execute($studentexamid, '{"1":"some answer"}');
 
-        $this->assertNotSame('Sin respuestas guardadas.', $result['message']);
+        $this->assertNotSame(get_string('error_no_answers', 'local_evalia'), $result['message']);
     }
 }

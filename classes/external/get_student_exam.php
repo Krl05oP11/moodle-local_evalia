@@ -79,7 +79,7 @@ class get_student_exam extends external_api {
                 'time_limit_min' => 0,
                 'status'         => 'not_assigned',
                 'questions'      => [],
-                'message'        => 'No tenés un examen asignado todavía.',
+                'message'        => get_string('student:none_assigned', 'local_evalia'),
             ];
         }
 
@@ -96,7 +96,7 @@ class get_student_exam extends external_api {
                     'time_limit_min' => (int)$exam->time_limit_min,
                     'status'         => $studentexam->status,
                     'questions'      => [],
-                    'message'        => 'El examen aún no está disponible. Podés rendirlo desde: ' . $opens,
+                    'message'        => get_string('exam:not_open_yet', 'local_evalia', $opens),
                 ];
             }
             if ((int)$exam->timeclose > 0 && $now > (int)$exam->timeclose) {
@@ -109,7 +109,7 @@ class get_student_exam extends external_api {
                     'time_limit_min' => (int)$exam->time_limit_min,
                     'status'         => $studentexam->status,
                     'questions'      => [],
-                    'message'        => 'El período de rendición ya cerró (cerró el ' . $closed . ').',
+                    'message'        => get_string('exam:window_closed', 'local_evalia', $closed),
                 ];
             }
         }
@@ -125,11 +125,11 @@ class get_student_exam extends external_api {
                 'time_limit_min' => (int) $exam->time_limit_min,
                 'status'         => $studentexam->status,
                 'questions'      => [],
-                'message'        => 'El examen no tiene preguntas asignadas.',
+                'message'        => get_string('error_exam_no_questions', 'local_evalia'),
             ];
         }
 
-        // Load questions — exclude correct_answer && tolerance (never send to student).
+        // Load questions — exclude correct_answer and tolerance (never send to student).
         [$insql, $inparams] = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid');
         $questions = $DB->get_records_select(
             'local_evalia_question_bank',
@@ -232,7 +232,7 @@ class get_student_exam extends external_api {
                 VALUE_DEFAULT,
                 []
             ),
-            'message'        => new external_value(PARAM_TEXT, 'Error || info message'),
+            'message'        => new external_value(PARAM_TEXT, 'Error or info message'),
         ]);
     }
 }

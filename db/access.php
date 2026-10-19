@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
 
-    // Teacher capability: can manage rubrics, questions, && exams for a course.
+    // Teacher capability: can manage rubrics, questions, and exams for a course.
     'local/evalia:manage' => [
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,

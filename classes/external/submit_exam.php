@@ -60,7 +60,7 @@ class submit_exam extends external_api {
         if (in_array($studentexam->status, ['submitted', 'graded'])) {
             return [
                 'success' => true,
-                'message' => 'El examen ya fue enviado anteriormente.',
+                'message' => get_string('exam:already_submitted', 'local_evalia'),
             ];
         }
 
@@ -69,7 +69,7 @@ class submit_exam extends external_api {
         if (!is_array($decoded)) {
             return [
                 'success' => false,
-                'message' => 'El formato de respuestas no es válido.',
+                'message' => get_string('exam:invalid_answers', 'local_evalia'),
             ];
         }
 
@@ -90,30 +90,46 @@ class submit_exam extends external_api {
                 'id,' . implode(',', \core_user\fields::get_name_fields())
             );
             $course   = $DB->get_record('course', ['id' => $exam->courseid], 'id, fullname');
-            $studentname = $student ? fullname($student) : 'Un alumno';
             $coursename  = $course ? format_string($course->fullname) : '';
             $examname    = format_string($exam->name);
-            $timestr     = userdate($now, get_string('strftimedatetime', 'core_langconfig'));
-
-            $msg = "<b>📝 EVAL-IA — Examen enviado</b>\n\n" .
-                   "<b>Alumno:</b> {$studentname}\n" .
-                   "<b>Curso:</b> {$coursename}\n" .
-                   "<b>Examen:</b> {$examname}\n" .
-                   "<b>Hora:</b> {$timestr}\n\n" .
-                   "Ingresá al panel docente para calificarlo con IA.";
+            $strman      = get_string_manager();
 
             // Find all users with manage capability in this course.
-            $teacherids = array_keys(get_users_by_capability($context, 'local/evalia:manage', 'u.id'));
+            $teachers = get_users_by_capability($context, 'local/evalia:manage', 'u.id, u.lang, u.timezone');
 
-            foreach ($teacherids as $tid) {
-                $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $tid], 'telegram_id');
-                if ($tglink && !empty($tglink->telegram_id)) {
-                    local_evalia_engine_request('/notify', [
-                        'telegram_id' => (int) $tglink->telegram_id,
-                        'message'     => $msg,
-                        'parse_mode'  => 'HTML',
-                    ], 5);
+            foreach ($teachers as $teacher) {
+                $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $teacher->id], 'telegram_id');
+                if (!$tglink || empty($tglink->telegram_id)) {
+                    continue;
                 }
+
+                // Build the message in the recipient's language and timezone, not the student's.
+                $lang = (!empty($teacher->lang) && $strman->translation_exists($teacher->lang))
+                    ? $teacher->lang
+                    : $CFG->lang;
+                // Month and day names in userdate() follow the current language, so switch to the
+                // recipient's language just for the date, then restore it.
+                $prevlang = force_current_language($lang);
+                try {
+                    $timestr = userdate($now, get_string('strftimedatetime', 'core_langconfig'), $teacher->timezone);
+                } finally {
+                    force_current_language($prevlang);
+                }
+
+                $msg = $strman->get_string('notify_exam_submitted', 'local_evalia', (object) [
+                    'student' => $student
+                        ? fullname($student)
+                        : $strman->get_string('notify_student_fallback', 'local_evalia', null, $lang),
+                    'course'  => $coursename,
+                    'exam'    => $examname,
+                    'time'    => $timestr,
+                ], $lang);
+
+                local_evalia_engine_request('/notify', [
+                    'telegram_id' => (int) $tglink->telegram_id,
+                    'message'     => $msg,
+                    'parse_mode'  => 'HTML',
+                ], 5);
             }
         } catch (\Throwable $e) {
             // Never block the student's submission over a notification failure.
@@ -122,7 +138,7 @@ class submit_exam extends external_api {
 
         return [
             'success' => true,
-            'message' => 'Examen enviado correctamente. El docente revisará tu resultado.',
+            'message' => get_string('exam_submitted_ok', 'local_evalia'),
         ];
     }
 
@@ -132,7 +148,7 @@ class submit_exam extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success flag'),
-            'message' => new external_value(PARAM_TEXT, 'Confirmation || error message'),
+            'message' => new external_value(PARAM_TEXT, 'Confirmation or error message'),
         ]);
     }
 }

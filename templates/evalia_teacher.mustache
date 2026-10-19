@@ -49,10 +49,10 @@
     {{! ── Tab content ─────────────────────────────────────────────────── }}
     <div class="tab-content" id="evaliaTabContent">
 
-        {{! ── Tab 1: Rúbrica ────────────────────────────────────────── }}
+        {{! ── Tab 1: Rubric ────────────────────────────────────────── }}
         <div class="tab-pane fade show active" id="tab-rubric" role="tabpanel">
 
-            {{! ── Material del curso ── }}
+            {{! ── Course material ── }}
             <div class="card mb-3" style="border:1px solid #0891b2;">
                 <div class="card-header d-flex justify-content-between align-items-center"
                      style="background:#0891b2;">
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            {{! ── Selector de fuentes (acordeón lazy) ── }}
+            {{! ── Source selector (lazy accordion) ── }}
             <div class="card mb-3 border-secondary-subtle">
                 <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center"
                      id="evalia-sources-toggle" role="button" style="cursor:pointer;">
@@ -153,7 +153,7 @@
             </div>
         </div>
 
-        {{! ── Tab 2: Banco de Preguntas ─────────────────────────────── }}
+        {{! ── Tab 2: Question Bank ─────────────────────────────── }}
         <div class="tab-pane fade" id="tab-questions" role="tabpanel">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -200,7 +200,7 @@
             </div>
         </div>
 
-        {{! ── Tab 3: Exámenes ────────────────────────────────────────── }}
+        {{! ── Tab 3: Exams ────────────────────────────────────────── }}
         <div class="tab-pane fade" id="tab-exams" role="tabpanel">
             <div class="row">
                 {{! Left: exam creation form }}
@@ -242,7 +242,7 @@
                                 <input type="number" id="evalia-exam-timelimit" class="form-control"
                                        value="{{exam_default_time_limit}}" min="0" max="300">
                             </div>
-                            {{! Ventana de rendición (colapsable) }}
+                            {{! Submission window (collapsible) }}
                             <div class="mb-3 border rounded p-2" style="background:#f8f9fa;">
                                 <div class="d-flex align-items-center"
                                      id="evalia-exam-window-toggle" style="cursor:pointer;">
@@ -323,7 +323,7 @@
                 </div>
             </div>
 
-            {{! ── Panel de estadísticas ── }}
+            {{! ── Statistics panel ── }}
             <div id="evalia-stats-section" class="mt-4" style="display:none;">
                 <div class="card border-info">
                     <div class="card-header d-flex justify-content-between align-items-center bg-info bg-opacity-10">
@@ -349,7 +349,7 @@
                 </div>
             </div>
 
-            {{! ── Prompt de feedback personalizable ── }}
+            {{! ── Customisable feedback prompt ── }}
             <div id="evalia-feedback-prompt-section" class="mt-4" style="display:none;">
                 <div class="card border-secondary">
                     <div class="card-header d-flex justify-content-between align-items-center bg-light">
@@ -375,7 +375,7 @@
             </div>
         </div>
 
-        {{! ── Tab 4: Legajos ─────────────────────────────────────────── }}
+        {{! ── Tab 4: Portfolios ─────────────────────────────────────────── }}
         <div class="tab-pane fade" id="tab-portfolio" role="tabpanel">
             <div class="row g-3">
 
@@ -486,7 +486,7 @@
 
 </div>{{! end #evalia-teacher-panel }}
 
-{{! ── Modal: Flujo de trabajo ─────────────────────────────────────────── }}
+{{! ── Modal: Workflow ─────────────────────────────────────────── }}
 <div id="evalia-workflow-modal"
      style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%);
             z-index:10500; width:700px; max-width:96vw; background:#fff;

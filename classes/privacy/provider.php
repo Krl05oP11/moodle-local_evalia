@@ -61,7 +61,7 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
 
-        // Teacher-authored data: rubrics && exams store created_by (teacher user ID).
+        // Teacher-authored data: rubrics and exams store created_by (teacher user ID).
         // Not personal data in the GDPR sense, but declared for Moodle table-coverage compliance.
         $collection->add_database_table('local_evalia_rubrics', [
             'created_by' => 'privacy:metadata:evalia_rubrics:created_by',
@@ -303,7 +303,7 @@ class provider implements
                     ];
                 }
                 writer::with_context($context)->export_data(
-                    [get_string('pluginname', 'local_evalia'), 'Feedback Log'],
+                    [get_string('pluginname', 'local_evalia'), get_string('privacy:feedback_log', 'local_evalia')],
                     (object) ['log' => $logexport]
                 );
             }
@@ -340,7 +340,7 @@ class provider implements
             $DB->delete_records_select('local_evalia_student_exams', "examid $insql", $inparams);
         }
 
-        // Portfolio && notes are keyed by courseid directly.
+        // Portfolio and notes are keyed by courseid directly.
         $DB->delete_records('local_evalia_portfolio', ['courseid' => $courseid]);
         $DB->delete_records('local_evalia_portfolio_notes', ['courseid' => $courseid]);
     }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: index_course — crawl a course's content && index it in ChromaDB.
+ * WS: index_course — crawl a course's content and index it in ChromaDB.
  *
  * Handles:
  *   mod_page     → extracts plain text from page intro + content HTML.
@@ -66,7 +66,7 @@ class index_course extends external_api {
         require_once($CFG->dirroot . '/local/evalia/lib.php');
         require_once($CFG->libdir  . '/filelib.php');
 
-        // Indexing PDFs && PPTX files via LibreOffice can take several minutes.
+        // Indexing PDFs and PPTX files via LibreOffice can take several minutes.
         \core_php_time_limit::raise(600);
 
         $params  = self::validate_parameters(self::execute_parameters(), [
@@ -155,8 +155,8 @@ class index_course extends external_api {
                     $source = 'resource:' . $res->id . ':' . $file->get_filename();
 
                     if ($ext === 'pdf') {
-                        // Read PDF bytes directly from Moodle's filestore && send as base64.
-                        // The engine cannot reach Moodle via URL (NAT hairpinning fails &&
+                        // Read PDF bytes directly from Moodle's filestore and send as base64.
+                        // The engine cannot reach Moodle via URL (NAT hairpinning fails and
                         // the internal hostname triggers a Moodle redirect error).
                         $pdfbytes = $file->get_content();
                         if (empty($pdfbytes)) {
@@ -201,8 +201,8 @@ class index_course extends external_api {
                         ], 300);
                     } else if ($ext === 'pptx') {
                         // Convert PPTX → PDF in the engine (LibreOffice headless).
-                        // Sending raw bytes avoids NAT hairpinning issues && captures
-                        // SmartArt, tables && grouped shapes that XML extraction misses.
+                        // Sending raw bytes avoids NAT hairpinning issues and captures
+                        // SmartArt, tables and grouped shapes that XML extraction misses.
                         $pptxbytes = $file->get_content();
                         if (empty($pptxbytes)) {
                             continue;

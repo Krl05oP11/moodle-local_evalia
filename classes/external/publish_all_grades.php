@@ -18,7 +18,7 @@
  * WS: publish_all_grades — batch-publish all graded student exams for an exam.
  *
  * Efficiently pushes all grades to Moodle gradebook in a single batch call,
- * then marks every qualifying student_exam as published && updates portfolios.
+ * then marks every qualifying student_exam as published and updates portfolios.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -74,7 +74,7 @@ class publish_all_grades extends external_api {
         );
 
         if (empty($graded)) {
-            return ['success' => true, 'published' => 0, 'message' => 'No hay exámenes calificados pendientes de publicación.'];
+            return ['success' => true, 'published' => 0, 'message' => get_string('publish_none_pending', 'local_evalia')];
         }
 
         // Push each student's grade to the Moodle gradebook.
@@ -114,7 +114,7 @@ class publish_all_grades extends external_api {
         return [
             'success'   => true,
             'published' => $count,
-            'message'   => $count . ' nota(s) publicada(s) y alumnos notificados por Telegram.',
+            'message'   => get_string('grades_published_notified', 'local_evalia', $count),
         ];
     }
 
@@ -125,7 +125,7 @@ class publish_all_grades extends external_api {
         return new external_single_structure([
             'success'   => new external_value(PARAM_BOOL, 'Whether publish succeeded'),
             'published' => new external_value(PARAM_INT, 'Number of grades published'),
-            'message'   => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message'   => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

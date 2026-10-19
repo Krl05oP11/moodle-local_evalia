@@ -17,7 +17,7 @@
 /**
  * WS: grade_all_exams — batch-grade all submitted student exams for an exam.
  *
- * Reads stored answers from DB (set during submit_exam) && grades each one.
+ * Reads stored answers from DB (set during submit_exam) and grades each one.
  * Calls the same engine grading + Telegram feedback pipeline as grade_exam.
  * Returns an array of per-student results.
  *
@@ -94,7 +94,7 @@ class grade_all_exams extends external_api {
                     'userid'  => (int) $se->userid,
                     'success' => false,
                     'score'   => 0.0,
-                    'message' => 'Sin respuestas guardadas.',
+                    'message' => get_string('error_no_answers', 'local_evalia'),
                 ];
                 continue;
             }
@@ -118,7 +118,7 @@ class grade_all_exams extends external_api {
                     'userid'  => (int) $se->userid,
                     'success' => false,
                     'score'   => 0.0,
-                    'message' => 'Error: ' . $e->getMessage(),
+                    'message' => get_string('error_rubric_save', 'local_evalia', $e->getMessage()),
                 ];
             }
         }

@@ -69,7 +69,7 @@ class save_feedback_prompt extends external_api {
             'timemodified'    => time(),
         ]);
 
-        return ['success' => true, 'message' => 'Prompt guardado correctamente.'];
+        return ['success' => true, 'message' => get_string('prompt_saved_ok', 'local_evalia')];
     }
 
     /**

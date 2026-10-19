@@ -16,7 +16,7 @@
 
 /**
  * WS: generate_questions — calls /eval/questions/generate for a rubric item
- * && saves results to evalia_question_bank + evalia_question_options.
+ * and saves results to evalia_question_bank + evalia_question_options.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -141,7 +141,7 @@ class generate_questions extends external_api {
                 'timemodified'   => $now,
             ]);
 
-            // Insert options for multichoice && truefalse.
+            // Insert options for multichoice and truefalse.
             if (in_array($qtype, ['multichoice', 'truefalse'])) {
                 $options = $q['options'] ?? [];
                 foreach ($options as $optidx => $opt) {
@@ -161,7 +161,7 @@ class generate_questions extends external_api {
         return [
             'success'   => true,
             'generated' => $saved,
-            'message'   => 'Se generaron ' . $saved . ' pregunta(s) correctamente.',
+            'message'   => get_string('questions_generated_ok', 'local_evalia', $saved),
         ];
     }
 
@@ -172,7 +172,7 @@ class generate_questions extends external_api {
         return new external_single_structure([
             'success'   => new external_value(PARAM_BOOL, 'Whether generation succeeded'),
             'generated' => new external_value(PARAM_INT, 'Number of questions saved'),
-            'message'   => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message'   => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

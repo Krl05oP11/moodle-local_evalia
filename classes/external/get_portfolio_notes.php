@@ -88,7 +88,7 @@ class get_portfolio_notes extends external_api {
             $result[] = [
                 'id'          => (int) $n->id,
                 'note_text'   => $n->note_text,
-                'author_name' => $author ? fullname($author) : 'Desconocido',
+                'author_name' => $author ? fullname($author) : get_string('unknownuser'),
                 'timecreated' => (int) $n->timecreated,
             ];
         }

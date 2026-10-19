@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * WS: grade_exam — grade a submitted student exam && update portfolio.
+ * WS: grade_exam — grade a submitted student exam and update portfolio.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -54,7 +54,7 @@ class grade_exam extends external_api {
                 'score'     => (float) $studentexam->score,
                 'max_score' => 10.0,
                 'percent'   => round((float) $studentexam->score * 10.0, 1),
-                'message'   => 'Este examen ya fue calificado.',
+                'message'   => get_string('error_exam_already_graded', 'local_evalia'),
             ];
         }
 
@@ -67,14 +67,14 @@ class grade_exam extends external_api {
         // this WS could still do it).
         if (empty($params['answers']) || $params['answers'] === '{}' || $params['answers'] === '[]') {
             return ['success' => false, 'score' => 0.0, 'max_score' => 10.0, 'percent' => 0.0,
-                    'message' => 'Sin respuestas guardadas.'];
+                    'message' => get_string('error_no_answers', 'local_evalia')];
         }
 
         // Load assigned question IDs.
         $questionids = json_decode($studentexam->question_ids ?? '[]', true);
         if (empty($questionids)) {
             return ['success' => false, 'score' => 0.0, 'max_score' => 10.0, 'percent' => 0.0,
-                    'message' => 'El examen no tiene preguntas asignadas.'];
+                    'message' => get_string('error_exam_no_questions', 'local_evalia')];
         }
 
         // Load question bank records (stem + topic needed for feedback message).
@@ -124,7 +124,7 @@ class grade_exam extends external_api {
             ];
         }
 
-        // Decode student answers && normalize keys to strings.
+        // Decode student answers and normalize keys to strings.
         $studentanswersraw = json_decode($params['answers'], true) ?? [];
         $studentanswers = [];
         foreach ((array) $studentanswersraw as $k => $v) {
@@ -182,7 +182,7 @@ class grade_exam extends external_api {
         }
 
         // Persist essay AI feedback inside the answers JSON so it survives to
-        // the Telegram feedback && graded-view rendering steps.
+        // the Telegram feedback and graded-view rendering steps.
         // Format: answers["__essay_eval__"] = {"qid": {"score": 0.8, "feedback": "..."}}.
         $essayevals = [];
         if (!isset($engineresp['error']) && !empty($engineresp['details'])) {
@@ -221,7 +221,7 @@ class grade_exam extends external_api {
                 } else if ($eq['type'] === 'shortanswer') {
                     $correctness[(int)$eq['id']] = ($studentans === strtolower(trim($eq['correct_answer'])));
                 } else {
-                    // Essay && unknown types: cannot grade without AI.
+                    // Essay and unknown types: cannot grade without AI.
                     $correctness[(int)$eq['id']] = false;
                 }
             }
@@ -299,7 +299,7 @@ class grade_exam extends external_api {
             'score'     => $score10,
             'max_score' => 10.0,
             'percent'   => $percent,
-            'message'   => 'Examen calificado: ' . number_format($score10, 1) . ' / 10.0',
+            'message'   => get_string('exam_graded_result', 'local_evalia', number_format($score10, 1)),
         ];
     }
 

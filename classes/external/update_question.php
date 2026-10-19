@@ -87,7 +87,7 @@ class update_question extends external_api {
 
         $DB->update_record('local_evalia_question_bank', $update);
 
-        return ['success' => true, 'message' => 'Pregunta actualizada.'];
+        return ['success' => true, 'message' => get_string('question_updated_ok', 'local_evalia')];
     }
 
     /**
@@ -96,7 +96,7 @@ class update_question extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether update succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

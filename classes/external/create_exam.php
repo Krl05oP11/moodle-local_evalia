@@ -102,7 +102,7 @@ class create_exam extends external_api {
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
 
-        // Verify rubric exists && belongs to this course.
+        // Verify rubric exists and belongs to this course.
         $DB->get_record(
             'local_evalia_rubrics',
             ['id' => $params['rubricid'], 'courseid' => $params['courseid']],
@@ -113,7 +113,7 @@ class create_exam extends external_api {
         // Validate counts.
         $total = $params['basic_count'] + $params['medium_count'] + $params['advanced_count'];
         if ($total < 1) {
-            return ['success' => false, 'examid' => 0, 'message' => 'El examen debe tener al menos 1 pregunta.'];
+            return ['success' => false, 'examid' => 0, 'message' => get_string('error_exam_min_questions', 'local_evalia')];
         }
 
         $now    = time();
@@ -142,7 +142,7 @@ class create_exam extends external_api {
             $DB->set_field('local_evalia_exams', 'grade_itemid', $gradeitemid, ['id' => $examid]);
         }
 
-        return ['success' => true, 'examid' => $examid, 'message' => 'Examen creado correctamente.'];
+        return ['success' => true, 'examid' => $examid, 'message' => get_string('exam_created_ok', 'local_evalia')];
     }
 
     /**
@@ -152,7 +152,7 @@ class create_exam extends external_api {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether creation succeeded'),
             'examid'  => new external_value(PARAM_INT, 'New exam ID (0 on failure)'),
-            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

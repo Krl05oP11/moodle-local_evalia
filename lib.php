@@ -129,7 +129,7 @@ function local_evalia_create_exam_calendar_event(\stdClass $exam, \moodle_databa
  * Create or update a Moodle gradebook item for an EVAL-IA exam.
  *
  * Creates a manual grade item (idnumber = evalia_exam_{examid}) the first time.
- * Optionally records a student grade when $userid && $grade are provided.
+ * Optionally records a student grade when $userid and $grade are provided.
  *
  * @param int        $examid    Row ID from evalia_exams
  * @param int        $courseid
@@ -187,7 +187,7 @@ function local_evalia_grade_item_update(
 }
 
 /**
- * Build the per-question breakdown for a student exam && send pedagogical
+ * Build the per-question breakdown for a student exam and send pedagogical
  * feedback to the student via Telegram (non-blocking — engine queues it).
  *
  * Called from publish_grade / publish_all_grades AFTER teacher approval.
@@ -359,8 +359,7 @@ function local_evalia_raw_engine_request(string $endpoint, ?array $data = null, 
     }
 
     if (empty($engineurl)) {
-        return ['error' => 'EVAL-IA engine URL not configured. '
-            . 'Set it under Site administration → Plugins → Local plugins → EVAL-IA.'];
+        return ['error' => get_string('error_engine_not_configured', 'local_evalia')];
     }
 
     $url = rtrim($engineurl, '/') . $endpoint;

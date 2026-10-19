@@ -74,7 +74,7 @@ class publish_grade extends external_api {
         if ($se->status !== 'graded') {
             return [
                 'success' => false,
-                'message' => 'El examen no está en estado "calificado" (estado actual: ' . $se->status . ').',
+                'message' => get_string('error_exam_not_graded', 'local_evalia', $se->status),
             ];
         }
 
@@ -105,11 +105,11 @@ class publish_grade extends external_api {
         // Send pedagogical feedback to student via Telegram (non-blocking).
         local_evalia_send_feedback((int) $se->id, $DB);
 
-        return ['success' => true, 'message' => 'Nota publicada y alumno notificado por Telegram.'];
+        return ['success' => true, 'message' => get_string('grade_published_notified', 'local_evalia')];
     }
 
     /**
-     * Recalculate avg_grade && total_exams for a student's portfolio
+     * Recalculate avg_grade and total_exams for a student's portfolio
      * based only on published exams.
      *
      * @param int $userid User ID.
@@ -157,7 +157,7 @@ class publish_grade extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether publish succeeded'),
-            'message' => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message' => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

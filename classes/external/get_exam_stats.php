@@ -114,7 +114,7 @@ class get_exam_stats extends external_api {
         $passcount = count(array_filter($gradedscores, fn($s) => $s >= 6.0));
 
         // 3. Most-failed questions.
-        // Scan all graded exams' answers && compare to correct answers.
+        // Scan all graded exams' answers and compare to correct answers.
         $failcounts = [];   // Question_id → fail count.
 
         $gradedrows = array_filter((array) $all, fn($r) => $r->status === 'graded');
@@ -204,9 +204,9 @@ class get_exam_stats extends external_api {
         }
 
         $difficultylabels = [
-            'basic'    => 'Básica',
-            'medium'   => 'Media',
-            'advanced' => 'Avanzada',
+            'basic'    => get_string('difficulty_basic', 'local_evalia'),
+            'medium'   => get_string('difficulty_medium', 'local_evalia'),
+            'advanced' => get_string('difficulty_advanced', 'local_evalia'),
         ];
 
         arsort($failmap);
@@ -215,7 +215,7 @@ class get_exam_stats extends external_api {
             $q = $questiondata[$qid] ?? null;
             $topfailed[] = [
                 'question_id' => $qid,
-                'stem'        => $q ? format_text($q->stem, FORMAT_PLAIN) : '(pregunta eliminada)',
+                'stem'        => $q ? format_text($q->stem, FORMAT_PLAIN) : get_string('stats_question_deleted', 'local_evalia'),
                 'topic'       => $q ? ($q->topic ?? '') : '',
                 'difficulty'  => $q ? ($difficultylabels[$q->difficulty ?? ''] ?? ucfirst($q->difficulty ?? '')) : '',
                 'fail_count'  => $fc,

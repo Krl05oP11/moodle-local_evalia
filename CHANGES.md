@@ -4,6 +4,22 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Changed
+- **Every user-visible string now comes from the language packs.** The
+  student exam JS, the teacher panel, `student_exam.php`, `setup.php`,
+  `lib.php`, the CSV export and the web service messages had hardcoded
+  Spanish text; a site in English showed Spanish UI. 43 new keys in
+  `en`/`es`/`pt_br`; the teacher panel's string fallbacks are now English.
+  Dates follow the page language instead of a fixed `es-AR` locale; the CSV
+  date uses `userdate()` in the user's timezone.
+- **The "exam submitted" Telegram notification to teachers uses each
+  teacher's language and timezone.**
+- Raw values shown as labels are localised (rubric weights, difficulty and
+  status badges).
+- Comments and web service descriptions: Spanish comments translated, and
+  `&&`/`||` used as prose turned back into "and"/"or" (also in 4 `lang/en`
+  strings, e.g. the plugin description).
+
 ### Fixed
 - **Student exam submission showed no confirmation and re-enabled the
   submit button.** `showToast()` in `evalia_student.js` called the Bootstrap 5

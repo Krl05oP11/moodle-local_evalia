@@ -68,7 +68,7 @@ class add_portfolio_note extends external_api {
         $text = trim($params['note_text']);
         if ($text === '') {
             return ['success' => false, 'noteid' => 0, 'timecreated' => 0,
-                    'message' => 'La observación no puede estar vacía.'];
+                    'message' => get_string('error_note_required', 'local_evalia')];
         }
 
         $now    = time();
@@ -97,7 +97,7 @@ class add_portfolio_note extends external_api {
             'success'     => true,
             'noteid'      => (int) $noteid,
             'timecreated' => $now,
-            'message'     => 'Observación guardada.',
+            'message'     => get_string('portfolio_note_saved', 'local_evalia'),
         ];
     }
 

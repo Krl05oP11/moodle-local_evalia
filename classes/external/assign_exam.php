@@ -16,7 +16,7 @@
 
 /**
  * WS: assign_exam — samples a unique question set per student via saipa-engine
- * && inserts one row in evalia_student_exams per student.
+ * and inserts one row in evalia_student_exams per student.
  *
  * Anti-copying guarantee: each student gets a different random sample drawn
  * independently by the engine's pure-Python sampler.
@@ -102,7 +102,7 @@ class assign_exam extends external_api {
                 'success'  => false,
                 'assigned' => 0,
                 'skipped'  => 0,
-                'message'  => 'No hay alumnos inscriptos con capacidad de rendir exámenes.',
+                'message'  => get_string('exam_assign_no_students', 'local_evalia'),
             ];
         }
 
@@ -204,9 +204,9 @@ class assign_exam extends external_api {
             ];
         }
 
-        $msg = 'Asignados: ' . $assigned . '. Omitidos (ya tenían examen): ' . $skipped . '.';
+        $msg = get_string('exam_assign_summary', 'local_evalia', (object) ['assigned' => $assigned, 'skipped' => $skipped]);
         if ($failed > 0) {
-            $msg .= ' Sin asignar (banco insuficiente): ' . $failed . '.';
+            $msg .= ' ' . get_string('exam_assign_not_assigned', 'local_evalia', $failed);
         }
 
         return [
@@ -225,7 +225,7 @@ class assign_exam extends external_api {
             'success'  => new external_value(PARAM_BOOL, 'Whether assignment succeeded'),
             'assigned' => new external_value(PARAM_INT, 'Students who received a new exam'),
             'skipped'  => new external_value(PARAM_INT, 'Students skipped (already had exam)'),
-            'message'  => new external_value(PARAM_TEXT, 'Status || error message'),
+            'message'  => new external_value(PARAM_TEXT, 'Status or error message'),
         ]);
     }
 }

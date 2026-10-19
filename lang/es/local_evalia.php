@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Cadenas de idioma español para local_evalia.
+ * Spanish language strings for local_evalia.
  *
  * @package    local_evalia
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Metadatos del plugin.
+// Plugin metadata.
 
 $string['btn_close']                  = 'Cerrar';
 $string['btn_copy']                   = 'Copiar';
@@ -67,12 +67,16 @@ $string['difficulty_advanced']         = 'Avanzada';
 $string['difficulty_basic']            = 'Básica';
 $string['difficulty_medium']           = 'Media';
 $string['error_already_assigned']   = 'Este alumno ya tiene un examen asignado.';
+$string['error_engine_not_configured'] = 'La URL del motor de EVAL-IA no está configurada. Configúrela en Administración del sitio → Extensiones → Extensiones locales → EVAL-IA.';
 $string['error_engine_unreachable'] = 'No se pudo conectar con el motor de IA. Verifique la configuración del engine SAIPA.';
+$string['error_exam_already_graded']  = 'Este examen ya fue calificado.';
 $string['error_exam_assign']          = 'Error al asignar exámenes.';
 $string['error_exam_create']          = 'Error al crear el examen.';
 $string['error_exam_first']           = 'Primero cree un examen.';
 $string['error_exam_min_questions']   = 'El examen debe tener al menos 1 pregunta.';
 $string['error_exam_name_required']   = 'Ingrese un nombre para el examen.';
+$string['error_exam_no_questions']    = 'El examen no tiene preguntas asignadas.';
+$string['error_exam_not_graded']      = 'El examen no está en estado "calificado" (estado actual: {$a}).';
 $string['error_exam_window_order']    = 'El cierre debe ser posterior a la apertura.';
 $string['error_grade_all']            = 'Error al calificar.';
 $string['error_grade_exams']          = 'Error al calificar los exámenes.';
@@ -85,6 +89,7 @@ $string['error_load_portfolio']       = 'Error al cargar legajos.';
 $string['error_load_rubric']          = 'Error al cargar la rúbrica.';
 $string['error_load_sources']         = 'Error al cargar fuentes.';
 $string['error_load_students']        = 'Error al cargar alumnos.';
+$string['error_no_answers']           = 'Sin respuestas guardadas.';
 $string['error_no_rubric']          = 'No se encontró una rúbrica activa para este curso.';
 $string['error_no_rubric_to_save']    = 'No hay rúbrica para guardar.';
 $string['error_not_enough_bank']    = 'El banco de preguntas no tiene suficientes preguntas aprobadas para completar la estructura solicitada.';
@@ -107,11 +112,18 @@ $string['error_select_qtype']         = 'Seleccione al menos un tipo de pregunta
 $string['evalia:manage'] = 'Gestionar evaluaciones EVAL-IA (docente)';
 $string['evalia:take']   = 'Rendir exámenes EVAL-IA (alumno)';
 $string['exam:ai_score_label']          = 'IA: {$a}%';
+$string['exam:already_submitted']     = 'El examen ya fue enviado anteriormente.';
 $string['exam:btn_grade_ai']            = '⚡ Calificar con IA';
 $string['exam:btn_submit_exam']         = '📤 Enviar examen';
+$string['exam:connection_error']      = 'Error de conexión.';
 $string['exam:correct_answer_label']    = 'Respuesta correcta:';
+$string['exam:grade_confirm']         = '¿Calificar el examen de este alumno con IA?';
+$string['exam:grade_label']           = 'Nota:';
 $string['exam:grade_panel_desc']        = 'Al confirmar, el engine de IA evaluará las respuestas del alumno y asignará una nota automáticamente.';
 $string['exam:grade_panel_title']       = '📝 Calificar examen';
+$string['exam:graded_heading']        = '✅ Examen calificado';
+$string['exam:invalid_answers']       = 'El formato de respuestas no es válido.';
+$string['exam:not_open_yet']          = 'El examen aún no está disponible. Podés rendirlo desde: {$a}';
 $string['exam:page_title']              = '{$a} — EVAL-IA';
 $string['exam:placeholder_essay']       = 'Redactá tu respuesta aquí';
 $string['exam:placeholder_numerical']   = 'Ingresá un valor numérico';
@@ -128,14 +140,25 @@ $string['exam:status_assigned']         = 'Asignado (aún no iniciado)';
 $string['exam:status_graded']           = 'Calificado';
 $string['exam:status_started']          = 'En progreso';
 $string['exam:status_submitted_review'] = 'Enviado — pendiente de calificación';
+$string['exam:submit_confirm']        = '¿Estás seguro de que querés enviar el examen? No podrás modificar tus respuestas después.';
+$string['exam:submit_network_error']  = 'Error de red al enviar el examen. Intentá de nuevo.';
+$string['exam:submit_status']         = 'Enviando tus respuestas...';
+$string['exam:submit_status_auto']    = 'Tiempo agotado — enviando tus respuestas...';
+$string['exam:submit_success']        = '✅ Examen enviado correctamente.';
 $string['exam:submitted_grade_msg']     = 'Tu nota: <strong>{$a} / 10.0</strong>. El docente ya calificó tu examen.';
 $string['exam:submitted_heading']       = '✅ Examen enviado';
 $string['exam:submitted_pending_msg']   = 'Tu examen fue recibido correctamente. El docente lo revisará próximamente.';
+$string['exam:submitting']            = '⏳ Enviando...';
+$string['exam:submitting_auto']       = '⏳ Enviando automáticamente...';
 $string['exam:timer_autosubmit']        = 'El examen se envía automáticamente al llegar a 00:00.';
 $string['exam:timer_remaining']         = '⏱ Tiempo restante:';
+$string['exam:window_closed']         = 'El período de rendición ya cerró (cerró el {$a}).';
 $string['exam_advanced_count']   = 'Preguntas avanzadas';
 $string['exam_assign_all']       = 'Asignar a todos los alumnos';
+$string['exam_assign_no_students']    = 'No hay alumnos inscriptos con capacidad de rendir exámenes.';
+$string['exam_assign_not_assigned']   = 'Sin asignar (banco insuficiente): {$a}.';
 $string['exam_assign_partial']   = 'Se asignó examen a {$a} alumno(s) antes de perder contacto con el motor. Volvé a ejecutar esta acción cuando esté disponible para asignar el resto.';
+$string['exam_assign_summary']        = 'Asignados: {$a->assigned}. Omitidos (ya tenían examen): {$a->skipped}.';
 $string['exam_assigned']         = 'Exámenes asignados. Cada alumno recibió un conjunto único de preguntas.';
 $string['exam_assigned_result']       = 'Asignados: {$a->assigned} alumno(s). Omitidos: {$a->skipped}.';
 $string['exam_assigning']        = 'Asignando exámenes únicos por alumno...';
@@ -146,6 +169,7 @@ $string['exam_create']           = 'Crear Examen';
 $string['exam_created_ok']            = 'Examen creado. Asígnelo a los alumnos cuando el banco esté listo.';
 $string['exam_expired_auto']     = 'Tiempo agotado — el examen fue enviado automáticamente.';
 $string['exam_grade_link_title']      = 'Calificar examen enviado';
+$string['exam_graded_result']         = 'Examen calificado: {$a} / 10.0';
 $string['exam_instructions']     = 'Instrucciones para los alumnos';
 $string['exam_instructions_placeholder'] = 'Lea cada pregunta con atención...';
 $string['exam_medium_count']     = 'Preguntas medias';
@@ -190,7 +214,9 @@ $string['gen_questions_title']        = '✨ Generar Preguntas con IA';
 $string['gen_questions_types_label']  = 'Tipos de pregunta';
 $string['grade_all_result']           = '✔ {$a->graded} calificado(s)';
 $string['grade_all_skipped_suffix']   = ' · {$a} omitido(s)';
+$string['grade_published_notified']   = 'Nota publicada y alumno notificado por Telegram.';
 $string['grade_published_ok']         = 'Nota publicada en el libro de calificaciones.';
+$string['grades_published_notified']  = '{$a} nota(s) publicada(s) y alumnos notificados por Telegram.';
 $string['grades_published_result']    = '✅ {$a} nota(s) publicada(s) en el gradebook.';
 $string['grading_in_progress']        = '⏳ Calificando...';
 $string['index_result_errors']        = '{$a} error(es)';
@@ -215,11 +241,26 @@ $string['material_title']             = 'Material del Curso';
 $string['nav_my_exams'] = '📝 Mis Exámenes';
 $string['no_exams_assigned_yet']      = 'Este alumno no tiene exámenes asignados aún.';
 $string['note_placeholder']           = 'Escribir observación...';
+$string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Examen enviado</b>
+
+<b>Alumno:</b> {$a->student}
+<b>Curso:</b> {$a->course}
+<b>Examen:</b> {$a->exam}
+<b>Hora:</b> {$a->time}
+
+Ingresá al panel docente para calificarlo con IA.';
+$string['notify_student_fallback']    = 'Un alumno';
 $string['plugindescription'] = 'Evaluación inteligente con IA para cursos Moodle. Genera rúbricas, bancos de preguntas y exámenes únicos por alumno usando RAG sobre el material del curso.';
 $string['pluginname'] = 'EVAL-IA';
 $string['portfolio_average_label']    = 'Promedio: {$a}';
 $string['portfolio_avg_grade']      = 'Nota prom.';
 $string['portfolio_coming_soon']    = 'Legajos — Disponible en Fase 2';
+$string['portfolio_csv_avg_grade']    = 'Nota Promedio (0-10)';
+$string['portfolio_csv_email']        = 'Email';
+$string['portfolio_csv_fullname']     = 'Apellido y Nombre';
+$string['portfolio_csv_last_activity'] = 'Última Actividad';
+$string['portfolio_csv_last_note']    = 'Última Observación del Docente';
+$string['portfolio_csv_total_exams']  = 'Exámenes Tomados';
 $string['portfolio_description']    = 'Aquí estarán los legajos de alumnos con historial de exámenes, calificaciones y observaciones del docente.';
 $string['portfolio_exam_history']   = 'Historial de Exámenes';
 $string['portfolio_export_csv']  = 'Exportar CSV';
@@ -234,6 +275,7 @@ $string['portfolio_observations']   = 'Observaciones';
 $string['portfolio_select_student'] = 'Seleccione un alumno de la lista para ver su legajo.';
 $string['portfolio_students']       = 'Legajos de Alumnos';
 $string['portfolio_total_exams']    = 'Exámenes';
+$string['privacy:feedback_log']       = 'Registro de retroalimentación';
 $string['privacy:metadata:evalia_exams']                            = 'Plantillas de examen creadas por docentes. Solo se almacena el ID del docente (created_by).';
 $string['privacy:metadata:evalia_exams:created_by']                 = 'ID del docente que creó el examen.';
 $string['privacy:metadata:evalia_feedback_log']                     = 'Registro de mensajes de retroalimentación generados por IA y enviados a los alumnos después de la calificación.';
@@ -266,6 +308,7 @@ $string['privacy:metadata:saipa_engine:answers']                    = 'Texto de 
 $string['privacy:metadata:saipa_engine:question_stems']             = 'Texto de las preguntas utilizado para la evaluación por IA.';
 $string['prompt_saved_ok']            = '✔ Guardado';
 $string['prompt_saving']              = 'Guardando...';
+$string['publish_none_pending']       = 'No hay exámenes calificados pendientes de publicación.';
 $string['publishing_all']             = '⏳ Publicando...';
 $string['publishing_ellipsis']        = '⏳...';
 $string['qtype_essay']                 = 'Ensayo';
@@ -279,6 +322,7 @@ $string['qtype_table_shortanswer']    = 'Corta';
 $string['qtype_truefalse']             = 'Verdadero/Falso';
 $string['question_approved_ok']       = 'Pregunta aprobada.';
 $string['question_rejected_ok']       = 'Pregunta rechazada.';
+$string['question_updated_ok']        = 'Pregunta actualizada.';
 $string['questions_approve']           = 'Aprobar';
 $string['questions_edit']              = 'Editar';
 $string['questions_empty_filtered']   = 'No hay preguntas con los filtros seleccionados. Active una rúbrica y use <strong>Generar Preguntas</strong> por ítem.';
@@ -297,6 +341,7 @@ $string['questions_status_draft']      = 'Pendiente de revisión';
 $string['questions_status_rejected']   = 'Rechazada';
 $string['rubric_activate']         = 'Activar';
 $string['rubric_activated']        = 'Rúbrica activada. Ya puede generar preguntas.';
+$string['rubric_default_topic']       = 'Tema {$a}';
 $string['rubric_empty_state']         = 'No hay rúbrica para este curso. Haga clic en <strong>Generar Rúbrica con IA</strong> para comenzar.';
 $string['rubric_generate']         = 'Generar Rúbrica con IA';
 $string['rubric_generated_ok']        = 'Rúbrica generada. Revísela y active cuando esté lista.';
@@ -364,6 +409,7 @@ $string['settings:weight_medium_desc']         = 'Puntos otorgados por cada preg
 $string['sources_badge_count']        = '{$a->checked}/{$a->total} fuentes';
 $string['sources_loading']            = 'Cargando fuentes...';
 $string['sources_none_indexed']       = 'No hay material indexado para este curso.';
+$string['sources_page_fallback']      = 'Página {$a}';
 $string['sources_select_all']         = 'Seleccionar todas';
 $string['sources_select_none']        = 'Ninguna';
 $string['sources_subtitle']           = '— filtrar qué capítulos usa la IA';
@@ -378,6 +424,7 @@ $string['stat_total']                 = 'Total';
 $string['stats_distribution_title']   = 'Distribución de notas';
 $string['stats_failed_title']         = 'Preguntas más falladas';
 $string['stats_no_data']              = 'Sin datos aún.';
+$string['stats_question_deleted']     = '(pregunta eliminada)';
 $string['stats_title']                = 'Estadísticas del Examen';
 $string['student:btn_continue']         = '▶️ Continuar →';
 $string['student:btn_detail']           = 'Ver detalle →';
@@ -421,6 +468,9 @@ $string['view_exam_title']            = 'Ver examen';
 $string['weight_high']             = 'Alto';
 $string['weight_low']              = 'Bajo';
 $string['weight_medium']           = 'Medio';
+$string['wizard_badge_advanced']      = 'AVANZADO';
+$string['wizard_badge_openai']        = 'COMPATIBLE CON OPENAI';
+$string['wizard_badge_selfhosted']    = 'AUTOALOJADO';
 $string['wizard_btn_back']              = '← Volver';
 $string['wizard_btn_next']              = 'Siguiente →';
 $string['wizard_btn_retry']             = '↻ Reintentar';
