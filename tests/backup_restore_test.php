@@ -117,9 +117,10 @@ final class backup_restore_test extends \advanced_testcase {
      * Backs up the course and restores it into a new course.
      *
      * @param bool $users Whether the backup includes user data.
-     * @return int Id of the new course.
+     * @param int|null $targetcourseid Restore into this course after deleting its content, instead of a new course.
+     * @return int Id of the course restored into.
      */
-    private function backup_and_restore(bool $users): int {
+    private function backup_and_restore(bool $users, ?int $targetcourseid = null): int {
         global $CFG, $USER;
         $CFG->keeptempdirectoriesonbackup = true;
 
@@ -136,15 +137,20 @@ final class backup_restore_test extends \advanced_testcase {
         $backupid = $bc->get_backupid();
         $bc->destroy();
 
-        $newcourseid = \restore_dbops::create_new_course('Restored', 'restored' . (int) $users, $this->course->category);
+        $newcourseid = $targetcourseid
+            ?: \restore_dbops::create_new_course('Restored', 'restored' . (int) $users, $this->course->category);
         $rc = new \restore_controller(
             $backupid,
             $newcourseid,
             \backup::INTERACTIVE_NO,
             \backup::MODE_GENERAL,
             $USER->id,
-            \backup::TARGET_NEW_COURSE
+            $targetcourseid ? \backup::TARGET_EXISTING_DELETING : \backup::TARGET_NEW_COURSE
         );
+        if ($targetcourseid) {
+            // Into an existing course, Moodle restores course-level plugin data only with this setting.
+            $rc->get_plan()->get_setting('overwrite_conf')->set_value(true);
+        }
         $this->assertTrue($rc->execute_precheck());
         $rc->execute_plan();
         $rc->destroy();
@@ -196,5 +202,76 @@ final class backup_restore_test extends \advanced_testcase {
         $this->assertFalse($DB->record_exists('local_evalia_student_exams', ['examid' => $exam->id]));
         $this->assertFalse($DB->record_exists('local_evalia_portfolio', ['courseid' => $newcourseid]));
         $this->assertFalse($DB->record_exists('local_evalia_portfolio_notes', ['courseid' => $newcourseid]));
+    }
+
+    /**
+     * A question whose rubric topic was deleted (the rubric was regenerated) is left out, and its
+     * options do not end up on another question.
+     */
+    public function test_question_without_topic_does_not_lend_its_options(): void {
+        global $DB;
+        $rubricid = $DB->get_field('local_evalia_rubrics', 'id', ['courseid' => $this->course->id]);
+        $ghost = $DB->insert_record('local_evalia_question_bank', (object) [
+            'courseid' => $this->course->id, 'rubricid' => $rubricid, 'rubric_item_id' => 999999,
+            'question_type' => 'mcq', 'stem' => 'Orphan', 'difficulty' => 'basic', 'topic' => 'Gone',
+            'status' => 'approved', 'timecreated' => time(), 'timemodified' => time(),
+        ]);
+        $DB->insert_record('local_evalia_question_options', (object) [
+            'questionid' => $ghost, 'option_text' => 'Ghost', 'is_correct' => 1, 'sortorder' => 1,
+        ]);
+
+        $newcourseid = $this->backup_and_restore(false);
+
+        $this->assertEquals(2, $DB->count_records('local_evalia_question_bank', ['courseid' => $newcourseid]));
+        $where = $DB->sql_compare_text('option_text') . ' = ?';
+        $ghosts = $DB->count_records_select('local_evalia_question_options', $where, ['Ghost']);
+        $this->assertEquals(1, $ghosts, 'Only the original Ghost option: none attached to a restored question.');
+    }
+
+    /**
+     * The exam's calendar event is linked to the restored exam, so it is not created twice.
+     */
+    public function test_calendar_event_follows_the_exam(): void {
+        global $DB;
+        $DB->set_field('local_evalia_exams', 'timeopen', time() + DAYSECS, ['id' => $this->examid]);
+        $this->assertNotEmpty(local_evalia_create_exam_calendar_event(
+            $DB->get_record('local_evalia_exams', ['id' => $this->examid]),
+            $DB
+        ));
+
+        $newcourseid = $this->backup_and_restore(false);
+
+        $exam = $DB->get_record('local_evalia_exams', ['courseid' => $newcourseid], '*', MUST_EXIST);
+        $this->assertTrue($DB->record_exists('event', [
+            'courseid' => $newcourseid, 'component' => 'local_evalia', 'instance' => $exam->id,
+        ]));
+        $this->assertSame(
+            (int) $DB->get_field('event', 'id', ['courseid' => $newcourseid, 'component' => 'local_evalia']),
+            local_evalia_create_exam_calendar_event($exam, $DB)
+        );
+    }
+
+    /**
+     * Deleting the course's content removes EVAL-IA's data; restoring into it brings it back once.
+     */
+    public function test_delete_contents_and_restore(): void {
+        global $DB;
+        $this->backup_and_restore(true, $this->course->id);
+
+        $this->assertEquals(1, $DB->count_records('local_evalia_rubrics', ['courseid' => $this->course->id]));
+        $this->assertEquals(2, $DB->count_records('local_evalia_question_bank', ['courseid' => $this->course->id]));
+        $this->assertEquals(1, $DB->count_records('local_evalia_exams', ['courseid' => $this->course->id]));
+        $this->assertEquals(1, $DB->count_records('local_evalia_student_exams'));
+        $this->assertEquals(1, $DB->count_records('local_evalia_portfolio_notes'));
+
+        remove_course_contents($this->course->id, false);
+        foreach (
+            ['local_evalia_rubrics', 'local_evalia_question_bank', 'local_evalia_exams', 'local_evalia_portfolio',
+                'local_evalia_portfolio_notes'] as $table
+        ) {
+            $this->assertFalse($DB->record_exists($table, ['courseid' => $this->course->id]), $table);
+        }
+        $this->assertEquals(0, $DB->count_records('local_evalia_student_exams'));
+        $this->assertEquals(0, $DB->count_records('local_evalia_question_options'));
     }
 }

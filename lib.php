@@ -444,3 +444,29 @@ function local_evalia_raw_engine_request(string $endpoint, ?array $data = null, 
 function local_evalia_engine_request(string $endpoint, ?array $data = null, int $timeout = 60): array {
     return local_evalia_raw_engine_request('/eval' . $endpoint, $data, $timeout);
 }
+
+/**
+ * Deletes all of EVAL-IA's data about a course.
+ *
+ * Called when the course's content is deleted (course deletion, or "delete contents" before a
+ * restore). The exams' grade items and calendar events are core data, removed by Moodle itself.
+ *
+ * @param int $courseid Course id.
+ */
+function local_evalia_delete_course_data(int $courseid): void {
+    global $DB;
+    $params = ['courseid' => $courseid];
+    $exams = "SELECT id FROM {local_evalia_exams} WHERE courseid = :courseid";
+    $DB->delete_records_select('local_evalia_student_exams', "examid IN ($exams)", $params);
+    $DB->delete_records_select('local_evalia_feedback_log', "examid IN ($exams)", $params);
+    $questions = "SELECT id FROM {local_evalia_question_bank} WHERE courseid = :courseid";
+    $DB->delete_records_select('local_evalia_question_options', "questionid IN ($questions)", $params);
+    $rubrics = "SELECT id FROM {local_evalia_rubrics} WHERE courseid = :courseid";
+    $DB->delete_records_select('local_evalia_rubric_items', "rubricid IN ($rubrics)", $params);
+    foreach (
+        ['local_evalia_exams', 'local_evalia_question_bank', 'local_evalia_rubrics', 'local_evalia_portfolio',
+            'local_evalia_portfolio_notes'] as $table
+    ) {
+        $DB->delete_records($table, $params);
+    }
+}
