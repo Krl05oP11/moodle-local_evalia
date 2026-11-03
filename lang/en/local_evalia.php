@@ -42,7 +42,7 @@ $string['btn_save_prompt']            = 'Save prompt';
 $string['btn_workflow']               = 'Workflow';
 $string['calendar_exam_event']        = 'Exam: {$a}';
 $string['chat_input_placeholder']     = 'Type a question...';
-$string['chat_welcome_msg']           = "Hi! I'm your EVAL-IA assistant. I can guide you through each step of the process: indexing material, generating rubrics, building questions, creating and assigning exams. What step are you on, or how can I help?";
+$string['chat_welcome_msg']           = 'Hi! I\'m your EVAL-IA assistant. I can guide you through each step of the process: indexing material, generating rubrics, building questions, creating and assigning exams. What step are you on, or how can I help?';
 $string['confirm_grade_all']          = 'Grade {$a} exam(s) with AI? This will send pedagogical feedback to each student via Telegram.';
 $string['confirm_publish_all']        = 'Publish the grades of {$a} student(s) to the gradebook?';
 $string['confirm_reset_prompt']       = 'Restore the default prompt? Saved changes will be lost.';
@@ -230,7 +230,7 @@ $string['link_view_star']             = '★ View';
 $string['loading_ellipsis']           = 'Loading...';
 $string['loading_exam_history']       = 'Loading history...';
 $string['loading_observations']       = 'Loading observations...';
-$string['material_how_desc']          = "The AI reads the material the teacher uploaded to the course to generate relevant questions and explain students' mistakes using the real syllabus as context.";
+$string['material_how_desc']          = 'The AI reads the material the teacher uploaded to the course to generate relevant questions and explain students\' mistakes using the real syllabus as context.';
 $string['material_how_title']         = 'How does it work?';
 $string['material_indexing']          = 'Indexing course pages, PDFs and presentations (PPTX) — this can take several minutes...';
 $string['material_step1']             = 'Add content to the course: a <strong>Page</strong> (text/HTML) or a <strong>File</strong> (PDF) from the <em>Add an activity or resource</em> menu.';
@@ -362,8 +362,7 @@ $string['rubric_status_draft']     = 'Draft';
 $string['settings:engine_token']               = 'Engine authentication token';
 $string['settings:engine_token_desc']          = 'Bearer token configured on the engine. Leave blank to inherit SAIPA\'s token.';
 $string['settings:engine_url']                 = 'AI Engine URL';
-$string['settings:engine_url_desc']            = 'Base URL of the engine, e.g. <code>http://localhost:8052</code> or '
-    . '<code>https://engine.example.edu</code>. Leave blank to inherit SAIPA\'s configuration.';
+$string['settings:engine_url_desc']            = 'Base URL of the engine, e.g. <code>http://localhost:8052</code> or <code>https://engine.example.edu</code>. Leave blank to inherit SAIPA\'s configuration.';
 $string['settings:exam_default_advanced']      = 'Default advanced questions';
 $string['settings:exam_default_advanced_desc'] = 'Initial number of advanced questions when creating an exam.';
 $string['settings:exam_default_basic']         = 'Default basic questions';
@@ -373,30 +372,23 @@ $string['settings:exam_default_medium_desc']   = 'Initial number of medium quest
 $string['settings:exam_default_time_limit']      = 'Default time limit (minutes)';
 $string['settings:exam_default_time_limit_desc'] = 'Initial value of the time-limit field. Use 0 for no limit.';
 $string['settings:feedback_telegram']          = 'Send feedback via Telegram';
-$string['settings:feedback_telegram_desc']     = 'When grading an exam, sends the student their result and pedagogical '
-    . 'analysis via Telegram. Requires the student to have linked their Telegram account in SAIPA.';
+$string['settings:feedback_telegram_desc']     = 'When grading an exam, sends the student their result and pedagogical analysis via Telegram. Requires the student to have linked their Telegram account in SAIPA.';
 $string['settings:heading_engine']             = '🤖 AI Engine (SAIPA Engine)';
-$string['settings:heading_engine_desc']        = 'URL and token for the AI engine. If left blank, EVAL-IA uses the SAIPA '
-    . 'plugin\'s configuration (if installed). Set these for standalone deployments where SAIPA is not installed.';
+$string['settings:heading_engine_desc']        = 'URL and token for the AI engine. If left blank, EVAL-IA uses the SAIPA plugin\'s configuration (if installed). Set these for standalone deployments where SAIPA is not installed.';
 $string['settings:heading_exam']               = '📝 Exams';
 $string['settings:heading_feedback']           = '💬 Feedback';
 $string['settings:heading_pdf']                = '📄 PDF indexing';
 $string['settings:heading_questions']          = '❓ Question generation';
 $string['settings:heading_rubric']             = '📋 Rubrics';
 $string['settings:heading_weights']            = '⚖️ Difficulty weighting';
-$string['settings:heading_weights_desc']       = 'Points assigned to each question according to its difficulty. The '
-    . 'final grade is calculated as (correct weights / total weights) × 10.';
+$string['settings:heading_weights_desc']       = 'Points assigned to each question according to its difficulty. The final grade is calculated as (correct weights / total weights) × 10.';
 $string['settings:heading_wizard']             = '🚀 Setup Wizard';
-$string['settings:heading_wizard_desc']        = 'Use the wizard to configure the AI engine step by step, with a '
-    . 'real-time connection test.';
+$string['settings:heading_wizard_desc']        = 'Use the wizard to configure the AI engine step by step, with a real-time connection test.';
 $string['settings:launch_wizard']              = '▶ Launch Setup Wizard';
 $string['settings:pdf_page_ranges']            = 'Page ranges per PDF file';
-$string['settings:pdf_page_ranges_desc']       = 'JSON mapping filenames to chapters. Allows indexing each chapter as '
-    . 'an independent source.<br>Format: <code>{"file.pdf": [{"from": 1, "to": 50, "label": "Ch1-Topic"}, ...]}</code>'
-    . '<br>Leave empty to index the whole PDF without splitting.';
+$string['settings:pdf_page_ranges_desc']       = 'JSON mapping filenames to chapters. Allows indexing each chapter as an independent source.<br>Format: <code>{"file.pdf": [{"from": 1, "to": 50, "label": "Ch1-Topic"}, ...]}</code><br>Leave empty to index the whole PDF without splitting.';
 $string['settings:questions_default_count']      = 'Questions per rubric item (default)';
-$string['settings:questions_default_count_desc'] = 'Initial value in the "Generate questions" dialog per rubric item. '
-    . 'Recommended range: 3–10.';
+$string['settings:questions_default_count_desc'] = 'Initial value in the "Generate questions" dialog per rubric item. Recommended range: 3–10.';
 $string['settings:rubric_default_items']       = 'Default number of items';
 $string['settings:rubric_default_items_desc']  = 'Initial value of the field when opening the generation form (range: 5–40).';
 $string['settings:weight_advanced']            = 'Weight — advanced questions';
