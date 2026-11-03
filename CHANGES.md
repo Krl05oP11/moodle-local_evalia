@@ -4,6 +4,33 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Ahead of its Marketplace review (0.4.13, 2026-11-02)
+The local_saipa review (MMR-462) found the issues below in that plugin; the same
+checks were applied here before this plugin's own review.
+
+#### Security
+- Services that take a student id (portfolio notes, exam history) require a
+  student of the course visible to the caller; student lists follow separate
+  groups (`\local_evalia\local\access`). Notes are limited to 5000 characters.
+- grade_exam grades the answers the student submitted, only once submitted; it
+  used to grade, and store, the answers passed in by the caller.
+- submit_exam applies the exam window (5 minutes of grace after closing).
+- index_course no longer reads another user's web service token.
+
+#### Added
+- Course backup and restore of EVAL-IA's data, with question ids remapped in the
+  students' exams and each exam's gradebook column relinked.
+- Moodle 5.0 jobs in the CI.
+
+#### Changed
+- Works without local_saipa installed (no more includes of its lib.php; Telegram
+  ids read through `local_evalia_telegram_id()`).
+- The setup wizard's script is an AMD module (`setup_wizard`), the teacher panel
+  has no inline JavaScript, and the setup and panel CSS moved to `styles.css`,
+  scoped to each page.
+- Prefixed global functions, GPL boilerplate in the template, language strings
+  as single literals.
+
 ### Changed
 - **Every user-visible string now comes from the language packs.** The
   student exam JS, the teacher panel, `student_exam.php`, `setup.php`,
