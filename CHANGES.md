@@ -24,7 +24,8 @@ checks were applied here before this plugin's own review.
 - Course backup and restore of EVAL-IA's data, with question ids remapped in the
   students' exams and each exam's gradebook column and calendar event relinked.
   Deleting a course, or its content before a restore, deletes EVAL-IA's data.
-- Moodle 5.0 jobs in the CI.
+- Supports Moodle 4.4 to 5.3 (`$plugin->supported = [404, 503]`). The CI runs
+  every branch from 4.4 to 5.3, each with its minimum PostgreSQL.
 
 #### Changed
 - Works without local_saipa installed (no more includes of its lib.php; Telegram
