@@ -72,6 +72,8 @@ class publish_all_grades extends external_api {
             '',
             'id, userid, score'
         );
+        // Separate groups: only the exams of the caller's groups.
+        $graded = \local_evalia\local\access::filter_visible_records($context, $graded);
 
         if (empty($graded)) {
             return ['success' => true, 'published' => 0, 'message' => get_string('publish_none_pending', 'local_evalia')];

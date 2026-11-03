@@ -28,6 +28,7 @@ $capabilities = [
 
     // Teacher capability: can manage rubrics, questions, and exams for a course.
     'local/evalia:manage' => [
+        'riskbitmask'  => RISK_PERSONAL | RISK_SPAM,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes'   => [

@@ -68,6 +68,8 @@ class get_student_exam extends external_api {
         }
         if (!$isteacher) {
             require_capability('local/evalia:take', $context);
+        } else if (!$isowner) {
+            \local_evalia\local\access::require_visible_user($context, (int) $studentexam->userid);
         }
 
         if ($studentexam->status === 'not_assigned') {

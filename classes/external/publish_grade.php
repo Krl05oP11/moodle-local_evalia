@@ -70,6 +70,7 @@ class publish_grade extends external_api {
         $context = \context_course::instance($exam->courseid);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
+        \local_evalia\local\access::require_visible_user($context, (int) $se->userid);
 
         if ($se->status !== 'graded') {
             return [

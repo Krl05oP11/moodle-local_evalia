@@ -628,4 +628,32 @@ final class externallib_test extends \advanced_testcase {
         $result = \local_evalia\external\get_student_portfolio::execute($this->course->id);
         $this->assertSame([(int) $this->student->id], array_column($result['students'], 'userid'));
     }
+
+    /**
+     * In separate groups, a grader without accessallgroups cannot grade another group's exam.
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_respects_separate_groups(): void {
+        global $DB;
+        $gen = $this->getDataGenerator();
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '{"1":"x"}');
+
+        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
+        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
+        $roleid = $gen->create_role();
+        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
+        $grader = $gen->create_user();
+        $gen->enrol_user($grader->id, $this->course->id, $roleid);
+        $mygroup = $gen->create_group(['courseid' => $this->course->id]);
+        $gen->create_group_member(['groupid' => $mygroup->id, 'userid' => $grader->id]);
+
+        $this->setUser($grader);
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('notsamegroup', 'local_evalia'));
+        \local_evalia\external\grade_exam::execute($studentexamid, '{}');
+    }
 }

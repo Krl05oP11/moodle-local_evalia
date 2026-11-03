@@ -243,7 +243,7 @@ $string['material_title']             = 'Material del Curso';
 $string['nav_my_exams'] = '📝 Mis Exámenes';
 $string['no_exams_assigned_yet']      = 'Este alumno no tiene exámenes asignados aún.';
 $string['note_placeholder']           = 'Escribir observación...';
-$string['notenrolled'] = 'El usuario especificado no está inscripto en este curso.';
+$string['notenrolled'] = 'El usuario especificado no es un alumno activo de este curso.';
 $string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Examen enviado</b>
 
 <b>Alumno:</b> {$a->student}

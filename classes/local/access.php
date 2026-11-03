@@ -34,7 +34,7 @@ namespace local_evalia\local;
  */
 class access {
     /**
-     * Throws unless $userid is enrolled in the course and visible to the current user.
+     * Throws unless $userid is an active student of the course (local/evalia:take), visible to the current user.
      *
      * Call it after validate_context() and require_capability() on the same context.
      *
@@ -43,7 +43,7 @@ class access {
      * @throws \moodle_exception notenrolled or notsamegroup.
      */
     public static function require_course_user(\context_course $context, int $userid): void {
-        if (!is_enrolled($context, $userid)) {
+        if (!is_enrolled($context, $userid, 'local/evalia:take', true)) {
             throw new \moodle_exception('notenrolled', 'local_evalia');
         }
         if (!groups_user_groups_visible(get_course($context->instanceid), $userid)) {
@@ -68,5 +68,34 @@ class access {
             return $userids;
         }
         return array_filter($userids, fn($uid) => groups_user_groups_visible($course, (int) $uid));
+    }
+
+    /**
+     * Throws unless the current user may see $userid's groups in the course.
+     *
+     * For services that act on a student's exam, which already belongs to the validated course:
+     * the student need not be enrolled any more (a past student's exam can still be graded),
+     * but in separate-groups courses it must be one of the caller's groups.
+     *
+     * @param \context_course $context Course context already validated by the caller.
+     * @param int $userid Owner of the exam.
+     * @throws \moodle_exception notsamegroup.
+     */
+    public static function require_visible_user(\context_course $context, int $userid): void {
+        if (!groups_user_groups_visible(get_course($context->instanceid), $userid)) {
+            throw new \moodle_exception('notsamegroup', 'local_evalia');
+        }
+    }
+
+    /**
+     * Keeps the records (with a userid field) of the users the current user may see in the course.
+     *
+     * @param \context_course $context Course context already validated by the caller.
+     * @param \stdClass[] $records Records with a userid field.
+     * @return \stdClass[] The visible subset, keys preserved.
+     */
+    public static function filter_visible_records(\context_course $context, array $records): array {
+        $visible = array_flip(self::filter_visible_users($context, array_map(fn($r) => (int) $r->userid, $records)));
+        return array_filter($records, fn($r) => isset($visible[(int) $r->userid]));
     }
 }

@@ -75,6 +75,8 @@ class grade_all_exams extends external_api {
             'id ASC',
             'id, userid, answers, question_ids'
         );
+        // Separate groups: only the exams of the caller's groups.
+        $submitted = \local_evalia\local\access::filter_visible_records($context, $submitted);
 
         if (empty($submitted)) {
             return ['graded' => 0, 'skipped' => 0, 'results' => []];

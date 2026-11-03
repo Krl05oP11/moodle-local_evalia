@@ -47,6 +47,7 @@ class grade_exam extends external_api {
 
         [$params, $studentexam, $exam, $context] = self::validate_and_load_student_exam($studentexamid, $answers);
         require_capability('local/evalia:manage', $context);
+        \local_evalia\local\access::require_visible_user($context, (int) $studentexam->userid);
 
         if ($studentexam->status === 'graded') {
             return [
