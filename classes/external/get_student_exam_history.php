@@ -64,6 +64,7 @@ class get_student_exam_history extends external_api {
         $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
+        \local_evalia\local\access::require_course_user($context, $params['userid']);
 
         $sql = 'SELECT se.id, se.examid, e.name AS exam_name,
                        se.score, se.max_score, se.status,

@@ -38,6 +38,9 @@ use core_external\external_value;
 class submit_exam extends external_api {
     use student_exam_lookup_trait;
 
+    /** @var int Seconds after the exam closes during which a submission is still accepted. */
+    public const SUBMIT_GRACE = 5 * MINSECS;
+
     /**
      * Execute the web service.
      *
@@ -64,6 +67,18 @@ class submit_exam extends external_api {
             ];
         }
 
+        // The exam window applies to submitting too, not only to opening the exam. A few
+        // minutes of grace after closing keep an answer sent at the last second.
+        $now = time();
+        if ((int) $exam->timeopen > 0 && $now < (int) $exam->timeopen) {
+            $opens = userdate((int) $exam->timeopen, get_string('strftimedatetimeshort', 'langconfig'));
+            return ['success' => false, 'message' => get_string('exam:not_open_yet', 'local_evalia', $opens)];
+        }
+        if ((int) $exam->timeclose > 0 && $now > (int) $exam->timeclose + self::SUBMIT_GRACE) {
+            $closed = userdate((int) $exam->timeclose, get_string('strftimedatetimeshort', 'langconfig'));
+            return ['success' => false, 'message' => get_string('exam:window_closed', 'local_evalia', $closed)];
+        }
+
         // Validate answers JSON.
         $decoded = json_decode($params['answers'], true);
         if (!is_array($decoded)) {
@@ -73,7 +88,6 @@ class submit_exam extends external_api {
             ];
         }
 
-        $now = time();
         $DB->update_record('local_evalia_student_exams', (object) [
             'id'            => $studentexam->id,
             'answers'       => $params['answers'],

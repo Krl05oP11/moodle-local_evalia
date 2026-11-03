@@ -506,4 +506,126 @@ final class externallib_test extends \advanced_testcase {
 
         $this->assertNotSame(get_string('error_no_answers', 'local_evalia'), $result['message']);
     }
+
+    // Marketplace review MMR-462 (local_saipa) found cross-user access in two services;
+    // the same audit of local_evalia led to the checks below.
+
+    /**
+     * grade_exam grades the answers the student submitted, not answers passed in by the caller.
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_uses_stored_answers(): void {
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '[]');
+
+        $result = \local_evalia\external\grade_exam::execute($studentexamid, '{"1":"answer the student never gave"}');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame(get_string('error_no_answers', 'local_evalia'), $result['message']);
+    }
+
+    /**
+     * grade_exam only grades submitted exams.
+     *
+     * @covers \local_evalia\external\grade_exam::execute
+     */
+    public function test_grade_exam_requires_submission(): void {
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $studentexamid = $this->create_student_exam($exam['examid'], '{"1":"x"}', 'assigned');
+
+        $result = \local_evalia\external\grade_exam::execute($studentexamid, '{"1":"x"}');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame(get_string('error_exam_not_submitted', 'local_evalia'), $result['message']);
+    }
+
+    /**
+     * submit_exam refuses answers once the exam closed (after the grace period).
+     *
+     * @covers \local_evalia\external\submit_exam::execute
+     */
+    public function test_submit_exam_after_close_is_refused(): void {
+        global $DB;
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Exam', '', 1, 1, 1, 60);
+        $DB->set_field('local_evalia_exams', 'timeclose', time() - HOURSECS, ['id' => $exam['examid']]);
+        $studentexamid = $this->create_student_exam($exam['examid'], '{}', 'assigned');
+
+        $this->setUser($this->student);
+        $result = \local_evalia\external\submit_exam::execute($studentexamid, '{"1":"late"}');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('assigned', $DB->get_field('local_evalia_student_exams', 'status', ['id' => $studentexamid]));
+    }
+
+    /**
+     * Portfolio notes and exam history only reach students of the course.
+     *
+     * @covers \local_evalia\external\add_portfolio_note::execute
+     * @covers \local_evalia\external\get_portfolio_notes::execute
+     * @covers \local_evalia\external\get_student_exam_history::execute
+     */
+    public function test_student_services_reject_user_outside_course(): void {
+        $outsider = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($outsider->id, $this->getDataGenerator()->create_course()->id, 'student');
+        $this->setUser($this->teacher);
+        $calls = [
+            fn() => \local_evalia\external\add_portfolio_note::execute($outsider->id, $this->course->id, 'Note'),
+            fn() => \local_evalia\external\get_portfolio_notes::execute($outsider->id, $this->course->id),
+            fn() => \local_evalia\external\get_student_exam_history::execute($outsider->id, $this->course->id),
+        ];
+        foreach ($calls as $call) {
+            try {
+                $call();
+                $this->fail('A user outside the course was accepted.');
+            } catch (\moodle_exception $e) {
+                $this->assertSame(get_string('notenrolled', 'local_evalia'), $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * A portfolio note has a length limit.
+     *
+     * @covers \local_evalia\external\add_portfolio_note::execute
+     */
+    public function test_add_portfolio_note_rejects_long_note(): void {
+        $this->setUser($this->teacher);
+        $long = str_repeat('a', \local_evalia\external\add_portfolio_note::MAX_NOTE_LENGTH + 1);
+        $result = \local_evalia\external\add_portfolio_note::execute($this->student->id, $this->course->id, $long);
+        $this->assertFalse($result['success']);
+        $this->assertSame(get_string('error_note_too_long', 'local_evalia'), $result['message']);
+    }
+
+    /**
+     * In separate groups, a manager role without accessallgroups lists only its groups' students.
+     *
+     * @covers \local_evalia\external\get_student_portfolio::execute
+     */
+    public function test_student_portfolio_respects_separate_groups(): void {
+        global $DB;
+        $gen = $this->getDataGenerator();
+        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
+        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
+        $roleid = $gen->create_role();
+        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
+        $grader = $gen->create_user();
+        $gen->enrol_user($grader->id, $this->course->id, $roleid);
+        $other = $gen->create_and_enrol($this->course, 'student');
+        $g1 = $gen->create_group(['courseid' => $this->course->id]);
+        $g2 = $gen->create_group(['courseid' => $this->course->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $grader->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $this->student->id]);
+        $gen->create_group_member(['groupid' => $g2->id, 'userid' => $other->id]);
+
+        $this->setUser($grader);
+        $result = \local_evalia\external\get_student_portfolio::execute($this->course->id);
+        $this->assertSame([(int) $this->student->id], array_column($result['students'], 'userid'));
+    }
 }

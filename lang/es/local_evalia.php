@@ -77,6 +77,7 @@ $string['error_exam_min_questions']   = 'El examen debe tener al menos 1 pregunt
 $string['error_exam_name_required']   = 'Ingrese un nombre para el examen.';
 $string['error_exam_no_questions']    = 'El examen no tiene preguntas asignadas.';
 $string['error_exam_not_graded']      = 'El examen no está en estado "calificado" (estado actual: {$a}).';
+$string['error_exam_not_submitted'] = 'El alumno todavía no entregó este examen.';
 $string['error_exam_window_order']    = 'El cierre debe ser posterior a la apertura.';
 $string['error_grade_all']            = 'Error al calificar.';
 $string['error_grade_exams']          = 'Error al calificar los exámenes.';
@@ -95,6 +96,7 @@ $string['error_no_rubric_to_save']    = 'No hay rúbrica para guardar.';
 $string['error_not_enough_bank']    = 'El banco de preguntas no tiene suficientes preguntas aprobadas para completar la estructura solicitada.';
 $string['error_note_required']        = 'Escriba una observación antes de guardar.';
 $string['error_note_save']            = 'Error al guardar la observación.';
+$string['error_note_too_long'] = 'La nota es demasiado larga: el límite es de 5000 caracteres.';
 $string['error_prompt_save']          = 'Error al guardar.';
 $string['error_publish_all']          = 'Error al publicar.';
 $string['error_publish_grade']        = 'Error al publicar la nota.';
@@ -241,6 +243,7 @@ $string['material_title']             = 'Material del Curso';
 $string['nav_my_exams'] = '📝 Mis Exámenes';
 $string['no_exams_assigned_yet']      = 'Este alumno no tiene exámenes asignados aún.';
 $string['note_placeholder']           = 'Escribir observación...';
+$string['notenrolled'] = 'El usuario especificado no está inscripto en este curso.';
 $string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Examen enviado</b>
 
 <b>Alumno:</b> {$a->student}
@@ -250,6 +253,7 @@ $string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Examen enviado</b>
 
 Ingresá al panel docente para calificarlo con IA.';
 $string['notify_student_fallback']    = 'Un alumno';
+$string['notsamegroup'] = 'No compartís ningún grupo con este usuario en este curso.';
 $string['plugindescription'] = 'Evaluación inteligente con IA para cursos Moodle. Genera rúbricas, bancos de preguntas y exámenes únicos por alumno usando RAG sobre el material del curso.';
 $string['pluginname'] = 'EVAL-IA';
 $string['portfolio_average_label']    = 'Promedio: {$a}';

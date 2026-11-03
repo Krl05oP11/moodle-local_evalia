@@ -34,6 +34,9 @@ use core_external\external_value;
  * Add_portfolio_note.
  */
 class add_portfolio_note extends external_api {
+    /** @var int Longest note a teacher can write, in characters. */
+    public const MAX_NOTE_LENGTH = 5000;
+
     /**
      * Define the parameters for this web service.
      */
@@ -64,11 +67,16 @@ class add_portfolio_note extends external_api {
         $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
+        \local_evalia\local\access::require_course_user($context, $params['userid']);
 
         $text = trim($params['note_text']);
         if ($text === '') {
             return ['success' => false, 'noteid' => 0, 'timecreated' => 0,
                     'message' => get_string('error_note_required', 'local_evalia')];
+        }
+        if (\core_text::strlen($text) > self::MAX_NOTE_LENGTH) {
+            return ['success' => false, 'noteid' => 0, 'timecreated' => 0,
+                    'message' => get_string('error_note_too_long', 'local_evalia')];
         }
 
         $now    = time();

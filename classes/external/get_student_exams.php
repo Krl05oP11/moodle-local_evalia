@@ -68,6 +68,10 @@ class get_student_exams extends external_api {
             'u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename'
         );
 
+        // Separate groups: only the students of the caller's groups.
+        $visible = \local_evalia\local\access::filter_visible_users($context, array_keys($students));
+        $students = array_intersect_key($students, array_flip($visible));
+
         if (empty($students)) {
             return ['total' => 0, 'students' => []];
         }

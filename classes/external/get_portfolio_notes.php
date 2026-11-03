@@ -62,6 +62,7 @@ class get_portfolio_notes extends external_api {
         $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('local/evalia:manage', $context);
+        \local_evalia\local\access::require_course_user($context, $params['userid']);
 
         $notes = $DB->get_records('local_evalia_portfolio_notes', [
             'userid'   => $params['userid'],

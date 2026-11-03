@@ -39,7 +39,7 @@ class grade_exam extends external_api {
      * Execute the web service.
      *
      * @param int $studentexamid Student exam ID (local_evalia_student_exams).
-     * @param string $answers JSON object of answers keyed by question ID.
+     * @param string $answers Ignored: the answers the student submitted are graded, as stored.
      */
     public static function execute(int $studentexamid, string $answers): array {
         global $CFG, $DB;
@@ -57,6 +57,14 @@ class grade_exam extends external_api {
                 'message'   => get_string('error_exam_already_graded', 'local_evalia'),
             ];
         }
+
+        // Only a submitted exam is graded, and always with the answers the student submitted:
+        // a teacher grades what the student sent, never answers passed in by the caller.
+        if ($studentexam->status !== 'submitted') {
+            return ['success' => false, 'score' => 0.0, 'max_score' => 10.0, 'percent' => 0.0,
+                    'message' => get_string('error_exam_not_submitted', 'local_evalia')];
+        }
+        $params['answers'] = (string) ($studentexam->answers ?? '');
 
         // No answers saved at all -- distinct from "attempted and got every
         // question wrong": don't silently score this 0.0/10.0 and mark it

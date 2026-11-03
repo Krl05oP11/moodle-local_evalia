@@ -77,6 +77,7 @@ $string['error_exam_min_questions']   = 'The exam must have at least 1 question.
 $string['error_exam_name_required']   = 'Enter a name for the exam.';
 $string['error_exam_no_questions']    = 'The exam has no assigned questions.';
 $string['error_exam_not_graded']      = 'The exam is not in "graded" status (current status: {$a}).';
+$string['error_exam_not_submitted'] = 'The student has not submitted this exam yet.';
 $string['error_exam_window_order']    = 'The close date must be after the open date.';
 $string['error_grade_all']            = 'Error grading.';
 $string['error_grade_exams']          = 'Error grading the exams.';
@@ -95,6 +96,7 @@ $string['error_no_rubric_to_save']    = 'No rubric to save.';
 $string['error_not_enough_bank']   = 'The question bank does not have enough approved questions to fill the requested exam structure.';
 $string['error_note_required']        = 'Write an observation before saving.';
 $string['error_note_save']            = 'Error saving the observation.';
+$string['error_note_too_long'] = 'The note is too long: the limit is 5000 characters.';
 $string['error_prompt_save']          = 'Error saving.';
 $string['error_publish_all']          = 'Error publishing.';
 $string['error_publish_grade']        = 'Error publishing the grade.';
@@ -241,6 +243,7 @@ $string['material_title']             = 'Course Material';
 $string['nav_my_exams'] = 'My Exams';
 $string['no_exams_assigned_yet']      = 'This student has no exams assigned yet.';
 $string['note_placeholder']           = 'Write an observation...';
+$string['notenrolled'] = 'The specified user is not enrolled in this course.';
 $string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Exam submitted</b>
 
 <b>Student:</b> {$a->student}
@@ -250,6 +253,7 @@ $string['notify_exam_submitted']      = '<b>📝 EVAL-IA — Exam submitted</b>
 
 Open the teacher panel to grade it with AI.';
 $string['notify_student_fallback']    = 'A student';
+$string['notsamegroup'] = 'You do not share a group with this user in this course.';
 $string['plugindescription'] = 'Intelligent AI-powered evaluation for Moodle courses. Generates rubrics, question banks, and unique exams per student using RAG from course materials.';
 $string['pluginname']   = 'EVAL-IA';
 $string['portfolio_average_label']    = 'Average: {$a}';
