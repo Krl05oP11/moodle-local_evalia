@@ -1833,6 +1833,27 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
     // ─── Init ────────────────────────────────────────────────────────────────
 
+    /**
+     * Copy the student page URL to the clipboard; the button shows a tick for a moment.
+     */
+    function initCopyStudentUrl() {
+        var btn = document.getElementById('evalia-btn-copy-student-url');
+        var url = document.getElementById('evalia-student-url');
+        if (!btn || !url || !navigator.clipboard) {
+            return;
+        }
+        var label = btn.textContent;
+        btn.addEventListener('click', function() {
+            navigator.clipboard.writeText(url.textContent.trim()).then(function() {
+                btn.textContent = '✅';
+                setTimeout(function() {
+                    btn.textContent = label;
+                }, 1500);
+                return null;
+            }).catch(Log.error);
+        });
+    }
+
     return {
         init: function(config) {
             loadStrings();
@@ -2013,6 +2034,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
             initPortfolioTabButtons();
             initSourcesPanel();
+            initCopyStudentUrl();
             initExamWindowToggle();
 
             var btnAddNote = document.getElementById('evalia-btn-add-note');

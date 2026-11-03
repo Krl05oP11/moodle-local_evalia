@@ -142,6 +142,29 @@ if (empty($cfgurl)) {
     $cfgtoken = get_config('local_saipa', 'engine_token') ?: '';
 }
 
+// Strings for amd/src/setup_wizard.js, passed in the wizard's data-config attribute.
+$wizardconfig = [
+    'url'     => (new moodle_url('/local/evalia/setup.php'))->out(false),
+    'strings' => [
+        'connecting_engine'   => get_string('wizard_js_connecting_engine', 'local_evalia'),
+        'url_empty'           => get_string('wizard_js_url_empty', 'local_evalia'),
+        'engine_reachable'    => get_string('wizard_js_engine_reachable', 'local_evalia'),
+        'engine_version'      => get_string('wizard_js_engine_version', 'local_evalia'),
+        'uptime'              => get_string('wizard_js_uptime', 'local_evalia'),
+        'success_msg'         => get_string('wizard_js_success_msg', 'local_evalia'),
+        'connection_failed'   => get_string('wizard_js_connection_failed', 'local_evalia'),
+        'error_label'         => get_string('wizard_js_error_label', 'local_evalia'),
+        'unknown_error'       => get_string('wizard_js_unknown_error', 'local_evalia'),
+        'network_error'       => get_string('wizard_js_network_error', 'local_evalia'),
+        'troubleshoot_header' => get_string('wizard_js_troubleshoot_header', 'local_evalia'),
+        'troubleshoot_li1'    => get_string('wizard_js_troubleshoot_li1', 'local_evalia'),
+        'troubleshoot_li2'    => get_string('wizard_js_troubleshoot_li2', 'local_evalia'),
+        'troubleshoot_li3'    => get_string('wizard_js_troubleshoot_li3', 'local_evalia'),
+        'troubleshoot_li4'    => get_string('wizard_js_troubleshoot_li4', 'local_evalia'),
+        'troubleshoot_li5'    => get_string('wizard_js_troubleshoot_li5', 'local_evalia'),
+    ],
+];
+
 // Detect server environment for the requirements screen.
 $phpverok     = version_compare(PHP_VERSION, '8.1.0', '>=');
 $moodleverok  = ($CFG->version >= 2024042200);   // Moodle 4.4.
@@ -156,7 +179,7 @@ echo $OUTPUT->header();
 // file docblock is present at the top of the file. Re-enabled at end of file.
 ?>
 
-<div class="evwiz mt-4">
+<div class="evwiz mt-4" data-config="<?= s(json_encode($wizardconfig, JSON_UNESCAPED_UNICODE)) ?>">
 
 <?php if ($done) : /* ─── Completion screen (after save + redirect) ─── */ ?>
   <div class="card shadow-sm">
@@ -259,7 +282,7 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-end">
-        <button class="btn btn-primary px-5" onclick="evwizGoto(2)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
+        <button class="btn btn-primary px-5" data-evwiz-goto="2"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 1 -->
 
@@ -446,11 +469,11 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(1)">
+        <button class="btn btn-outline-secondary" data-evwiz-goto="1">
             <?= get_string('wizard_btn_back', 'local_evalia') ?>
         </button>
         <button class="btn btn-primary px-5" id="req-next-btn" disabled
-                onclick="evwizGoto(3)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
+                data-evwiz-goto="3"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 2 -->
 
@@ -500,10 +523,10 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(2)">
+        <button class="btn btn-outline-secondary" data-evwiz-goto="2">
             <?= get_string('wizard_btn_back', 'local_evalia') ?>
         </button>
-        <button class="btn btn-primary px-5" onclick="evwizGoto(4)"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
+        <button class="btn btn-primary px-5" data-evwiz-goto="4"><?= get_string('wizard_btn_next', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 3 -->
 
@@ -553,10 +576,10 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(3)">
+        <button class="btn btn-outline-secondary" data-evwiz-goto="3">
             <?= get_string('wizard_btn_back', 'local_evalia') ?>
         </button>
-        <button class="btn btn-primary px-5" onclick="evwizGoto(5)"><?= get_string('wizard_btn_test', 'local_evalia') ?></button>
+        <button class="btn btn-primary px-5" data-evwiz-goto="5"><?= get_string('wizard_btn_test', 'local_evalia') ?></button>
       </div>
     </div><!-- /step 4 -->
 
@@ -579,14 +602,14 @@ echo $OUTPUT->header();
       </div>
 
       <div class="d-flex justify-content-between mt-4">
-        <button class="btn btn-outline-secondary" onclick="evwizGoto(4)">
+        <button class="btn btn-outline-secondary" data-evwiz-goto="4">
             <?= get_string('wizard_btn_back', 'local_evalia') ?>
         </button>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-secondary" id="evwiz-retry-btn" style="display:none"
-                  onclick="evwizRunTest()"><?= get_string('wizard_btn_retry', 'local_evalia') ?></button>
+                  data-evwiz-action="runtest"><?= get_string('wizard_btn_retry', 'local_evalia') ?></button>
           <button class="btn btn-success px-5" id="evwiz-save-btn" style="display:none"
-                  onclick="evwizSave()"><?= get_string('wizard_btn_save_finish', 'local_evalia') ?></button>
+                  data-evwiz-action="save"><?= get_string('wizard_btn_save_finish', 'local_evalia') ?></button>
         </div>
       </div>
     </div><!-- /step 5 -->
@@ -627,210 +650,9 @@ echo $OUTPUT->header();
 <?php endif; /* /wizard */ ?>
 </div><!-- /evwiz -->
 
-<script>
-(function () {
-    'use strict';
-
-    // Localized runtime strings injected from Moodle lang files.
-    var L = <?= json_encode([
-        'connecting_engine'   => get_string('wizard_js_connecting_engine', 'local_evalia'),
-        'url_empty'           => get_string('wizard_js_url_empty', 'local_evalia'),
-        'engine_reachable'    => get_string('wizard_js_engine_reachable', 'local_evalia'),
-        'engine_version'      => get_string('wizard_js_engine_version', 'local_evalia'),
-        'uptime'              => get_string('wizard_js_uptime', 'local_evalia'),
-        'success_msg'         => get_string('wizard_js_success_msg', 'local_evalia'),
-        'connection_failed'   => get_string('wizard_js_connection_failed', 'local_evalia'),
-        'error_label'         => get_string('wizard_js_error_label', 'local_evalia'),
-        'unknown_error'       => get_string('wizard_js_unknown_error', 'local_evalia'),
-        'network_error'       => get_string('wizard_js_network_error', 'local_evalia'),
-        'troubleshoot_header' => get_string('wizard_js_troubleshoot_header', 'local_evalia'),
-        'troubleshoot_li1'    => get_string('wizard_js_troubleshoot_li1', 'local_evalia'),
-        'troubleshoot_li2'    => get_string('wizard_js_troubleshoot_li2', 'local_evalia'),
-        'troubleshoot_li3'    => get_string('wizard_js_troubleshoot_li3', 'local_evalia'),
-        'troubleshoot_li4'    => get_string('wizard_js_troubleshoot_li4', 'local_evalia'),
-        'troubleshoot_li5'    => get_string('wizard_js_troubleshoot_li5', 'local_evalia'),
-    ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-
-    var currentStep = 1;
-    var healthOk    = false;
-
-    // ── Step navigation ───────────────────────────────────────────────────────
-    /**
-     * EvwizGoto.
-     */
-    function evwizGoto(step) {
-        var prev = document.getElementById('evwiz-step-' + currentStep);
-        if (prev) prev.classList.remove('active');
-        currentStep = step;
-        var next = document.getElementById('evwiz-step-' + step);
-        if (next) next.classList.add('active');
-
-        var steps = document.querySelectorAll('#evwiz-progress .step');
-        steps.forEach(function (el) {
-            var n = parseInt(el.dataset.step, 10);
-            el.classList.remove('active', 'done');
-            if (n === step) el.classList.add('active');
-            if (n < step)   el.classList.add('done');
-        });
-
-        if (step === 4) updateHints();
-        if (step === 5) evwizRunTest();
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    window.evwizGoto = evwizGoto;
-
-    // ── Requirements confirmation checkbox ───────────────────────────────────
-    var reqCheck   = document.getElementById('req-confirm');
-    var reqNextBtn = document.getElementById('req-next-btn');
-    if (reqCheck) {
-        reqCheck.addEventListener('change', function () {
-            reqNextBtn.disabled = !reqCheck.checked;
-        });
-    }
-
-    // ── Mode card selection ───────────────────────────────────────────────────
-    document.querySelectorAll('.mode-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-            document.querySelectorAll('.mode-card').forEach(function (c) {
-                c.classList.remove('selected');
-            });
-            card.classList.add('selected');
-            card.querySelector('input[type=radio]').checked = true;
-        });
-    });
-
-    /**
-     * GetSelectedMode.
-     */
-    function getSelectedMode() {
-        var checked = document.querySelector('input[name="engine_mode"]:checked');
-        return checked ? checked.value : 'local_ollama';
-    }
-
-    /**
-     * UpdateHints.
-     */
-    function updateHints() {
-        var mode  = getSelectedMode();
-        var modes = ['local_ollama', 'cloud_api', 'custom'];
-        modes.forEach(function (m) {
-            var el = document.getElementById('hint-' + m);
-            if (el) el.style.display = (m === mode) ? '' : 'none';
-        });
-    }
-
-    // ── Real-time health check ────────────────────────────────────────────────
-    /**
-     * EvwizRunTest.
-     */
-    function evwizRunTest() {
-        healthOk = false;
-        var resultEl  = document.getElementById('evwiz-health-result');
-        var saveBtn   = document.getElementById('evwiz-save-btn');
-        var retryBtn  = document.getElementById('evwiz-retry-btn');
-
-        saveBtn.style.display  = 'none';
-        retryBtn.style.display = 'none';
-        resultEl.innerHTML =
-            '<div class="d-flex align-items-center gap-2 text-muted py-2">' +
-            '<div class="spinner-border spinner-border-sm" role="status"></div>' +
-            '<span>' + he(L.connecting_engine) + '</span></div>';
-
-        var url   = (document.getElementById('evwiz-url')   || {}).value || '';
-        var token = (document.getElementById('evwiz-token') || {}).value || '';
-        url = url.trim();
-
-        if (!url) {
-            renderHealthError(L.url_empty, url);
-            return;
-        }
-
-        var fd = new FormData();
-        fd.append('action',       'health');
-        fd.append('sesskey',      '<?= $sesskey ?>');
-        fd.append('engine_url',   url);
-        fd.append('engine_token', token);
-
-        fetch(
-            '<?= (new moodle_url('/local/evalia/setup.php'))->out(false) ?>',
-            { method: 'POST', credentials: 'same-origin', body: fd }
-        )
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.ok) {
-                healthOk = true;
-                resultEl.innerHTML =
-                    '<div class="health-row">' +
-                    '<div class="health-icon">✅</div>' +
-                    '<div class="health-label"><strong>' + he(L.engine_reachable) + '</strong></div>' +
-                    '<div class="health-value">' + he(url) + '</div></div>' +
-                    '<div class="health-row">' +
-                    '<div class="health-icon">🔢</div>' +
-                    '<div class="health-label">' + he(L.engine_version) + '</div>' +
-                    '<div class="health-value">' + he(data.version) + '</div></div>' +
-                    '<div class="health-row">' +
-                    '<div class="health-icon">⏱️</div>' +
-                    '<div class="health-label">' + he(L.uptime) + '</div>' +
-                    '<div class="health-value">' + he(data.uptime) + '</div></div>' +
-                    '<div class="alert alert-success py-2 px-3 mt-3 mb-0" style="font-size:.85rem;">' +
-                    L.success_msg + '</div>';
-                saveBtn.style.display = '';
-            } else {
-                renderHealthError(data.error || L.unknown_error, url);
-            }
-        })
-        .catch(function (e) { renderHealthError(e.message || L.network_error, url); });
-    }
-    window.evwizRunTest = evwizRunTest;
-
-    /**
-     * RenderHealthError.
-     */
-    function renderHealthError(msg, url) {
-        document.getElementById('evwiz-health-result').innerHTML =
-            '<div class="health-row">' +
-            '<div class="health-icon">❌</div>' +
-            '<div class="health-label"><strong>' + he(L.connection_failed) + '</strong></div>' +
-            '<div class="health-value">' + he(url || '—') + '</div></div>' +
-            '<div class="alert alert-danger py-2 px-3 mt-3 mb-0" style="font-size:.84rem;">' +
-            '<strong>' + he(L.error_label) + '</strong> ' + he(msg) + '<br><br>' +
-            '<strong>' + he(L.troubleshoot_header) + '</strong>' +
-            '<ul class="mb-0 mt-1">' +
-            '<li>' + L.troubleshoot_li1 + '</li>' +
-            '<li>' + L.troubleshoot_li2 + '</li>' +
-            '<li>' + L.troubleshoot_li3 + '</li>' +
-            '<li>' + L.troubleshoot_li4 + '</li>' +
-            '<li>' + L.troubleshoot_li5 + '</li>' +
-            '</ul></div>';
-        document.getElementById('evwiz-retry-btn').style.display = '';
-    }
-
-    // ── Save ──────────────────────────────────────────────────────────────────
-    /**
-     * EvwizSave.
-     */
-    function evwizSave() {
-        document.getElementById('sf-mode').value  = getSelectedMode();
-        document.getElementById('sf-url').value   = (document.getElementById('evwiz-url')   || {}).value || '';
-        document.getElementById('sf-token').value = (document.getElementById('evwiz-token') || {}).value || '';
-        document.getElementById('evwiz-save-form').submit();
-    }
-    window.evwizSave = evwizSave;
-
-    // ── HTML escape ───────────────────────────────────────────────────────────
-    /**
-     * He.
-     */
-    function he(s) {
-        return String(s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-}());
-</script>
 
 <?php
 // phpcs:enable moodle.Commenting.MissingDocblock.File
+$PAGE->requires->js_call_amd('local_evalia/setup_wizard', 'init');
 echo $OUTPUT->footer();
 
