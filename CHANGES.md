@@ -12,6 +12,9 @@ checks were applied here before this plugin's own review.
 - Services that take a student id (portfolio notes, exam history) require a
   student of the course visible to the caller; student lists follow separate
   groups (`\local_evalia\local\access`). Notes are limited to 5000 characters.
+  Only active students count. Viewing, grading and publishing a student's exam,
+  one by one or in bulk, follow separate groups. `local/evalia:manage` declares
+  its `riskbitmask`.
 - grade_exam grades the answers the student submitted, only once submitted; it
   used to grade, and store, the answers passed in by the caller.
 - submit_exam applies the exam window (5 minutes of grace after closing).
@@ -19,7 +22,8 @@ checks were applied here before this plugin's own review.
 
 #### Added
 - Course backup and restore of EVAL-IA's data, with question ids remapped in the
-  students' exams and each exam's gradebook column relinked.
+  students' exams and each exam's gradebook column and calendar event relinked.
+  Deleting a course, or its content before a restore, deletes EVAL-IA's data.
 - Moodle 5.0 jobs in the CI.
 
 #### Changed
