@@ -70,7 +70,7 @@ $myexams = $DB->get_records_sql(
  * @param object $ex Exam record (uses timeopen and timeclose).
  * @param int $now Current timestamp.
  */
-function evalia_window_open(object $ex, int $now): bool {
+function local_evalia_window_open(object $ex, int $now): bool {
     if ($ex->timeopen > 0 && $now < $ex->timeopen) {
         return false;
     }
@@ -86,7 +86,7 @@ function evalia_window_open(object $ex, int $now): bool {
  * @param object $ex Exam record (uses timeopen and timeclose).
  * @param int $now Current timestamp.
  */
-function evalia_window_note(object $ex, int $now): string {
+function local_evalia_window_note(object $ex, int $now): string {
     $dateformat = get_string('strftimedatetimeshort', 'langconfig');
     if ($ex->timeopen > 0 && $now < $ex->timeopen) {
         return get_string('student:window_opens', 'local_evalia', userdate($ex->timeopen, $dateformat));
@@ -123,8 +123,8 @@ echo $OUTPUT->header();
 
 <?php else : ?>
 <?php foreach ($myexams as $ex) :
-    $windowopen = evalia_window_open($ex, $now);
-    $windownote = evalia_window_note($ex, $now);
+    $windowopen = local_evalia_window_open($ex, $now);
+    $windownote = local_evalia_window_note($ex, $now);
 
     // Decide card appearance and CTA per status.
     $alreadyclosed = ($ex->timeclose > 0 && $now > $ex->timeclose);
