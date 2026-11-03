@@ -1799,7 +1799,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         Ajax.call([{
             methodname: 'local_evalia_index_course',
-            args: {courseid: courseId, token: ''}
+            args: {courseid: courseId}
         }])[0].then(function(result) {
             btn.disabled = false;
             setLoading('evalia-index-loading', false);

@@ -46,12 +46,6 @@ class index_course extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID to index'),
-            'token'    => new external_value(
-                PARAM_ALPHANUMEXT,
-                'Moodle webservice token used by saipa-engine to download files',
-                VALUE_DEFAULT,
-                ''
-            ),
         ]);
     }
 
@@ -59,9 +53,8 @@ class index_course extends external_api {
      * Execute the web service.
      *
      * @param int $courseid Course ID to index.
-     * @param string $token Moodle webservice token used by saipa-engine to download files.
      */
-    public static function execute(int $courseid, string $token): array {
+    public static function execute(int $courseid): array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/local/evalia/lib.php');
         require_once($CFG->libdir  . '/filelib.php');
@@ -71,10 +64,8 @@ class index_course extends external_api {
 
         $params  = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
-            'token'    => $token,
         ]);
         $courseid = (int) $params['courseid'];
-        $token    = $params['token'];
 
         $course  = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
         $context = \context_course::instance($courseid);
@@ -83,13 +74,6 @@ class index_course extends external_api {
 
         $indexed  = [];
         $errors   = [];
-
-        // Retrieve the course's webservice download token.
-        // If the caller didn't pass a token, try to find a valid WS token for
-        // the local_evalia or saipa service so the engine can download files.
-        if (empty($token)) {
-            $token = self::find_ws_token();
-        }
 
         // Mod_page.
         $pages = $DB->get_records_sql(
@@ -127,104 +111,102 @@ class index_course extends external_api {
             }
         }
 
-        // Mod_resource (PDF files).
-        if (!empty($token)) {
-            $resources = $DB->get_records_sql(
-                'SELECT r.id, r.name, cm.id AS cmid
-                   FROM {resource} r
-                   JOIN {course_modules} cm ON cm.instance = r.id
-                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                  WHERE cm.course = :courseid AND cm.deletioninprogress = 0 AND cm.visible = 1',
-                ['modname' => 'resource', 'courseid' => $courseid]
+        // Mod_resource (PDF files), read straight from the file storage.
+        $resources = $DB->get_records_sql(
+            'SELECT r.id, r.name, cm.id AS cmid
+               FROM {resource} r
+               JOIN {course_modules} cm ON cm.instance = r.id
+               JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+              WHERE cm.course = :courseid AND cm.deletioninprogress = 0 AND cm.visible = 1',
+            ['modname' => 'resource', 'courseid' => $courseid]
+        );
+
+        foreach ($resources as $res) {
+            $cmcontext = \context_module::instance((int) $res->cmid);
+            $fs    = get_file_storage();
+            $files = $fs->get_area_files(
+                $cmcontext->id,
+                'mod_resource',
+                'content',
+                0,
+                'sortorder DESC, id ASC',
+                false
             );
 
-            foreach ($resources as $res) {
-                $cmcontext = \context_module::instance((int) $res->cmid);
-                $fs    = get_file_storage();
-                $files = $fs->get_area_files(
-                    $cmcontext->id,
-                    'mod_resource',
-                    'content',
-                    0,
-                    'sortorder DESC, id ASC',
-                    false
-                );
+            foreach ($files as $file) {
+                $ext    = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+                $source = 'resource:' . $res->id . ':' . $file->get_filename();
 
-                foreach ($files as $file) {
-                    $ext    = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
-                    $source = 'resource:' . $res->id . ':' . $file->get_filename();
+                if ($ext === 'pdf') {
+                    // Read PDF bytes directly from Moodle's filestore and send as base64.
+                    // The engine cannot reach Moodle via URL (NAT hairpinning fails and
+                    // the internal hostname triggers a Moodle redirect error).
+                    $pdfbytes = $file->get_content();
+                    if (empty($pdfbytes)) {
+                        continue;
+                    }
+                    $b64 = base64_encode($pdfbytes);
 
-                    if ($ext === 'pdf') {
-                        // Read PDF bytes directly from Moodle's filestore and send as base64.
-                        // The engine cannot reach Moodle via URL (NAT hairpinning fails and
-                        // the internal hostname triggers a Moodle redirect error).
-                        $pdfbytes = $file->get_content();
-                        if (empty($pdfbytes)) {
-                            continue;
-                        }
-                        $b64 = base64_encode($pdfbytes);
+                    // Check if page ranges are configured for this filename.
+                    $rangesjson = get_config('local_evalia', 'pdf_page_ranges');
+                    $rangesmap  = $rangesjson ? @json_decode($rangesjson, true) : [];
+                    $filename    = $file->get_filename();
 
-                        // Check if page ranges are configured for this filename.
-                        $rangesjson = get_config('local_evalia', 'pdf_page_ranges');
-                        $rangesmap  = $rangesjson ? @json_decode($rangesjson, true) : [];
-                        $filename    = $file->get_filename();
-
-                        if (!empty($rangesmap[$filename])) {
-                            // Index each configured chapter range as a separate source.
-                            foreach ($rangesmap[$filename] as $range) {
-                                $rangesource = $source . ':' . ($range['label'] ?? 'p' . $range['from'] . '-' . $range['to']);
-                                $result = local_evalia_raw_engine_request('/index-pdf-bytes', [
-                                    'course_id'   => $courseid,
-                                    'content_b64' => $b64,
+                    if (!empty($rangesmap[$filename])) {
+                        // Index each configured chapter range as a separate source.
+                        foreach ($rangesmap[$filename] as $range) {
+                            $rangesource = $source . ':' . ($range['label'] ?? 'p' . $range['from'] . '-' . $range['to']);
+                            $result = local_evalia_raw_engine_request('/index-pdf-bytes', [
+                                'course_id'   => $courseid,
+                                'content_b64' => $b64,
+                                'source'      => $rangesource,
+                                'page_from'   => (int) $range['from'],
+                                'page_to'     => (int) $range['to'],
+                            ], 300);
+                            if (isset($result['error'])) {
+                                $errors[] = ['source' => $rangesource, 'error' => $result['error']];
+                            } else {
+                                $indexed[] = [
                                     'source'      => $rangesource,
-                                    'page_from'   => (int) $range['from'],
-                                    'page_to'     => (int) $range['to'],
-                                ], 300);
-                                if (isset($result['error'])) {
-                                    $errors[] = ['source' => $rangesource, 'error' => $result['error']];
-                                } else {
-                                    $indexed[] = [
-                                        'source'      => $rangesource,
-                                        'chunk_count' => (int) ($result['chunk_count'] ?? 0),
-                                        'status'      => $result['status'] ?? 'ok',
-                                    ];
-                                }
+                                    'chunk_count' => (int) ($result['chunk_count'] ?? 0),
+                                    'status'      => $result['status'] ?? 'ok',
+                                ];
                             }
-                            continue;   // Skip the generic full-PDF index below.
                         }
-
-                        // No ranges configured — index the full PDF as one source.
-                        $result = local_evalia_raw_engine_request('/index-pdf-bytes', [
-                            'course_id'   => $courseid,
-                            'content_b64' => $b64,
-                            'source'      => $source,
-                        ], 300);
-                    } else if ($ext === 'pptx') {
-                        // Convert PPTX → PDF in the engine (LibreOffice headless).
-                        // Sending raw bytes avoids NAT hairpinning issues and captures
-                        // SmartArt, tables and grouped shapes that XML extraction misses.
-                        $pptxbytes = $file->get_content();
-                        if (empty($pptxbytes)) {
-                            continue;
-                        }
-                        $result = local_evalia_raw_engine_request('/index-pptx-bytes', [
-                            'course_id'   => $courseid,
-                            'content_b64' => base64_encode($pptxbytes),
-                            'source'      => $source,
-                        ], 300);
-                    } else {
-                        continue;   // Unsupported format.
+                        continue;   // Skip the generic full-PDF index below.
                     }
 
-                    if (isset($result['error'])) {
-                        $errors[] = ['source' => $source, 'error' => $result['error']];
-                    } else {
-                        $indexed[] = [
-                            'source'      => $source,
-                            'chunk_count' => (int) ($result['chunk_count'] ?? 0),
-                            'status'      => $result['status'] ?? 'ok',
-                        ];
+                    // No ranges configured — index the full PDF as one source.
+                    $result = local_evalia_raw_engine_request('/index-pdf-bytes', [
+                        'course_id'   => $courseid,
+                        'content_b64' => $b64,
+                        'source'      => $source,
+                    ], 300);
+                } else if ($ext === 'pptx') {
+                    // Convert PPTX → PDF in the engine (LibreOffice headless).
+                    // Sending raw bytes avoids NAT hairpinning issues and captures
+                    // SmartArt, tables and grouped shapes that XML extraction misses.
+                    $pptxbytes = $file->get_content();
+                    if (empty($pptxbytes)) {
+                        continue;
                     }
+                    $result = local_evalia_raw_engine_request('/index-pptx-bytes', [
+                        'course_id'   => $courseid,
+                        'content_b64' => base64_encode($pptxbytes),
+                        'source'      => $source,
+                    ], 300);
+                } else {
+                    continue;   // Unsupported format.
+                }
+
+                if (isset($result['error'])) {
+                    $errors[] = ['source' => $source, 'error' => $result['error']];
+                } else {
+                    $indexed[] = [
+                        'source'      => $source,
+                        'chunk_count' => (int) ($result['chunk_count'] ?? 0),
+                        'status'      => $result['status'] ?? 'ok',
+                    ];
                 }
             }
         }
@@ -237,25 +219,6 @@ class index_course extends external_api {
             'indexed'      => $indexed,
             'errors'       => $errors,
         ];
-    }
-
-    /**
-     * Try to locate a valid webservice token that the engine can use to
-     * download files via webservice/pluginfile.php.
-     * Prefers tokens for the 'evalia_service' or 'saipa_service' services.
-     */
-    private static function find_ws_token(): string {
-        global $DB;
-        $row = $DB->get_record_sql(
-            "SELECT t.token
-               FROM {external_tokens} t
-               JOIN {external_services} s ON s.id = t.externalserviceid
-              WHERE s.shortname IN ('evalia_service', 'saipa_service')
-                AND t.validuntil = 0
-              ORDER BY t.id ASC
-              LIMIT 1"
-        );
-        return $row ? $row->token : '';
     }
 
     /**
