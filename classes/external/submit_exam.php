@@ -98,8 +98,8 @@ class submit_exam extends external_api {
             $teachers = get_users_by_capability($context, 'local/evalia:manage', 'u.id, u.lang, u.timezone');
 
             foreach ($teachers as $teacher) {
-                $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $teacher->id], 'telegram_id');
-                if (!$tglink || empty($tglink->telegram_id)) {
+                $tgid = local_evalia_telegram_id((int) $teacher->id);
+                if (!$tgid) {
                     continue;
                 }
 
@@ -126,7 +126,7 @@ class submit_exam extends external_api {
                 ], $lang);
 
                 local_evalia_engine_request('/notify', [
-                    'telegram_id' => (int) $tglink->telegram_id,
+                    'telegram_id' => $tgid,
                     'message'     => $msg,
                     'parse_mode'  => 'HTML',
                 ], 5);

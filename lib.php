@@ -187,6 +187,24 @@ function local_evalia_grade_item_update(
 }
 
 /**
+ * Telegram chat id a user linked through SAIPA, or 0.
+ *
+ * The links live in local_saipa's table. local_evalia does not require local_saipa,
+ * so without it installed nobody has a link.
+ *
+ * @param  int $userid User id.
+ * @return int Telegram chat id, or 0.
+ */
+function local_evalia_telegram_id(int $userid): int {
+    global $DB;
+    if (get_config('local_saipa', 'version') === false) {
+        return 0;
+    }
+    $link = $DB->get_record('local_saipa_telegram_links', ['userid' => $userid, 'confirmed' => 1], 'telegram_id');
+    return ($link && !empty($link->telegram_id)) ? (int) $link->telegram_id : 0;
+}
+
+/**
  * Build the per-question breakdown for a student exam and send pedagogical
  * feedback to the student via Telegram (non-blocking — engine queues it).
  *
@@ -207,8 +225,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
         $exam = $DB->get_record('local_evalia_exams', ['id' => $se->examid], '*', MUST_EXIST);
 
         // Telegram chat_id for this student (may be 0 → engine will skip send).
-        $tglink = $DB->get_record('local_saipa_telegram_links', ['userid' => $se->userid], 'telegram_id');
-        $tgid   = ($tglink && !empty($tglink->telegram_id)) ? (int) $tglink->telegram_id : 0;
+        $tgid = local_evalia_telegram_id((int) $se->userid);
 
         $course  = $DB->get_record('course', ['id' => $exam->courseid], 'fullname');
         $student = $DB->get_record(

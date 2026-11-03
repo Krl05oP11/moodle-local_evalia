@@ -55,7 +55,6 @@ class assign_exam extends external_api {
      */
     public static function execute(int $examid): array {
         global $CFG;
-        require_once($CFG->dirroot . '/local/saipa/lib.php');
         require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB;
 

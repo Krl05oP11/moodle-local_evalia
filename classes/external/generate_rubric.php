@@ -67,7 +67,6 @@ class generate_rubric extends external_api {
      */
     public static function execute(int $courseid, string $scope = '', int $itemcount = 18, string $sourcefilter = ''): array {
         global $CFG;
-        require_once($CFG->dirroot . '/local/saipa/lib.php');
         require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB, $USER;
 

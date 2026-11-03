@@ -70,7 +70,6 @@ class generate_questions extends external_api {
         int $count
     ): array {
         global $CFG;
-        require_once($CFG->dirroot . '/local/saipa/lib.php');
         require_once($CFG->dirroot . '/local/evalia/lib.php');
         global $DB;
 
