@@ -1,0 +1,103 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evalia/rubric_items
+
+    Rubric items table: read-only for an active rubric, editable while it is a draft.
+
+    Rendered from amd/src/evalia_teacher.js with core/templates; every value is escaped.
+
+    Context variables required for this template:
+    * editable - true for a draft rubric
+    * items - list of {num, id, topic, description, weightlabel, weights: [{value, label, selected}]}
+
+    Example context (json):
+    {
+        "editable": true,
+        "items": [
+            {
+                "num": 1,
+                "id": 7,
+                "topic": "Photosynthesis",
+                "description": "Light phase",
+                "weightlabel": "Medium",
+                "weights": [
+                    {
+                        "value": "low",
+                        "label": "Low",
+                        "selected": false
+                    },
+                    {
+                        "value": "medium",
+                        "label": "Medium",
+                        "selected": true
+                    },
+                    {
+                        "value": "high",
+                        "label": "High",
+                        "selected": false
+                    }
+                ]
+            }
+        ]
+    }
+
+    @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>{{#str}}rubric_item_topic, local_evalia{{/str}}</th>
+                <th>{{#str}}rubric_item_description, local_evalia{{/str}}</th>
+                <th>{{#str}}rubric_item_weight_short, local_evalia{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#items}}
+            <tr>
+                <td>{{num}}</td>
+                {{#editable}}
+                <td>
+                    <input type="text" class="form-control form-control-sm" data-item-id="{{id}}" data-field="topic"
+                        value="{{topic}}" aria-label="{{#str}}rubric_item_topic, local_evalia{{/str}}">
+                </td>
+                <td>
+                    <textarea class="form-control form-control-sm" rows="2" data-item-id="{{id}}" data-field="description"
+                        aria-label="{{#str}}rubric_item_description, local_evalia{{/str}}">{{description}}</textarea>
+                </td>
+                <td>
+                    <select class="form-select form-select-sm" data-item-id="{{id}}" data-field="difficulty_weight"
+                        aria-label="{{#str}}rubric_item_weight_short, local_evalia{{/str}}">
+                        {{#weights}}
+                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                        {{/weights}}
+                    </select>
+                </td>
+                {{/editable}}
+                {{^editable}}
+                <td>{{topic}}</td>
+                <td><small class="text-muted">{{description}}</small></td>
+                <td><span class="badge bg-secondary">{{weightlabel}}</span></td>
+                {{/editable}}
+            </tr>
+            {{/items}}
+        </tbody>
+    </table>
+</div>

@@ -24,7 +24,7 @@
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
+define(['core/ajax', 'core/log', 'core/str', 'core/templates'], function(Ajax, Log, Str, Templates) {
 
     'use strict';
 
@@ -268,7 +268,67 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
      */
     function setLoading(elementId, visible) {
         var el = document.getElementById(elementId);
-        if (el) { el.style.display = visible ? '' : 'none'; }
+        if (el) {
+            el.hidden = !visible;
+            el.style.display = visible ? '' : 'none';
+        }
+    }
+
+    /**
+     * Renders a local_evalia template into a container, replacing its contents.
+     *
+     * Every value in the context is escaped by Mustache, so data from the web services (rubric topics,
+     * AI-generated question stems, names, notes, source labels) is never inserted as markup (MMR-463 #3).
+     *
+     * @param {HTMLElement} container Element whose contents are replaced.
+     * @param {string} template Template name inside local_evalia.
+     * @param {Object} context Template context.
+     * @returns {Promise} jQuery promise resolved after the HTML is in the page.
+     */
+    function renderInto(container, template, context) {
+        return Templates.render('local_evalia/' + template, context).then(function(html, js) {
+            Templates.replaceNodeContents(container, html, js);
+            return container;
+        }).fail(function(err) {
+            Log.error('evalia_teacher: could not render local_evalia/' + template, err);
+        });
+    }
+
+    /**
+     * Replaces the contents of an element with a single text node wrapped in a tag (a notice or an error).
+     *
+     * @param {HTMLElement} el Element whose contents are replaced.
+     * @param {string} cls CSS classes of the wrapper.
+     * @param {string} text Plain text; it is never parsed as HTML.
+     * @param {string} [tag] Wrapper tag, 'p' by default.
+     */
+    function showNotice(el, cls, text, tag) {
+        if (!el) { return; }
+        var node = document.createElement(tag || 'p');
+        node.className = cls;
+        node.textContent = text;
+        el.textContent = '';
+        el.appendChild(node);
+    }
+
+    /**
+     * Replaces the contents of an element with a spinner and an optional text.
+     *
+     * @param {HTMLElement} el Element whose contents are replaced.
+     * @param {string} cls CSS classes of the wrapper.
+     * @param {string} [text] Plain text shown after the spinner.
+     */
+    function showSpinner(el, cls, text) {
+        if (!el) { return; }
+        var node = document.createElement('p');
+        node.className = cls;
+        var spinner = document.createElement('span');
+        spinner.className = 'spinner-border spinner-border-sm text-secondary' + (text ? ' me-2' : '');
+        spinner.setAttribute('role', 'status');
+        node.appendChild(spinner);
+        if (text) { node.appendChild(document.createTextNode(text)); }
+        el.textContent = '';
+        el.appendChild(node);
     }
 
     /**
@@ -310,17 +370,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             var statusDiv = document.getElementById('evalia-rubric-status');
             if (statusDiv) {
                 if (result.rubricid === 0) {
-                    statusDiv.innerHTML = '';
+                    statusDiv.textContent = '';
                 } else {
-                    var badgeClass = result.status === 'active' ? 'bg-success' : 'bg-secondary';
-                    statusDiv.innerHTML = '<span class="badge ' + badgeClass + ' me-2">' +
-                        (result.status === 'active' ? S.rubric_status_active : S.rubric_status_draft) + '</span>' +
-                        '<small class="text-muted">' + result.name + '</small>';
+                    renderInto(statusDiv, 'rubric_status', {active: result.status === 'active', name: result.name});
                 }
             }
 
             if (result.rubricid === 0) {
-                container.innerHTML = '<p class="text-muted">' + S.rubric_empty_state + '</p>';
+                renderInto(container, 'empty_state', {rubric: true});
                 showRubricButtons(false, false);
                 return;
             }
@@ -330,7 +387,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
 
         }).fail(function(err) {
             Log.error('evalia_teacher: get_rubric failed', err);
-            container.innerHTML = '<p class="text-danger">' + S.error_load_rubric + '</p>';
+            showNotice(container, 'text-danger', S.error_load_rubric);
         });
     }
 
@@ -356,39 +413,25 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
     function renderRubricItems(items, status) {
         var container = document.getElementById('evalia-rubric-items-container');
         if (!items || items.length === 0) {
-            container.innerHTML = '<p class="text-muted">' + S.rubric_no_items + '</p>';
+            showNotice(container, 'text-muted', S.rubric_no_items);
             return;
         }
 
-        var editable = (status === 'draft');
-        var rows = items.map(function(item, idx) {
-            if (!editable) {
-                return '<tr>' +
-                    '<td>' + (idx + 1) + '</td>' +
-                    '<td>' + item.topic + '</td>' +
-                    '<td><small class="text-muted">' + (item.description || '') + '</small></td>' +
-                    '<td><span class="badge bg-secondary">' + weightLabel(item.difficulty_weight) + '</span></td>' +
-                    '</tr>';
-            }
-            var weightOpts = ['low', 'medium', 'high'].map(function(w) {
-                return '<option value="' + w + '"' + (item.difficulty_weight === w ? ' selected' : '') + '>' +
-                    weightLabel(w) + '</option>';
-            }).join('');
-            return '<tr>' +
-                '<td>' + (idx + 1) + '</td>' +
-                '<td><input type="text" class="form-control form-control-sm" ' +
-                    'data-item-id="' + item.id + '" data-field="topic" value="' + item.topic + '"></td>' +
-                '<td><textarea class="form-control form-control-sm" rows="2" ' +
-                    'data-item-id="' + item.id + '" data-field="description">' + (item.description || '') + '</textarea></td>' +
-                '<td><select class="form-select form-select-sm" ' +
-                    'data-item-id="' + item.id + '" data-field="difficulty_weight">' + weightOpts + '</select></td>' +
-                '</tr>';
-        }).join('');
-
-        container.innerHTML = '<div class="table-responsive"><table class="table table-sm table-hover">' +
-            '<thead class="table-light"><tr><th>#</th><th>' + S.rubric_item_topic + '</th><th>' +
-            S.rubric_item_description + '</th><th>' + S.rubric_item_weight_short + '</th></tr></thead>' +
-            '<tbody>' + rows + '</tbody></table></div>';
+        renderInto(container, 'rubric_items', {
+            editable: status === 'draft',
+            items: items.map(function(item, idx) {
+                return {
+                    num: idx + 1,
+                    id: item.id,
+                    topic: item.topic,
+                    description: item.description || '',
+                    weightlabel: weightLabel(item.difficulty_weight),
+                    weights: ['low', 'medium', 'high'].map(function(w) {
+                        return {value: w, label: weightLabel(w), selected: item.difficulty_weight === w};
+                    })
+                };
+            })
+        });
     }
 
     /**
@@ -440,27 +483,27 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var list = document.getElementById('evalia-sources-list');
         if (!list) { return; }
         if (!sources.length) {
-            list.innerHTML = '<span class="text-muted small">' + S.sources_none_indexed + '</span>';
+            showNotice(list, 'text-muted small', S.sources_none_indexed, 'span');
             return;
         }
         var icons = {page: '📄', resource: '📑', unknown: '📎'};
-        var html = '<div class="d-flex flex-wrap gap-2">';
-        sources.forEach(function(s) {
-            var icon = icons[s.type] || '📎';
-            var eid = 'evalia-src-' + s.id.replace(/[^a-zA-Z0-9]/g, '_');
-            html += '<label class="d-flex align-items-center gap-1 small border rounded px-2 py-1" style="cursor:pointer;">' +
-                    '<input type="checkbox" class="evalia-source-cb" id="' + eid + '"' +
-                    ' data-source-id="' + s.id.replace(/"/g, '&quot;') + '" checked> ' +
-                    icon + ' ' + s.label + '</label>';
+        renderInto(list, 'source_list', {
+            sources: sources.map(function(src) {
+                return {
+                    eid: 'evalia-src-' + String(src.id).replace(/[^a-zA-Z0-9]/g, '_'),
+                    id: src.id,
+                    icon: icons[src.type] || '📎',
+                    label: src.label
+                };
+            })
+        }).then(function() {
+            // Listen for changes to update the badge.
+            list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
+                cb.addEventListener('change', updateSourcesBadge);
+            });
+            updateSourcesBadge();
+            return list;
         });
-        html += '</div>';
-        list.innerHTML = html;
-
-        // Listen for changes to update the badge.
-        list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
-            cb.addEventListener('change', updateSourcesBadge);
-        });
-        updateSourcesBadge();
     }
 
     /**
@@ -478,7 +521,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }).fail(function(err) {
             Log.error('evalia_teacher: get_course_sources failed', err);
             var list = document.getElementById('evalia-sources-list');
-            if (list) { list.innerHTML = '<span class="text-danger small">' + S.error_load_sources + '</span>'; }
+            if (list) { showNotice(list, 'text-danger small', S.error_load_sources, 'span'); }
         });
     }
 
@@ -664,7 +707,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var status = statusEl ? statusEl.value : '';
 
         setLoading('evalia-questions-loading', true);
-        if (container) { container.innerHTML = ''; }
+        if (container) { container.textContent = ''; }
 
         Ajax.call([{
             methodname: 'local_evalia_get_question_bank',
@@ -672,7 +715,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }])[0].then(function(result) {
             setLoading('evalia-questions-loading', false);
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">' + S.questions_empty_filtered + '</p>';
+                renderInto(container, 'empty_state', {questions: true});
                 return;
             }
             renderQuestionsTable(result.questions);
@@ -680,7 +723,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             setLoading('evalia-questions-loading', false);
             Log.error('evalia_teacher: get_question_bank failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger">' + S.error_load_bank + '</p>';
+                showNotice(container, 'text-danger', S.error_load_bank);
             }
         });
     }
@@ -693,14 +736,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
     function renderQuestionsTable(questions) {
         var container = document.getElementById('evalia-questions-table-container');
         var statusMap = {
-            'draft':    '<span class="badge bg-secondary">' + S.questions_status_draft + '</span>',
-            'approved': '<span class="badge bg-success">' + S.questions_status_approved + '</span>',
-            'rejected': '<span class="badge bg-danger">' + S.questions_status_rejected + '</span>'
+            'draft':    {cls: 'bg-secondary', label: S.questions_status_draft},
+            'approved': {cls: 'bg-success', label: S.questions_status_approved},
+            'rejected': {cls: 'bg-danger', label: S.questions_status_rejected}
         };
         var diffMap = {
-            'basic':    '<span class="badge bg-info text-dark">' + S.difficulty_basic + '</span>',
-            'medium':   '<span class="badge bg-warning text-dark">' + S.difficulty_medium + '</span>',
-            'advanced': '<span class="badge bg-danger">' + S.difficulty_advanced + '</span>'
+            'basic':    {cls: 'bg-info text-dark', label: S.difficulty_basic},
+            'medium':   {cls: 'bg-warning text-dark', label: S.difficulty_medium},
+            'advanced': {cls: 'bg-danger', label: S.difficulty_advanced}
         };
         var typeMap = {
             'multichoice': S.qtype_table_multichoice,
@@ -710,35 +753,29 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             'essay':       S.qtype_essay
         };
 
-        var rows = questions.map(function(q) {
-            var stem = q.stem.length > 70 ? q.stem.substring(0, 70) + '…' : q.stem;
-            return '<tr>' +
-                '<td><small class="text-muted">' + q.topic + '</small></td>' +
-                '<td><small>' + stem + '</small></td>' +
-                '<td><span class="badge bg-light text-dark border">' +
-                    (typeMap[q.question_type] || q.question_type) + '</span></td>' +
-                '<td>' + (diffMap[q.difficulty] || q.difficulty) + '</td>' +
-                '<td>' + (statusMap[q.status] || q.status) + '</td>' +
-                '<td class="text-nowrap">' +
-                    '<button class="btn btn-sm btn-outline-success py-0 me-1 evalia-approve-btn" ' +
-                        'data-id="' + q.id + '" title="' + S.questions_approve + '">✓</button>' +
-                    '<button class="btn btn-sm btn-outline-danger py-0 evalia-reject-btn" ' +
-                        'data-id="' + q.id + '" title="' + S.questions_reject + '">✗</button>' +
-                '</td>' +
-                '</tr>';
-        }).join('');
-
-        container.innerHTML = '<div class="table-responsive"><table class="table table-sm table-hover mb-0">' +
-            '<thead class="table-light"><tr>' +
-            '<th>' + S.rubric_item_topic + '</th><th>' + S.table_question + '</th><th>' + S.table_type +
-            '</th><th>' + S.gen_questions_difficulty_label + '</th><th>' + S.table_status + '</th><th></th>' +
-            '</tr></thead><tbody>' + rows + '</tbody></table></div>';
-
-        container.querySelectorAll('.evalia-approve-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() { updateQuestion(+btn.dataset.id, 'approved'); });
-        });
-        container.querySelectorAll('.evalia-reject-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() { updateQuestion(+btn.dataset.id, 'rejected'); });
+        renderInto(container, 'question_bank', {
+            questions: questions.map(function(q) {
+                var st = statusMap[q.status] || {cls: 'bg-light text-dark border', label: q.status};
+                var df = diffMap[q.difficulty] || {cls: 'bg-light text-dark border', label: q.difficulty};
+                return {
+                    id: q.id,
+                    topic: q.topic,
+                    stem: q.stem.length > 70 ? q.stem.substring(0, 70) + '…' : q.stem,
+                    typelabel: typeMap[q.question_type] || q.question_type,
+                    difficultyclass: df.cls,
+                    difficultylabel: df.label,
+                    statusclass: st.cls,
+                    statuslabel: st.label
+                };
+            })
+        }).then(function() {
+            container.querySelectorAll('.evalia-approve-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() { updateQuestion(+btn.dataset.id, 'approved'); });
+            });
+            container.querySelectorAll('.evalia-reject-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() { updateQuestion(+btn.dataset.id, 'rejected'); });
+            });
+            return container;
         });
     }
 
@@ -780,69 +817,19 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             return;
         }
 
-        var itemOptions = currentRubric.items.map(function(it) {
-            return '<option value="' + it.id + '">' + it.topic + ' (' + weightLabel(it.difficulty_weight) + ')</option>';
-        }).join('');
-
-        var formHtml = '<div class="card border-primary mb-3" id="evalia-gen-q-form">' +
-            '<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">' +
-            '<span>' + S.gen_questions_title + '</span>' +
-            '<button type="button" class="btn-close btn-close-white" id="evalia-gen-q-close"></button>' +
-            '</div>' +
-            '<div class="card-body">' +
-            '<div class="row g-2">' +
-            '<div class="col-md-4">' +
-            '<label class="form-label form-label-sm">' + S.gen_questions_item_label + '</label>' +
-            '<select id="gen-q-item" class="form-select form-select-sm">' + itemOptions + '</select>' +
-            '</div>' +
-            '<div class="col-md-3">' +
-            '<label class="form-label form-label-sm">' + S.gen_questions_difficulty_label + '</label>' +
-            '<select id="gen-q-difficulty" class="form-select form-select-sm">' +
-            '<option value="basic">' + S.difficulty_basic + '</option>' +
-            '<option value="medium" selected>' + S.difficulty_medium + '</option>' +
-            '<option value="advanced">' + S.difficulty_advanced + '</option>' +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-3">' +
-            '<label class="form-label form-label-sm">' + S.gen_questions_count_label + '</label>' +
-            '<input type="number" id="gen-q-count" class="form-control form-control-sm" value="' +
-            defaultQuestionsCount + '" min="1" max="10">' +
-            '</div>' +
-            '<div class="col-md-2 d-flex align-items-end">' +
-            '<button id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">' +
-            S.gen_questions_btn + '</button>' +
-            '</div>' +
-            '</div>' +
-            '<div class="mt-2">' +
-            '<label class="form-label form-label-sm">' + S.gen_questions_types_label + '</label><br>' +
-            '<div class="form-check form-check-inline">' +
-            '<input class="form-check-input" type="checkbox" id="qt-multichoice" value="multichoice" checked>' +
-            '<label class="form-check-label" for="qt-multichoice">' + S.qtype_multichoice + '</label></div>' +
-            '<div class="form-check form-check-inline">' +
-            '<input class="form-check-input" type="checkbox" id="qt-truefalse" value="truefalse" checked>' +
-            '<label class="form-check-label" for="qt-truefalse">' + S.qtype_short_truefalse + '</label></div>' +
-            '<div class="form-check form-check-inline">' +
-            '<input class="form-check-input" type="checkbox" id="qt-shortanswer" value="shortanswer">' +
-            '<label class="form-check-label" for="qt-shortanswer">' + S.qtype_shortanswer + '</label></div>' +
-            '<div class="form-check form-check-inline">' +
-            '<input class="form-check-input" type="checkbox" id="qt-essay" value="essay">' +
-            '<label class="form-check-label" for="qt-essay">' + S.qtype_essay + '</label></div>' +
-            '</div>' +
-            '<div id="gen-q-loading" style="display:none;" class="mt-2">' +
-            '<div class="d-flex align-items-center gap-2 text-primary">' +
-            '<div class="spinner-border spinner-border-sm" role="status"></div>' +
-            '<span>' + S.gen_questions_loading + '</span>' +
-            '</div></div>' +
-            '</div></div>';
-
-        container.innerHTML = formHtml;
-
-        document.getElementById('evalia-gen-q-close').addEventListener('click', function() {
-            loadQuestionBank();
-        });
-
-        document.getElementById('evalia-btn-do-generate-questions').addEventListener('click', function() {
-            handleDoGenerateQuestions();
+        renderInto(container, 'generate_questions_form', {
+            items: currentRubric.items.map(function(it) {
+                return {id: it.id, topic: it.topic, weightlabel: weightLabel(it.difficulty_weight)};
+            }),
+            defaultcount: defaultQuestionsCount
+        }).then(function() {
+            document.getElementById('evalia-gen-q-close').addEventListener('click', function() {
+                loadQuestionBank();
+            });
+            document.getElementById('evalia-btn-do-generate-questions').addEventListener('click', function() {
+                handleDoGenerateQuestions();
+            });
+            return container;
         });
     }
 
@@ -891,7 +878,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                 if (statusEl) { statusEl.value = 'draft'; }
                 // Restore the table container (the form replaced it) then load
                 var container = document.getElementById('evalia-questions-table-container');
-                if (container) { container.innerHTML = ''; }
+                if (container) { container.textContent = ''; }
                 loadQuestionBank();
             } else {
                 showToast(S.error_rubric_save.replace('{$a}', result.message), 'danger');
@@ -1043,15 +1030,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var container = document.getElementById('evalia-student-exams-container');
         if (!container || !examId) { return; }
 
-        container.innerHTML = '<div class="text-center py-3">' +
-            '<div class="spinner-border spinner-border-sm text-secondary"></div></div>';
+        showSpinner(container, 'text-center py-3');
 
         Ajax.call([{
             methodname: 'local_evalia_get_student_exams',
             args: {examid: examId}
         }])[0].then(function(result) {
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center p-4">' + S.students_none_enrolled_exam + '</p>';
+                showNotice(container, 'text-muted text-center p-4', S.students_none_enrolled_exam);
                 return;
             }
             renderStudentExamsTable(result.students);
@@ -1080,7 +1066,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             }
         }).fail(function(err) {
             Log.error('evalia_teacher: get_student_exams failed', err);
-            container.innerHTML = '<p class="text-danger p-3">' + S.error_load_students + '</p>';
+            showNotice(container, 'text-danger p-3', S.error_load_students);
         });
     }
 
@@ -1093,69 +1079,40 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var container = document.getElementById('evalia-student-exams-container');
         var wwwroot = (typeof M !== 'undefined' && M.cfg) ? M.cfg.wwwroot : '';
         var statusMap = {
-            'not_assigned': '<span class="badge bg-light text-dark border">' + S.exam_status_not_assigned + '</span>',
-            'assigned':     '<span class="badge" style="background-color:#0d6efd;color:#fff">' + S.exam_status_assigned + '</span>',
-            'started':      '<span class="badge bg-warning text-dark">' + S.exam_status_started + '</span>',
-            'submitted':    '<span class="badge bg-info text-dark">' + S.exam_status_submitted + '</span>',
-            'graded':       '<span class="badge bg-success">' + S.exam_status_graded + '</span>',
-            'published':    '<span class="badge" style="background:#198754;color:#fff;">' +
-                S['student:status_published'] + '</span>'
+            'not_assigned': {cls: 'bg-light text-dark border', label: S.exam_status_not_assigned},
+            'assigned':     {cls: 'bg-primary', label: S.exam_status_assigned},
+            'started':      {cls: 'bg-warning text-dark', label: S.exam_status_started},
+            'submitted':    {cls: 'bg-info text-dark', label: S.exam_status_submitted},
+            'graded':       {cls: 'bg-success', label: S.exam_status_graded},
+            'published':    {cls: 'bg-success', label: S['student:status_published']}
         };
 
-        var rows = students.map(function(s) {
-            var score = (s.score !== null && s.score !== undefined)
-                ? '<strong>' + s.score.toFixed(1) + '</strong>'
-                : '<span class="text-muted">—</span>';
-
-            // Build exam link cell.
-            var examCell = '';
-            if (s.student_examid > 0) {
-                var examUrl = wwwroot + '/local/evalia/student_exam.php?student_examid=' + s.student_examid;
-                if (s.status === 'assigned') {
-                    examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-secondary py-0" title="' + S.exam_preview_link_title + '">' +
-                        S.link_view + '</a>';
-                } else if (s.status === 'started') {
-                    examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-primary py-0" title="' + S.exam_watching_link_title + '">' +
-                        S.link_view + '</a>';
-                } else if (s.status === 'submitted') {
-                    examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-warning py-0" title="' + S.exam_grade_link_title + '">' +
-                        S.link_grade + '</a>';
-                } else if (s.status === 'graded') {
-                    examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="btn btn-sm btn-outline-success py-0 me-1" title="' + S.exam_view_graded_title + '">' +
-                        S.link_view_star + '</a>' +
-                        '<button class="btn btn-sm btn-success py-0 evalia-btn-publish-single" ' +
-                        'data-student-examid="' + s.student_examid + '" title="' + S.exam_publish_single_title + '">' +
-                        S.btn_publish_single + '</button>';
-                } else if (s.status === 'published') {
-                    examCell = '<a href="' + examUrl + '" target="_blank" ' +
-                        'class="text-success small" title="' + S.exam_view_published_title + '">' + S.link_view_star + '</a>';
-                }
-            }
-
-            return '<tr>' +
-                '<td>' + s.fullname + '</td>' +
-                '<td>' + (statusMap[s.status] || s.status) + '</td>' +
-                '<td class="text-center">' + score + '</td>' +
-                '<td class="text-center">' + examCell + '</td>' +
-                '</tr>';
-        }).join('');
-
-        container.innerHTML = '<div class="table-responsive"><table class="table table-sm mb-0">' +
-            '<thead class="table-light"><tr>' +
-            '<th>' + S.table_student + '</th><th>' + S.table_status + '</th><th class="text-center">' +
-            S.table_grade + '</th><th class="text-center">' + S.table_action + '</th>' +
-            '</tr></thead>' +
-            '<tbody>' + rows + '</tbody></table></div>';
-
-        // Wire publish buttons (delegated — buttons created dynamically).
-        container.querySelectorAll('.evalia-btn-publish-single').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                handlePublishGrade(parseInt(btn.dataset.studentExamid, 10), btn);
+        renderInto(container, 'student_exams', {
+            students: students.map(function(s) {
+                var st = statusMap[s.status] || {cls: 'bg-light text-dark border', label: s.status};
+                var hasexam = s.student_examid > 0;
+                return {
+                    fullname: s.fullname,
+                    statusclass: st.cls,
+                    statuslabel: st.label,
+                    hasscore: s.score !== null && s.score !== undefined,
+                    score: (s.score !== null && s.score !== undefined) ? s.score.toFixed(1) : '',
+                    examurl: wwwroot + '/local/evalia/student_exam.php?student_examid=' + s.student_examid,
+                    student_examid: s.student_examid,
+                    isassigned: hasexam && s.status === 'assigned',
+                    isstarted: hasexam && s.status === 'started',
+                    issubmitted: hasexam && s.status === 'submitted',
+                    isgraded: hasexam && s.status === 'graded',
+                    ispublished: hasexam && s.status === 'published'
+                };
+            })
+        }).then(function() {
+            container.querySelectorAll('.evalia-btn-publish-single').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    handlePublishGrade(parseInt(btn.dataset.studentExamid, 10), btn);
+                });
             });
+            return container;
         });
     }
 
@@ -1169,7 +1126,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (!container) { return; }
 
         setLoading('evalia-portfolio-loading', true);
-        container.innerHTML = '';
+        container.textContent = '';
 
         Ajax.call([{
             methodname: 'local_evalia_get_student_portfolio',
@@ -1177,7 +1134,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }])[0].then(function(result) {
             setLoading('evalia-portfolio-loading', false);
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center p-4">' + S.students_none_enrolled_course + '</p>';
+                showNotice(container, 'text-muted text-center p-4', S.students_none_enrolled_course);
                 return;
             }
             renderPortfolioTable(result.students);
@@ -1185,7 +1142,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
             setLoading('evalia-portfolio-loading', false);
             Log.error('evalia_teacher: get_student_portfolio failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger p-3">' + S.error_load_portfolio + '</p>';
+                showNotice(container, 'text-danger p-3', S.error_load_portfolio);
             }
         });
     }
@@ -1198,54 +1155,43 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
     function renderPortfolioTable(students) {
         var container = document.getElementById('evalia-portfolio-list-container');
 
-        var rows = students.map(function(s) {
-            var gradeHtml = s.has_portfolio
-                ? '<span class="fw-bold">' + s.avg_grade.toFixed(1) + '</span>'
-                : '<span class="text-muted">—</span>';
-            var examsHtml = s.has_portfolio
-                ? String(s.total_exams)
-                : '<span class="text-muted">0</span>';
-            var isActive = (s.userid === selectedPortfolioUserId) ? ' table-active' : '';
-            return '<tr class="evalia-portfolio-row' + isActive + '" data-userid="' + s.userid + '"' +
-                '    data-fullname="' + s.fullname.replace(/"/g, '&quot;') + '"' +
-                '    style="cursor:pointer;">' +
-                '<td><small>' + s.fullname + '</small></td>' +
-                '<td class="text-center"><small>' + examsHtml + '</small></td>' +
-                '<td class="text-center"><small>' + gradeHtml + '</small></td>' +
-                '</tr>';
-        }).join('');
-
-        container.innerHTML = '<div class="table-responsive">' +
-            '<table class="table table-sm table-hover mb-0">' +
-            '<thead class="table-light"><tr>' +
-            '<th>' + S.table_student + '</th>' +
-            '<th class="text-center">' + S.tab_exams + '</th>' +
-            '<th class="text-center">' + S.portfolio_avg_grade + '</th>' +
-            '</tr></thead>' +
-            '<tbody>' + rows + '</tbody>' +
-            '</table></div>';
-
-        container.querySelectorAll('.evalia-portfolio-row').forEach(function(row) {
-            row.addEventListener('click', function() {
-                var uid = parseInt(row.dataset.userid, 10);
-                var fullname = row.dataset.fullname;
-                showStudentDetail(uid, fullname);
-                // Highlight row
-                container.querySelectorAll('.evalia-portfolio-row').forEach(function(r) {
-                    r.classList.remove('table-active');
+        renderInto(container, 'portfolio_students', {
+            students: students.map(function(s) {
+                return {
+                    userid: s.userid,
+                    fullname: s.fullname,
+                    active: s.userid === selectedPortfolioUserId,
+                    hasportfolio: !!s.has_portfolio,
+                    totalexams: s.total_exams,
+                    avggrade: s.has_portfolio ? s.avg_grade.toFixed(1) : ''
+                };
+            })
+        }).then(function() {
+            container.querySelectorAll('.evalia-portfolio-row').forEach(function(row) {
+                var open = function() {
+                    showStudentDetail(parseInt(row.dataset.userid, 10), row.dataset.fullname);
+                    container.querySelectorAll('.evalia-portfolio-row').forEach(function(r) {
+                        r.classList.remove('table-active');
+                    });
+                    row.classList.add('table-active');
+                };
+                row.addEventListener('click', open);
+                row.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        open();
+                    }
                 });
-                row.classList.add('table-active');
             });
-        });
 
-        // Re-select previously chosen student if still in list
-        if (selectedPortfolioUserId > 0) {
-            var existingRow = container.querySelector('[data-userid="' + selectedPortfolioUserId + '"]');
-            if (!existingRow) {
-                // Student gone — reset detail panel
+            // Re-select previously chosen student if still in list.
+            if (selectedPortfolioUserId > 0 &&
+                    !container.querySelector('[data-userid="' + selectedPortfolioUserId + '"]')) {
+                // Student gone: reset the detail panel.
                 hideStudentDetail();
             }
-        }
+            return container;
+        });
     }
 
     /**
@@ -1268,7 +1214,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         // Reset notes panel
         var notesContainer = document.getElementById('evalia-portfolio-notes-container');
         if (notesContainer) {
-            notesContainer.innerHTML = '<p class="text-muted small">' + S.loading_ellipsis + '</p>';
+            showNotice(notesContainer, 'text-muted small', S.loading_ellipsis);
         }
         var noteInput = document.getElementById('evalia-portfolio-note-input');
         if (noteInput) { noteInput.value = ''; }
@@ -1276,8 +1222,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         // Reset exams panel and load history
         var examsContainer = document.getElementById('evalia-portfolio-exams-container');
         if (examsContainer) {
-            examsContainer.innerHTML = '<p class="text-muted text-center py-3">' +
-                '<span class="spinner-border spinner-border-sm me-2"></span>' + S.loading_exam_history + '</p>';
+            showSpinner(examsContainer, 'text-muted text-center py-3', S.loading_exam_history);
         }
 
         // Update stats header
@@ -1326,9 +1271,10 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var examsLabel = (examsText !== '1')
             ? S.exam_count_plural.replace('{$a}', examsText)
             : S.exam_count_singular.replace('{$a}', examsText);
-        statsEl.innerHTML =
-            '<span class="fw-semibold me-3">📝 ' + examsLabel + '</span>' +
-            '<span class="fw-semibold text-primary">' + S.portfolio_average_label.replace('{$a}', gradeText) + '</span>';
+        renderInto(statsEl, 'portfolio_stats', {
+            examslabel: examsLabel,
+            averagelabel: S.portfolio_average_label.replace('{$a}', gradeText)
+        });
     }
 
     /**
@@ -1387,14 +1333,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">' + S.no_exams_assigned_yet + '</p>';
+                showNotice(container, 'text-muted text-center py-4', S.no_exams_assigned_yet);
                 return;
             }
             renderPortfolioExams(result.exams);
         }).fail(function(err) {
             Log.error('evalia_teacher: get_student_exam_history failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger small p-3">' + S.error_load_exam_history + '</p>';
+                showNotice(container, 'text-danger small p-3', S.error_load_exam_history);
             }
         });
     }
@@ -1409,56 +1355,33 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (!container) { return; }
 
         var statusClasses = {
-            'assigned':  'secondary',
-            'started':   'warning',
-            'submitted': 'info',
-            'graded':    'success'
+            'assigned':  'bg-secondary',
+            'started':   'bg-warning text-dark',
+            'submitted': 'bg-info text-dark',
+            'graded':    'bg-success'
         };
+        var locale = document.documentElement.lang || undefined;
 
-        var rows = exams.map(function(ex) {
-            var scoreHtml;
-            if (ex.status === 'graded') {
-                var pct = ex.max_score > 0 ? (ex.score / ex.max_score * 100) : 0;
-                var color = pct >= 60 ? 'success' : (pct >= 40 ? 'warning' : 'danger');
-                scoreHtml = '<span class="fw-bold text-' + color + '">' +
-                    ex.score.toFixed(1) + ' / ' + ex.max_score.toFixed(1) + '</span>';
-            } else {
-                scoreHtml = '<span class="text-muted">—</span>';
-            }
-
-            var dateHtml = ex.timesubmitted > 0
-                ? new Date(ex.timesubmitted * 1000).toLocaleDateString(document.documentElement.lang || undefined)
-                : '—';
-
-            var sc = statusClasses[ex.status] || 'secondary';
-            var viewLink = ex.status === 'graded' || ex.status === 'submitted'
-                ? ' <a href="' + M.cfg.wwwroot + '/local/evalia/student_exam.php?student_examid=' + ex.student_examid + '" ' +
-                  'class="btn btn-outline-secondary btn-sm py-0 ms-1" target="_blank" title="' + S.view_exam_title + '">🔍</a>'
-                : '';
-
-            return '<tr>' +
-                '<td>' + ex.exam_name + '</td>' +
-                '<td class="text-center">' +
-                    '<span class="badge bg-' + sc + '">' + ex.status_label + '</span>' +
-                '</td>' +
-                '<td class="text-center">' + scoreHtml + '</td>' +
-                '<td class="text-center">' + dateHtml + '</td>' +
-                '<td class="text-center">' + ex.total_questions + viewLink + '</td>' +
-                '</tr>';
-        }).join('');
-
-        container.innerHTML =
-            '<div class="table-responsive">' +
-            '<table class="table table-sm table-hover mb-0">' +
-            '<thead class="table-light"><tr>' +
-            '<th>' + S.table_exam + '</th>' +
-            '<th class="text-center">' + S.table_status + '</th>' +
-            '<th class="text-center">' + S.table_grade + '</th>' +
-            '<th class="text-center">' + S.table_date + '</th>' +
-            '<th class="text-center">' + S.table_questions + '</th>' +
-            '</tr></thead>' +
-            '<tbody>' + rows + '</tbody>' +
-            '</table></div>';
+        renderInto(container, 'portfolio_exams', {
+            exams: exams.map(function(ex) {
+                var graded = ex.status === 'graded';
+                var pct = (graded && ex.max_score > 0) ? (ex.score / ex.max_score * 100) : 0;
+                var canview = ex.status === 'graded' || ex.status === 'submitted';
+                return {
+                    name: ex.exam_name,
+                    statusclass: statusClasses[ex.status] || 'bg-secondary',
+                    statuslabel: ex.status_label,
+                    graded: graded,
+                    scoreclass: 'text-' + (pct >= 60 ? 'success' : (pct >= 40 ? 'warning' : 'danger')),
+                    score: graded ? ex.score.toFixed(1) : '',
+                    maxscore: graded ? ex.max_score.toFixed(1) : '',
+                    date: ex.timesubmitted > 0 ? new Date(ex.timesubmitted * 1000).toLocaleDateString(locale) : '—',
+                    totalquestions: ex.total_questions,
+                    viewurl: canview
+                        ? M.cfg.wwwroot + '/local/evalia/student_exam.php?student_examid=' + ex.student_examid : ''
+                };
+            })
+        });
     }
 
     /**
@@ -1471,7 +1394,7 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (!container) { return; }
         if (userid !== selectedPortfolioUserId) { return; }
 
-        container.innerHTML = '<p class="text-muted small">' + S.loading_observations + '</p>';
+        showNotice(container, 'text-muted small', S.loading_observations);
 
         Ajax.call([{
             methodname: 'local_evalia_get_portfolio_notes',
@@ -1479,14 +1402,14 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         }])[0].then(function(result) {
             if (userid !== selectedPortfolioUserId) { return; }
             if (!result || result.total === 0) {
-                container.innerHTML = '<p class="text-muted small">' + S.portfolio_note_empty + '</p>';
+                showNotice(container, 'text-muted small', S.portfolio_note_empty);
                 return;
             }
             renderNotesList(result.notes);
         }).fail(function(err) {
             Log.error('evalia_teacher: get_portfolio_notes failed', err);
             if (container) {
-                container.innerHTML = '<p class="text-danger small">' + S.error_load_notes + '</p>';
+                showNotice(container, 'text-danger small', S.error_load_notes);
             }
         });
     }
@@ -1500,18 +1423,18 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         var container = document.getElementById('evalia-portfolio-notes-container');
         if (!container) { return; }
 
-        var items = notes.map(function(n) {
-            var date = new Date(n.timecreated * 1000);
-            var locale = document.documentElement.lang || undefined;
-            var dateStr = date.toLocaleDateString(locale) + ' ' +
-                date.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'});
-            return '<div class="border rounded p-2 mb-2 bg-light">' +
-                '<small class="text-muted d-block mb-1">' + n.author_name + ' · ' + dateStr + '</small>' +
-                '<span class="small">' + n.note_text + '</span>' +
-                '</div>';
-        }).join('');
-
-        container.innerHTML = items;
+        var locale = document.documentElement.lang || undefined;
+        renderInto(container, 'portfolio_notes', {
+            notes: notes.map(function(n) {
+                var date = new Date(n.timecreated * 1000);
+                return {
+                    author: n.author_name,
+                    date: date.toLocaleDateString(locale) + ' ' +
+                        date.toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'}),
+                    text: n.note_text
+                };
+            })
+        });
     }
 
     /**
@@ -1698,12 +1621,17 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (summaryEl) {
             var total = r.counts.assigned + r.counts.started + r.counts.submitted + r.counts.graded;
             var passRate = r.graded > 0 ? Math.round(r.pass_count / r.graded * 100) : 0;
-            summaryEl.innerHTML =
-                statCard('👥', S.stat_total, total, 'secondary') +
-                statCard('✅', S.stat_graded, r.graded, 'success') +
-                statCard('📤', S.stat_submitted, r.counts.submitted, 'info') +
-                statCard('⭐', S.stat_average, r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—', 'primary') +
-                statCard('🎯', S.stat_passed, r.graded > 0 ? passRate + '%' : '—', passRate >= 50 ? 'success' : 'warning');
+            renderInto(summaryEl, 'exam_stats_summary', {
+                cards: [
+                    {icon: '👥', label: S.stat_total, value: total, color: 'secondary'},
+                    {icon: '✅', label: S.stat_graded, value: r.graded, color: 'success'},
+                    {icon: '📤', label: S.stat_submitted, value: r.counts.submitted, color: 'info'},
+                    {icon: '⭐', label: S.stat_average, value: r.graded > 0 ? r.avg_score.toFixed(1) + '/10' : '—',
+                        color: 'primary'},
+                    {icon: '🎯', label: S.stat_passed, value: r.graded > 0 ? passRate + '%' : '—',
+                        color: passRate >= 50 ? 'success' : 'warning'}
+                ]
+            });
         }
 
         // ── Score bands ───────────────────────────────────────────────────────
@@ -1711,77 +1639,40 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
         if (bandsEl && r.bands) {
             var maxCount = Math.max.apply(null, r.bands.map(function(b) { return b.count; })) || 1;
             var bandColors = ['danger', 'warning', 'warning', 'success', 'success'];
-            var rows = r.bands.map(function(b, i) {
-                var pct = Math.round(b.count / maxCount * 100);
-                return '<div class="d-flex align-items-center gap-2 mb-1">' +
-                    '<span class="text-muted small" style="width:35px;">' + b.label + '</span>' +
-                    '<div class="flex-grow-1 bg-light rounded" style="height:18px;">' +
-                    '<div class="bg-' + bandColors[i] + ' rounded h-100" style="width:' + pct + '%"></div>' +
-                    '</div>' +
-                    '<span class="small fw-bold" style="width:20px;">' + b.count + '</span>' +
-                    '</div>';
-            }).join('');
-            bandsEl.innerHTML = rows || '<p class="text-muted small">' + S.stats_no_data + '</p>';
+            renderInto(bandsEl, 'exam_stats_bands', {
+                empty: r.bands.length === 0,
+                bands: r.bands.map(function(b, i) {
+                    return {label: b.label, count: b.count, pct: Math.round(b.count / maxCount * 100),
+                        color: bandColors[i] || 'secondary'};
+                })
+            });
         }
 
         // ── Top failed questions ───────────────────────────────────────────────
         var failedEl = document.getElementById('evalia-stats-failed');
         if (failedEl) {
-            if (!r.top_failed || r.top_failed.length === 0) {
-                failedEl.innerHTML = '<p class="text-muted small">' + S.stats_no_data + '</p>';
-            } else {
-                // Difficulty badge colors, keyed by the resolved label: basic=teal, medium=blue, advanced=orange.
-                var diffStyle = {};
-                diffStyle[S.difficulty_basic] = 'background:#0d9488;color:#fff;';
-                diffStyle[S.difficulty_medium] = 'background:#2563eb;color:#fff;';
-                diffStyle[S.difficulty_advanced] = 'background:#ea580c;color:#fff;';
-                var items = r.top_failed.map(function(q, idx) {
-                    var pct = q.total > 0 ? Math.round(q.fail_count / q.total * 100) : 0;
-                    var stem = q.stem.length > 100 ? q.stem.substring(0, 97) + '…' : q.stem;
-                    var badges = '';
-                    if (q.topic) {
-                        badges += '<span class="badge me-1" style="background:#6366f1;color:#fff;" title="' +
-                            S.stat_topic_title + '">' + q.topic + '</span>';
-                    }
-                    if (q.difficulty) {
-                        var ds = diffStyle[q.difficulty] || 'background:#6b7280;color:#fff;';
-                        badges += '<span class="badge" style="' + ds + '">' + q.difficulty + '</span>';
-                    }
-                    return '<div class="mb-2 border rounded p-2">' +
-                        '<div class="d-flex justify-content-between align-items-start mb-1">' +
-                        '<span class="text-muted small fw-bold me-2">#' + (idx + 1) + '</span>' +
-                        '<div class="flex-grow-1">' + badges + '</div>' +
-                        '<span class="small text-danger fw-bold ms-2">' + S.stat_pct_failed.replace('{$a}', pct) + '</span>' +
-                        '</div>' +
-                        '<div class="small text-dark mb-1">' + stem + '</div>' +
-                        '<div class="progress" style="height:6px;">' +
-                        '<div class="progress-bar bg-danger" style="width:' + pct + '%"></div>' +
-                        '</div>' +
-                        '</div>';
-                }).join('');
-                failedEl.innerHTML = items;
-            }
+            // Difficulty badge classes, keyed by the resolved label (styles.css: teal, blue, orange).
+            var diffClass = {};
+            diffClass[S.difficulty_basic] = 'evalia-diff-basic';
+            diffClass[S.difficulty_medium] = 'evalia-diff-medium';
+            diffClass[S.difficulty_advanced] = 'evalia-diff-advanced';
+            var failed = r.top_failed || [];
+            renderInto(failedEl, 'exam_stats_failed', {
+                empty: failed.length === 0,
+                questions: failed.map(function(q, idx) {
+                    return {
+                        num: idx + 1,
+                        topic: q.topic || '',
+                        difficulty: q.difficulty || '',
+                        difficultyclass: diffClass[q.difficulty] || 'evalia-diff-other',
+                        pct: q.total > 0 ? Math.round(q.fail_count / q.total * 100) : 0,
+                        stem: q.stem.length > 100 ? q.stem.substring(0, 97) + '…' : q.stem
+                    };
+                })
+            });
         }
     }
 
-    /**
-     * Builds the HTML for a single summary statistic card.
-     *
-     * @param {string} icon Emoji icon.
-     * @param {string} label Card label.
-     * @param {(string|number)} value Value to display.
-     * @param {string} color Bootstrap contextual colour name.
-     * @returns {string} Card HTML.
-     */
-    function statCard(icon, label, value, color) {
-        return '<div class="col">' +
-            '<div class="card text-center border-' + color + '">' +
-            '<div class="card-body py-2 px-1">' +
-            '<div class="fs-5">' + icon + '</div>' +
-            '<div class="fw-bold text-' + color + '">' + value + '</div>' +
-            '<div class="text-muted small">' + label + '</div>' +
-            '</div></div></div>';
-    }
 
     // ─── RAG: Index course material ─────────────────────────────────────────
 

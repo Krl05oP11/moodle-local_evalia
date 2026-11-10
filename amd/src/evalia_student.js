@@ -290,10 +290,16 @@ define(['core/ajax', 'core/log', 'core/str'], function(Ajax, Log, Str) {
                             panel.className = 'card border-success mt-3 mb-5';
                             panel.querySelector('.card-header').className = 'card-header bg-success text-white fw-bold';
                             panel.querySelector('.card-header').textContent = S['exam:graded_heading'];
-                            panel.querySelector('.card-body').innerHTML =
-                                '<p class="mb-0 fs-5">' + S['exam:grade_label'] + ' <strong>' +
-                                result.score.toFixed(1) + ' / ' + result.max_score.toFixed(1) +
-                                '</strong> &nbsp;(' + result.percent.toFixed(0) + '%)</p>';
+                            var gradeP = document.createElement('p');
+                            gradeP.className = 'mb-0 fs-5';
+                            var gradeStrong = document.createElement('strong');
+                            gradeStrong.textContent = result.score.toFixed(1) + ' / ' + result.max_score.toFixed(1);
+                            gradeP.appendChild(document.createTextNode(S['exam:grade_label'] + ' '));
+                            gradeP.appendChild(gradeStrong);
+                            gradeP.appendChild(document.createTextNode('\u00a0(' + result.percent.toFixed(0) + '%)'));
+                            var body = panel.querySelector('.card-body');
+                            body.textContent = '';
+                            body.appendChild(gradeP);
                         }
                     } else {
                         btn.disabled = false;

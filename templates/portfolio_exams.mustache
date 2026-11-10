@@ -1,0 +1,77 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evalia/portfolio_exams
+
+    Exam history of a student in the course.
+
+    Rendered from amd/src/evalia_teacher.js with core/templates; every value is escaped.
+
+    Context variables required for this template:
+    * exams - list of {name, statusclass, statuslabel, graded, scoreclass, score, maxscore, date, totalquestions, viewurl}
+
+    Example context (json):
+    {
+        "exams": [
+            {
+                "name": "Midterm",
+                "statusclass": "bg-success",
+                "statuslabel": "Graded",
+                "graded": true,
+                "scoreclass": "text-success",
+                "score": "8.0",
+                "maxscore": "10.0",
+                "date": "10/11/2026",
+                "totalquestions": 10,
+                "viewurl": "https://example.edu/local/evalia/student_exam.php?student_examid=4"
+            }
+        ]
+    }
+
+    @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>{{#str}}table_exam, local_evalia{{/str}}</th>
+                <th class="text-center">{{#str}}table_status, local_evalia{{/str}}</th>
+                <th class="text-center">{{#str}}table_grade, local_evalia{{/str}}</th>
+                <th class="text-center">{{#str}}table_date, local_evalia{{/str}}</th>
+                <th class="text-center">{{#str}}table_questions, local_evalia{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#exams}}
+            <tr>
+                <td>{{name}}</td>
+                <td class="text-center"><span class="badge {{statusclass}}">{{statuslabel}}</span></td>
+                <td class="text-center">{{#graded}}<span class="fw-bold {{scoreclass}}">{{score}} / {{maxscore}}</span>{{/graded}}{{^graded}}<span class="text-muted">—</span>{{/graded}}</td>
+                <td class="text-center">{{date}}</td>
+                <td class="text-center">
+                    {{totalquestions}}
+                    {{#viewurl}}
+                    <a href="{{viewurl}}" class="btn btn-outline-secondary btn-sm py-0 ms-1" target="_blank"
+                        title="{{#str}}view_exam_title, local_evalia{{/str}}" aria-label="{{#str}}view_exam_title, local_evalia{{/str}}">🔍</a>
+                    {{/viewurl}}
+                </td>
+            </tr>
+            {{/exams}}
+        </tbody>
+    </table>
+</div>

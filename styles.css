@@ -472,3 +472,44 @@
     opacity: .6;
     cursor: not-allowed;
 }
+
+/* Teacher panel: classes of the templates rendered by amd/src/evalia_teacher.js (MMR-463 #7, #9). */
+#page-local-evalia-teacher .evalia-clickable,
+#page-local-evalia-teacher .evalia-source-label {
+    cursor: pointer;
+}
+#page-local-evalia-teacher .evalia-note-text {
+    white-space: pre-wrap;
+}
+#page-local-evalia-teacher .evalia-band-label {
+    width: 35px;
+}
+#page-local-evalia-teacher .evalia-band-track {
+    height: 18px;
+}
+#page-local-evalia-teacher .evalia-band-count {
+    width: 20px;
+}
+#page-local-evalia-teacher .evalia-progress-thin {
+    height: 6px;
+}
+#page-local-evalia-teacher .evalia-topic-badge {
+    background: #6366f1;
+    color: #fff;
+}
+#page-local-evalia-teacher .evalia-diff-basic {
+    background: #0d9488;
+    color: #fff;
+}
+#page-local-evalia-teacher .evalia-diff-medium {
+    background: #2563eb;
+    color: #fff;
+}
+#page-local-evalia-teacher .evalia-diff-advanced {
+    background: #ea580c;
+    color: #fff;
+}
+#page-local-evalia-teacher .evalia-diff-other {
+    background: #6b7280;
+    color: #fff;
+}

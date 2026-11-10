@@ -1,0 +1,102 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evalia/generate_questions_form
+
+    Inline form to generate questions with AI for an item of the active rubric.
+
+    Rendered from amd/src/evalia_teacher.js with core/templates; every value is escaped.
+
+    Context variables required for this template:
+    * items - list of {id, topic, weightlabel}
+    * defaultcount - default number of questions
+
+    Example context (json):
+    {
+        "items": [
+            {
+                "id": 7,
+                "topic": "Photosynthesis",
+                "weightlabel": "Medium"
+            }
+        ],
+        "defaultcount": 5
+    }
+
+    @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="card border-primary mb-3" id="evalia-gen-q-form">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span>{{#str}}gen_questions_title, local_evalia{{/str}}</span>
+        <button type="button" class="btn-close btn-close-white" id="evalia-gen-q-close" aria-label="{{#str}}closebuttontitle, core{{/str}}"></button>
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label form-label-sm" for="gen-q-item">{{#str}}gen_questions_item_label, local_evalia{{/str}}</label>
+                <select id="gen-q-item" class="form-select form-select-sm">
+                    {{#items}}
+                    <option value="{{id}}">{{topic}} ({{weightlabel}})</option>
+                    {{/items}}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label form-label-sm" for="gen-q-difficulty">{{#str}}gen_questions_difficulty_label, local_evalia{{/str}}</label>
+                <select id="gen-q-difficulty" class="form-select form-select-sm">
+                    <option value="basic">{{#str}}difficulty_basic, local_evalia{{/str}}</option>
+                    <option value="medium" selected>{{#str}}difficulty_medium, local_evalia{{/str}}</option>
+                    <option value="advanced">{{#str}}difficulty_advanced, local_evalia{{/str}}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label form-label-sm" for="gen-q-count">{{#str}}gen_questions_count_label, local_evalia{{/str}}</label>
+                <input type="number" id="gen-q-count" class="form-control form-control-sm" value="{{defaultcount}}" min="1" max="10">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" id="evalia-btn-do-generate-questions" class="btn btn-primary btn-sm w-100">
+                    {{#str}}gen_questions_btn, local_evalia{{/str}}
+                </button>
+            </div>
+        </div>
+        <div class="mt-2">
+            <span class="form-label form-label-sm d-block">{{#str}}gen_questions_types_label, local_evalia{{/str}}</span>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="qt-multichoice" value="multichoice" checked>
+                <label class="form-check-label" for="qt-multichoice">{{#str}}qtype_multichoice, local_evalia{{/str}}</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="qt-truefalse" value="truefalse" checked>
+                <label class="form-check-label" for="qt-truefalse">{{#str}}qtype_short_truefalse, local_evalia{{/str}}</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="qt-shortanswer" value="shortanswer">
+                <label class="form-check-label" for="qt-shortanswer">{{#str}}qtype_shortanswer, local_evalia{{/str}}</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="qt-essay" value="essay">
+                <label class="form-check-label" for="qt-essay">{{#str}}qtype_essay, local_evalia{{/str}}</label>
+            </div>
+        </div>
+        <div id="gen-q-loading" class="mt-2" hidden>
+            <div class="d-flex align-items-center gap-2 text-primary">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <span>{{#str}}gen_questions_loading, local_evalia{{/str}}</span>
+            </div>
+        </div>
+    </div>
+</div>
