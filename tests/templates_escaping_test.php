@@ -46,11 +46,10 @@ final class templates_escaping_test extends \advanced_testcase {
         return [
             'rubric_status' => ['rubric_status', ['active' => true, 'name' => $p]],
             'rubric_items editable' => ['rubric_items', ['editable' => true, 'items' => [[
-                'num' => 1, 'id' => 1, 'topic' => $p, 'description' => $p, 'weightlabel' => 'Low',
-                'weights' => [['value' => 'low', 'label' => 'Low', 'selected' => true]],
+                'num' => 1, 'id' => 1, 'topic' => $p, 'description' => $p, 'islow' => true,
             ]]]],
             'rubric_items read-only' => ['rubric_items', ['editable' => false, 'items' => [[
-                'num' => 1, 'id' => 1, 'topic' => $p, 'description' => $p, 'weightlabel' => 'Low', 'weights' => [],
+                'num' => 1, 'id' => 1, 'topic' => $p, 'description' => $p, 'ishigh' => true,
             ]]]],
             'source_list' => ['source_list', ['sources' => [['eid' => 'evalia-src-1', 'id' => $p, 'icon' => 'x',
                 'label' => $p]]]],

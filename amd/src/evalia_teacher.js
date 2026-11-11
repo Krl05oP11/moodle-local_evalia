@@ -425,10 +425,11 @@ define(['core/ajax', 'core/log', 'core/str', 'core/templates'], function(Ajax, L
                     id: item.id,
                     topic: item.topic,
                     description: item.description || '',
-                    weightlabel: weightLabel(item.difficulty_weight),
-                    weights: ['low', 'medium', 'high'].map(function(w) {
-                        return {value: w, label: weightLabel(w), selected: item.difficulty_weight === w};
-                    })
+                    // Weight labels come from {{#str}} in the template: the rubric renders at page load,
+                    // before loadStrings() has replaced the English fallbacks of S.
+                    islow: item.difficulty_weight === 'low',
+                    ismedium: item.difficulty_weight === 'medium' || ['low', 'high'].indexOf(item.difficulty_weight) < 0,
+                    ishigh: item.difficulty_weight === 'high'
                 };
             })
         });
@@ -1080,7 +1081,7 @@ define(['core/ajax', 'core/log', 'core/str', 'core/templates'], function(Ajax, L
         var wwwroot = (typeof M !== 'undefined' && M.cfg) ? M.cfg.wwwroot : '';
         var statusMap = {
             'not_assigned': {cls: 'bg-light text-dark border', label: S.exam_status_not_assigned},
-            'assigned':     {cls: 'bg-primary', label: S.exam_status_assigned},
+            'assigned':     {cls: 'evalia-badge-assigned', label: S.exam_status_assigned},
             'started':      {cls: 'bg-warning text-dark', label: S.exam_status_started},
             'submitted':    {cls: 'bg-info text-dark', label: S.exam_status_submitted},
             'graded':       {cls: 'bg-success', label: S.exam_status_graded},

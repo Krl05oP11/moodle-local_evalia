@@ -23,7 +23,7 @@
 
     Context variables required for this template:
     * editable - true for a draft rubric
-    * items - list of {num, id, topic, description, weightlabel, weights: [{value, label, selected}]}
+    * items - list of {num, id, topic, description, islow, ismedium, ishigh}
 
     Example context (json):
     {
@@ -34,24 +34,9 @@
                 "id": 7,
                 "topic": "Photosynthesis",
                 "description": "Light phase",
-                "weightlabel": "Medium",
-                "weights": [
-                    {
-                        "value": "low",
-                        "label": "Low",
-                        "selected": false
-                    },
-                    {
-                        "value": "medium",
-                        "label": "Medium",
-                        "selected": true
-                    },
-                    {
-                        "value": "high",
-                        "label": "High",
-                        "selected": false
-                    }
-                ]
+                "islow": false,
+                "ismedium": true,
+                "ishigh": false
             }
         ]
     }
@@ -85,16 +70,16 @@
                 <td>
                     <select class="form-select form-select-sm" data-item-id="{{id}}" data-field="difficulty_weight"
                         aria-label="{{#str}}rubric_item_weight_short, local_evalia{{/str}}">
-                        {{#weights}}
-                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                        {{/weights}}
+                        <option value="low" {{#islow}}selected{{/islow}}>{{#str}}weight_low, local_evalia{{/str}}</option>
+                        <option value="medium" {{#ismedium}}selected{{/ismedium}}>{{#str}}weight_medium, local_evalia{{/str}}</option>
+                        <option value="high" {{#ishigh}}selected{{/ishigh}}>{{#str}}weight_high, local_evalia{{/str}}</option>
                     </select>
                 </td>
                 {{/editable}}
                 {{^editable}}
                 <td>{{topic}}</td>
                 <td><small class="text-muted">{{description}}</small></td>
-                <td><span class="badge bg-secondary">{{weightlabel}}</span></td>
+                <td><span class="badge bg-secondary">{{#islow}}{{#str}}weight_low, local_evalia{{/str}}{{/islow}}{{#ismedium}}{{#str}}weight_medium, local_evalia{{/str}}{{/ismedium}}{{#ishigh}}{{#str}}weight_high, local_evalia{{/str}}{{/ishigh}}</span></td>
                 {{/editable}}
             </tr>
             {{/items}}
