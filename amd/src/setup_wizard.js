@@ -24,7 +24,7 @@
  * @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/config'], function(Config) {
+define(['core/config', 'core/templates', 'core/log'], function(Config, Templates, Log) {
 
     'use strict';
 
@@ -33,14 +33,18 @@ define(['core/config'], function(Config) {
     var currentStep = 1;
 
     /**
-     * Escape a value for HTML.
+     * Render the engine test result (template local_evalia/setup_wizard_health) into the result box.
      *
-     * @param {*} s Value to escape.
-     * @returns {string}
+     * @param {Object} context Template context: ok, url, version, uptime, error.
      */
-    function he(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    function renderHealth(context) {
+        var el = document.getElementById('evwiz-health-result');
+        Templates.render('local_evalia/setup_wizard_health', context).then(function(html, js) {
+            Templates.replaceNodeContents(el, html, js);
+            return el;
+        }).fail(function(err) {
+            Log.error('EVAL-IA setup wizard: could not render the engine test result', err);
+        });
     }
 
     /**
@@ -73,21 +77,7 @@ define(['core/config'], function(Config) {
      * @param {string} url Engine URL that was tried.
      */
     function renderHealthError(msg, url) {
-        document.getElementById('evwiz-health-result').innerHTML =
-            '<div class="health-row">' +
-            '<div class="health-icon">❌</div>' +
-            '<div class="health-label"><strong>' + he(L.connection_failed) + '</strong></div>' +
-            '<div class="health-value">' + he(url || '—') + '</div></div>' +
-            '<div class="alert alert-danger py-2 px-3 mt-3 mb-0" style="font-size:.84rem;">' +
-            '<strong>' + he(L.error_label) + '</strong> ' + he(msg) + '<br><br>' +
-            '<strong>' + he(L.troubleshoot_header) + '</strong>' +
-            '<ul class="mb-0 mt-1">' +
-            '<li>' + L.troubleshoot_li1 + '</li>' +
-            '<li>' + L.troubleshoot_li2 + '</li>' +
-            '<li>' + L.troubleshoot_li3 + '</li>' +
-            '<li>' + L.troubleshoot_li4 + '</li>' +
-            '<li>' + L.troubleshoot_li5 + '</li>' +
-            '</ul></div>';
+        renderHealth({ok: false, url: url || '', version: '', uptime: '', error: msg});
         document.getElementById('evwiz-retry-btn').style.display = '';
     }
 
@@ -101,10 +91,17 @@ define(['core/config'], function(Config) {
 
         saveBtn.style.display = 'none';
         retryBtn.style.display = 'none';
-        resultEl.innerHTML =
-            '<div class="d-flex align-items-center gap-2 text-muted py-2">' +
-            '<div class="spinner-border spinner-border-sm" role="status"></div>' +
-            '<span>' + he(L.connecting_engine) + '</span></div>';
+        var spinnerRow = document.createElement('div');
+        spinnerRow.className = 'd-flex align-items-center gap-2 text-muted py-2';
+        var spinner = document.createElement('div');
+        spinner.className = 'spinner-border spinner-border-sm';
+        spinner.setAttribute('role', 'status');
+        var spinnerText = document.createElement('span');
+        spinnerText.textContent = L.connecting_engine;
+        spinnerRow.appendChild(spinner);
+        spinnerRow.appendChild(spinnerText);
+        resultEl.textContent = '';
+        resultEl.appendChild(spinnerRow);
 
         var url = ((document.getElementById('evwiz-url') || {}).value || '').trim();
         var token = (document.getElementById('evwiz-token') || {}).value || '';
@@ -126,21 +123,7 @@ define(['core/config'], function(Config) {
         })
         .then(function(data) {
             if (data.ok) {
-                resultEl.innerHTML =
-                    '<div class="health-row">' +
-                    '<div class="health-icon">✅</div>' +
-                    '<div class="health-label"><strong>' + he(L.engine_reachable) + '</strong></div>' +
-                    '<div class="health-value">' + he(url) + '</div></div>' +
-                    '<div class="health-row">' +
-                    '<div class="health-icon">🔢</div>' +
-                    '<div class="health-label">' + he(L.engine_version) + '</div>' +
-                    '<div class="health-value">' + he(data.version) + '</div></div>' +
-                    '<div class="health-row">' +
-                    '<div class="health-icon">⏱️</div>' +
-                    '<div class="health-label">' + he(L.uptime) + '</div>' +
-                    '<div class="health-value">' + he(data.uptime) + '</div></div>' +
-                    '<div class="alert alert-success py-2 px-3 mt-3 mb-0" style="font-size:.85rem;">' +
-                    L.success_msg + '</div>';
+                renderHealth({ok: true, url: url, version: data.version, uptime: data.uptime, error: ''});
                 saveBtn.style.display = '';
             } else {
                 renderHealthError(data.error || L.unknown_error, url);

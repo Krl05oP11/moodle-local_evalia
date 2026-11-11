@@ -1,0 +1,111 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evalia/exam_questions
+
+    The questions of an exam (partial of local_evalia/exam_page): answer inputs for the student, disabled inputs
+    with the stored answers for the teacher preview, and the corrections in the graded preview.
+
+    Context variables required for this template:
+    * questions - list of {id, num, topic, cardborder, diffclass, difflabel, ptsclass, ptstext, stem (output of
+      format_text), disabled, choice, numerical, essay, shortanswer, value, graded, correct, inputborder, showcorrect,
+      correctanswer, tolerance, options: [{optid, value, checked, labelclass, indicator}], essayborder, essayscored,
+      essaybadge, essayscore, essayfeedback}
+
+    Example context (json):
+    {
+        "questions": [
+            {
+                "id": 3, "num": 1, "topic": "Graphs", "cardborder": "", "diffclass": "bg-info", "difflabel": "Basic",
+                "ptsclass": "bg-secondary", "ptstext": "1 pt", "stem": "<p>How many edges does K4 have?</p>",
+                "disabled": false, "choice": true, "numerical": false, "essay": false, "shortanswer": false, "value": "",
+                "graded": false, "correct": false, "inputborder": "", "showcorrect": false, "correctanswer": "6",
+                "tolerance": "", "options": [{"optid": "q3_opt1", "value": "6", "checked": false, "labelclass": "",
+                "indicator": ""}]
+            }
+        ]
+    }
+
+    @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{#questions}}
+<div class="card mb-3 {{cardborder}}" id="evalia-q-{{id}}">
+    <div class="card-header d-flex justify-content-between align-items-start">
+        <span><strong>{{#str}}exam:question_num, local_evalia, {{num}}{{/str}}</strong> — <small class="text-muted">{{topic}}</small></span>
+        <span class="d-flex gap-1 align-items-center">
+            <span class="badge {{diffclass}}">{{difflabel}}</span>
+            <span class="badge {{ptsclass}}">{{ptstext}}</span>
+        </span>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">{{{stem}}}</div>
+
+        {{#choice}}
+        {{#options}}
+        <div class="form-check mb-1">
+            <input class="form-check-input evalia-answer" type="radio" name="answer_{{id}}" id="{{optid}}" value="{{value}}"
+                data-qid="{{id}}" {{#checked}}checked{{/checked}} {{#disabled}}disabled{{/disabled}}>
+            <label class="form-check-label {{labelclass}}" for="{{optid}}">{{value}}{{#indicator}} {{indicator}}{{/indicator}}</label>
+        </div>
+        {{/options}}
+        {{/choice}}
+
+        {{#numerical}}
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" step="any" class="form-control evalia-answer evalia-input-numerical {{inputborder}}"
+                name="answer_{{id}}" data-qid="{{id}}" placeholder="{{#cleanstr}}exam:placeholder_numerical, local_evalia{{/cleanstr}}"
+                value="{{value}}" aria-label="{{#cleanstr}}exam:question_num, local_evalia, {{num}}{{/cleanstr}}" {{#disabled}}disabled{{/disabled}}>
+            {{#graded}}
+            {{#correct}}<span class="text-success fw-bold fs-5">✅</span>{{/correct}}
+            {{^correct}}<span class="text-danger fw-bold fs-5">❌</span>{{/correct}}
+            {{/graded}}
+        </div>
+        {{#showcorrect}}
+        <small class="text-muted mt-1 d-block">{{#str}}exam:correct_answer_label, local_evalia{{/str}} <strong>{{correctanswer}}</strong> {{tolerance}}</small>
+        {{/showcorrect}}
+        {{/numerical}}
+
+        {{#essay}}
+        <textarea class="form-control evalia-answer {{essayborder}}" name="answer_{{id}}" data-qid="{{id}}" rows="5"
+            placeholder="{{#cleanstr}}exam:placeholder_essay, local_evalia{{/cleanstr}}"
+            aria-label="{{#cleanstr}}exam:question_num, local_evalia, {{num}}{{/cleanstr}}" {{#disabled}}disabled{{/disabled}}>{{value}}</textarea>
+        {{#essayscored}}
+        <div class="mt-2 d-flex align-items-center gap-2">
+            <span class="badge {{essaybadge}}">{{essayscore}}</span>
+            {{#essayfeedback}}<small class="text-muted">{{essayfeedback}}</small>{{/essayfeedback}}
+        </div>
+        {{/essayscored}}
+        {{/essay}}
+
+        {{#shortanswer}}
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" class="form-control evalia-answer {{inputborder}}" name="answer_{{id}}" data-qid="{{id}}"
+                placeholder="{{#cleanstr}}exam:placeholder_shortanswer, local_evalia{{/cleanstr}}" value="{{value}}"
+                aria-label="{{#cleanstr}}exam:question_num, local_evalia, {{num}}{{/cleanstr}}" {{#disabled}}disabled{{/disabled}}>
+            {{#graded}}
+            {{#correct}}<span class="text-success fw-bold fs-5">✅</span>{{/correct}}
+            {{^correct}}<span class="text-danger fw-bold fs-5">❌</span>{{/correct}}
+            {{/graded}}
+        </div>
+        {{#showcorrect}}
+        <small class="text-muted mt-1 d-block">{{#str}}exam:correct_answer_label, local_evalia{{/str}} <strong>{{correctanswer}}</strong></small>
+        {{/showcorrect}}
+        {{/shortanswer}}
+    </div>
+</div>
+{{/questions}}

@@ -1,0 +1,116 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evalia/exam_page
+
+    An EVAL-IA exam (student_exam.php): the student takes it, or sees the "submitted" banner afterwards; the
+    teacher previews it with the stored answers and, once submitted, grades it with AI.
+
+    Context variables required for this template:
+    * preview - true for the teacher preview
+    * studentname, statuslabel - preview banner (preview only)
+    * studentexamid - student exam id
+    * submittedview - true for the student after submitting (banner only)
+    * submittedscore - grade shown in that banner, empty while pending
+    * gradedpreview, previewscore - grade banner of the graded preview
+    * showtimer - true when the exam has a time limit (student only)
+    * instructions - exam instructions, output of format_text()
+    * showgradepanel - true for the teacher preview of a submitted exam
+    * questions - see local_evalia/exam_questions
+
+    Example context (json):
+    {
+        "preview": false, "studentexamid": 7, "submittedview": false, "submittedscore": "", "gradedpreview": false,
+        "previewscore": "", "showtimer": true, "instructions": "<p>Answer every question.</p>", "showgradepanel": false,
+        "questions": []
+    }
+
+    @copyright  2026 Schaller & Ponce <dev@schaller-ponce.com.ar>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{#preview}}
+<div class="alert alert-secondary d-flex align-items-center gap-3 mt-3 mb-0">
+    <span class="evalia-exam-icon" aria-hidden="true">🔍</span>
+    <div>
+        <strong>{{#str}}exam:preview_banner_title, local_evalia{{/str}}</strong><br>
+        <small>{{#str}}exam:preview_student_label, local_evalia{{/str}} <strong>{{studentname}}</strong> &nbsp;·&nbsp;
+            {{#str}}exam:preview_status_label, local_evalia{{/str}} {{statuslabel}}</small>
+    </div>
+</div>
+{{/preview}}
+
+{{#submittedview}}
+<div class="alert alert-success mt-3">
+    <h4>{{#str}}exam:submitted_heading, local_evalia{{/str}}</h4>
+    {{#submittedscore}}<p class="mb-0">{{#str}}exam:submitted_grade_msg, local_evalia, {{submittedscore}}{{/str}}</p>{{/submittedscore}}
+    {{^submittedscore}}<p class="mb-0">{{#str}}exam:submitted_pending_msg, local_evalia{{/str}}</p>{{/submittedscore}}
+</div>
+{{/submittedview}}
+
+{{^submittedview}}
+{{#gradedpreview}}
+<div class="alert alert-success mt-3 mb-2">✅ {{#str}}exam:preview_graded_msg, local_evalia, {{previewscore}}{{/str}}</div>
+{{/gradedpreview}}
+
+{{#showtimer}}
+<div id="evalia-timer-bar" class="alert alert-warning d-flex justify-content-between align-items-center mt-3 mb-0">
+    <span>{{#str}}exam:timer_remaining, local_evalia{{/str}} <strong id="evalia-timer-display">--:--</strong></span>
+    <span class="small text-muted">{{#str}}exam:timer_autosubmit, local_evalia{{/str}}</span>
+</div>
+{{/showtimer}}
+
+{{#instructions}}<div class="alert alert-info mt-3">{{{instructions}}}</div>{{/instructions}}
+
+{{#preview}}
+<div class="mt-3">
+    {{> local_evalia/exam_questions}}
+</div>
+{{#showgradepanel}}
+<div class="card border-warning mt-3 mb-5" id="evalia-grade-panel">
+    <div class="card-header bg-warning text-dark fw-bold">{{#str}}exam:grade_panel_title, local_evalia{{/str}}</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">{{#str}}exam:grade_panel_desc, local_evalia{{/str}}</p>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" id="evalia-btn-grade" class="btn btn-warning btn-lg">{{#str}}exam:btn_grade_ai, local_evalia{{/str}}</button>
+            <span id="evalia-grade-status" class="text-muted small"></span>
+        </div>
+    </div>
+</div>
+{{/showgradepanel}}
+{{/preview}}
+
+{{^preview}}
+<form id="evalia-exam-form" class="mt-3">
+    <input type="hidden" name="student_examid" value="{{studentexamid}}">
+    {{> local_evalia/exam_questions}}
+</form>
+<div class="d-flex justify-content-between align-items-center mb-5 mt-2">
+    <div id="evalia-submit-status" class="text-muted small"></div>
+    <button type="button" id="evalia-btn-submit-exam" class="btn btn-success btn-lg">{{#str}}exam:btn_submit_exam, local_evalia{{/str}}</button>
+</div>
+{{/preview}}
+
+<div class="position-fixed bottom-0 end-0 p-3 evalia-toast-wrap">
+    <div id="evalia-toast" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="evalia-toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="{{#cleanstr}}closebuttontitle, core{{/cleanstr}}"></button>
+        </div>
+    </div>
+</div>
+{{/submittedview}}

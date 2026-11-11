@@ -517,3 +517,82 @@
     background: #0d6efd;
     color: #fff;
 }
+
+/* Setup wizard: former inline styles of setup.php (MMR-463 #5, #7). */
+#page-local-evalia-setup .evwiz-s1 {
+    font-size:2.8rem;
+    line-height:1;
+}
+#page-local-evalia-setup .evwiz-s2 {
+    font-size:.9rem;
+}
+#page-local-evalia-setup .evwiz-s3 {
+    font-size:.88rem;
+}
+#page-local-evalia-setup .evwiz-s4 {
+    background:#f8f9fa;
+}
+#page-local-evalia-setup .evwiz-s5 {
+    border-color:#f0ad4e;
+}
+#page-local-evalia-setup .evwiz-s6 {
+    background:#fff8e1;
+    color:#856404;
+    border-bottom:1px solid #f0e0a0;
+}
+#page-local-evalia-setup .evwiz-s7 {
+    font-size:.87rem;
+    margin-bottom:14px;
+}
+#page-local-evalia-setup .evwiz-s8 {
+    white-space:normal;
+    max-width:200px;
+    text-align:right;
+}
+#page-local-evalia-setup .evwiz-s9 {
+    font-size:.72rem;
+}
+#page-local-evalia-setup .evwiz-s10 {
+    border-color:#0d6efd;
+}
+#page-local-evalia-setup .evwiz-s11 {
+    background:#e7f1ff;
+    color:#084298;
+    border-bottom:1px solid #b6d4fe;
+}
+#page-local-evalia-setup .evwiz-s12 {
+    font-size:.85rem;
+    margin-bottom:14px;
+    color:#495057;
+}
+#page-local-evalia-setup .evwiz-s13 {
+    font-size:.84rem;
+}
+#page-local-evalia-setup .evwiz-s14 {
+    font-size:.82rem;
+}
+#page-local-evalia-setup .evwiz-result-md {
+    font-size: .84rem;
+}
+#page-local-evalia-setup .evwiz-result-lg {
+    font-size: .85rem;
+}
+
+/* Student page (student.php, templates/student_dashboard.mustache; MMR-463 #5). */
+#page-local-evalia-student .evalia-student {
+    max-width: 800px;
+}
+#page-local-evalia-student .evalia-student-icon {
+    font-size: 1.6rem;
+}
+
+/* Exam page (student_exam.php, templates/exam_page.mustache; MMR-463 #5). */
+#page-local-evalia-student_exam .evalia-exam-icon {
+    font-size: 1.5rem;
+}
+#page-local-evalia-student_exam .evalia-input-numerical {
+    max-width: 200px;
+}
+#page-local-evalia-student_exam .evalia-toast-wrap {
+    z-index: 9999;
+}

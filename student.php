@@ -98,139 +98,86 @@ function local_evalia_window_note(object $ex, int $now): string {
 }
 
 
-echo $OUTPUT->header();
-
-// This is a mixed HTML/PHP template. MissingDocblock.File re-fires on every
-// reopened PHP tag (the file docblock is present above); ScopeIndent expects PHP
-// scope indentation inside markup that is indented as HTML.
-// phpcs:disable moodle.Commenting.MissingDocblock.File, Generic.WhiteSpace.ScopeIndent
-?>
-<div class="container-fluid mt-4" style="max-width:800px;">
-
-    <div class="d-flex align-items-baseline gap-3 mb-4">
-        <h2 class="mb-0"><?php echo get_string('student:heading', 'local_evalia'); ?></h2>
-        <span class="text-muted"><?php echo format_string($course->fullname); ?></span>
-    </div>
-
-<?php if (empty($myexams)) : ?>
-    <div class="alert alert-info d-flex align-items-center gap-3">
-        <span style="font-size:1.6rem;">📭</span>
-        <div>
-            <strong><?php echo get_string('student:none_assigned', 'local_evalia'); ?></strong><br>
-            <small><?php echo get_string('student:none_assigned_desc', 'local_evalia'); ?></small>
-        </div>
-    </div>
-
-<?php else : ?>
-<?php foreach ($myexams as $ex) :
+// Context of templates/student_dashboard.mustache; every value is escaped there except coursename,
+// which is the output of format_string().
+$dateformat = get_string('strftimedatetimeshort', 'langconfig');
+$statusmap = [
+    'assigned'  => ['bg-primary', 'student:status_assigned'],
+    'started'   => ['bg-warning text-dark', 'student:status_started'],
+    'submitted' => ['bg-secondary', 'student:status_submitted'],
+    'graded'    => ['bg-info text-dark', 'student:status_graded'],
+    'published' => ['bg-success', 'student:status_published'],
+];
+$cards = [];
+foreach ($myexams as $ex) {
     $windowopen = local_evalia_window_open($ex, $now);
     $windownote = local_evalia_window_note($ex, $now);
+    $detailurl = (new moodle_url('/local/evalia/student_exam.php', ['student_examid' => $ex->student_examid]))->out(false);
+    [$statusclass, $statuskey] = $statusmap[$ex->status] ?? ['bg-light text-dark border', ''];
 
-    // Decide card appearance and CTA per status.
-    $alreadyclosed = ($ex->timeclose > 0 && $now > $ex->timeclose);
-    $detailurl = (new moodle_url(
-        '/local/evalia/student_exam.php',
-        ['student_examid' => $ex->student_examid]
-    ))->out(false);
-
-    $showbtn      = false;
-    $btnlabel     = '';
-    $btncls       = '';
-    $statecontent = '';
-
+    $card = [
+        'name'          => $ex->name,
+        'statusclass'   => $statusclass,
+        'statuslabel'   => $statuskey ? get_string($statuskey, 'local_evalia') : $ex->status,
+        'bordercls'     => '',
+        'timelimit'     => $ex->time_limit_min > 0
+            ? get_string('student:meta_timelimit', 'local_evalia', (int) $ex->time_limit_min) : '',
+        'from'          => $ex->timeopen > 0
+            ? get_string('student:meta_from', 'local_evalia', userdate($ex->timeopen, $dateformat)) : '',
+        'until'         => $ex->timeclose > 0
+            ? get_string('student:meta_until', 'local_evalia', userdate($ex->timeclose, $dateformat)) : '',
+        'submitted'     => '',
+        'graded'        => false,
+        'published'     => false,
+        'score'         => '',
+        'windownote'    => '',
+        'showbtn'       => false,
+        'btnlabel'      => '',
+        'btncls'        => '',
+        'detailurl'     => $detailurl,
+    ];
     switch ($ex->status) {
         case 'assigned':
-            $bordercls  = $windowopen ? 'border-primary' : 'border-secondary';
-            $statushtml = '<span class="badge bg-primary">' . get_string('student:status_assigned', 'local_evalia') . '</span>';
-            $showbtn    = $windowopen;
-            $btnlabel   = get_string('student:btn_take', 'local_evalia');
-            $btncls     = 'btn-primary';
+            $card['bordercls'] = $windowopen ? 'border-primary' : 'border-secondary';
+            $card['showbtn']   = $windowopen;
+            $card['btnlabel']  = get_string('student:btn_take', 'local_evalia');
+            $card['btncls']    = 'btn-primary';
             break;
         case 'started':
-            $bordercls  = $windowopen ? 'border-warning' : 'border-secondary';
-            $statushtml = '<span class="badge bg-warning text-dark">'
-                . get_string('student:status_started', 'local_evalia') . '</span>';
-            $showbtn    = $windowopen;
-            $btnlabel   = get_string('student:btn_continue', 'local_evalia');
-            $btncls     = 'btn-warning text-dark';
+            $card['bordercls'] = $windowopen ? 'border-warning' : 'border-secondary';
+            $card['showbtn']   = $windowopen;
+            $card['btnlabel']  = get_string('student:btn_continue', 'local_evalia');
+            $card['btncls']    = 'btn-warning text-dark';
             break;
         case 'submitted':
-            $bordercls    = 'border-secondary';
-            $statushtml   = '<span class="badge bg-secondary">'
-                . get_string('student:status_submitted', 'local_evalia') . '</span>';
-            $submittedon  = $ex->timesubmitted
-                ? userdate($ex->timesubmitted, get_string('strftimedatetimeshort', 'langconfig'))
-                : '—';
-            $statecontent = '<p class="text-muted small mb-0">'
-                . get_string('student:msg_submitted_on', 'local_evalia', $submittedon) . '</p>';
+            $card['bordercls'] = 'border-secondary';
+            $card['submitted'] = get_string(
+                'student:msg_submitted_on',
+                'local_evalia',
+                $ex->timesubmitted ? userdate($ex->timesubmitted, $dateformat) : '—'
+            );
             break;
         case 'graded':
-            $bordercls    = 'border-info';
-            $statushtml   = '<span class="badge bg-info text-dark">'
-                . get_string('student:status_graded', 'local_evalia') . '</span>';
-            $statecontent = '<p class="text-muted small mb-0">'
-                . get_string('student:msg_graded', 'local_evalia') . '</p>';
+            $card['bordercls'] = 'border-info';
+            $card['graded']    = true;
             break;
         case 'published':
-            $bordercls    = 'border-success';
-            $statushtml   = '<span class="badge bg-success">' . get_string('student:status_published', 'local_evalia') . '</span>';
-            $statecontent = '<div class="d-flex align-items-center gap-3 mt-1">'
-                . '<span class="fs-3 fw-bold text-success">' . number_format((float) $ex->score, 1) . ' / 10.0</span>'
-                . '<a href="' . $detailurl . '" class="btn btn-sm btn-outline-success">'
-                . get_string('student:btn_detail', 'local_evalia') . '</a></div>';
+            $card['bordercls'] = 'border-success';
+            $card['published'] = true;
+            $card['score']     = number_format((float) $ex->score, 1);
             break;
-        default:
-            $bordercls  = '';
-            $statushtml = '<span class="badge bg-light text-dark border">' . htmlspecialchars($ex->status) . '</span>';
     }
-
     // Assigned/started with a closed or not-yet-open window: show the window note.
-    if ($statecontent === '' && !$windowopen && $windownote !== '') {
-        $statecontent = '<p class="text-danger small mb-0">' . htmlspecialchars($windownote) . '</p>';
+    if (in_array($ex->status, ['assigned', 'started']) && !$windowopen && $windownote !== '') {
+        $card['windownote'] = $windownote;
     }
-?>
-    <div class="card <?php echo $bordercls; ?> mb-3 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center py-2">
-            <span class="fw-bold"><?php echo htmlspecialchars($ex->name); ?></span>
-            <?php echo $statushtml; ?>
-        </div>
-        <div class="card-body py-3">
+    $cards[] = $card;
+}
 
-            <?php // Meta info row. ?>
-            <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
-                <?php if ($ex->time_limit_min > 0) : ?>
-                    <span><?php echo get_string('student:meta_timelimit', 'local_evalia', (int) $ex->time_limit_min); ?></span>
-                <?php endif; ?>
-                <?php if ($ex->timeopen > 0) : ?>
-                    <?php $fromdate = userdate($ex->timeopen, get_string('strftimedatetimeshort', 'langconfig')); ?>
-                    <span><?php echo get_string('student:meta_from', 'local_evalia', $fromdate); ?></span>
-                <?php endif; ?>
-                <?php if ($ex->timeclose > 0) : ?>
-                    <?php $untildate = userdate($ex->timeclose, get_string('strftimedatetimeshort', 'langconfig')); ?>
-                    <span><?php echo get_string('student:meta_until', 'local_evalia', $untildate); ?></span>
-                <?php endif; ?>
-            </div>
-
-            <?php // State-specific content. ?>
-            <?php echo $statecontent; ?>
-
-            <?php // CTA button. ?>
-            <?php if ($showbtn) : ?>
-                <div class="mt-3">
-                    <a href="<?php echo $detailurl; ?>"
-                       class="btn <?php echo $btncls; ?> px-4">
-                        <?php echo $btnlabel; ?>
-                    </a>
-                </div>
-            <?php endif; ?>
-
-        </div><!-- card-body -->
-    </div><!-- card -->
-<?php endforeach; ?>
-<?php endif; ?>
-
-</div>
-
-<?php
-// phpcs:enable moodle.Commenting.MissingDocblock.File, Generic.WhiteSpace.ScopeIndent
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template('local_evalia/student_dashboard', [
+    'coursename' => format_string($course->fullname, true, ['context' => context_course::instance($courseid)]),
+    'hasexams'   => !empty($cards),
+    'exams'      => $cards,
+]);
 echo $OUTPUT->footer();
