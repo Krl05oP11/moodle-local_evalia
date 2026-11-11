@@ -4,6 +4,34 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Marketplace review MMR-463 (0.4.14, 2026-11-10; build 2026111000)
+The reviewer's findings are the GitHub issues 1-9 of this repository. Issues 1, 2, 4, 6, 7 and 8 were
+already fixed in 0.4.13 (build 2026110300, uploaded on 3 November); the review looked at the October build.
+
+#### Security
+- The teacher panel renders its tables and lists with Mustache templates, which escape every value:
+  rubric topics, AI-generated question stems, names, notes and source labels are never inserted as
+  HTML (#3, #9). The rubric, question bank, exam statistics and student exam services return the
+  AI-written text as raw plain text, so a stem or topic with "<" or a tag no longer makes the whole
+  response invalid.
+- In separate-groups courses, a teacher without moodle/site:accessallgroups only counts, assigns and
+  exports the students of their groups (exam statistics, exam assignment, portfolio CSV). The CSV shows
+  the email column only when the site shows email addresses, and neutralises formula cells.
+
+#### Privacy
+- The engine location declares everything sent for the AI feedback after publishing (user id, name,
+  grade, answers), and the Telegram messages relayed by the engine are a declared external location.
+
+#### Templates, styles and strings
+- setup.php, student.php and student_exam.php render templates; no page echoes HTML (#5). The old
+  wizard markup had six duplicated closing tags, now fixed. Inline styles moved to styles.css (#7).
+- English strings in sentence case; Moodle 4.4 to 5.3 in the README and the setup wizard.
+
+#### Tests
+- templates_escaping_test, groups and markup tests; the ten Behat scenarios that failed because of the
+  tests themselves are fixed, and Behat runs in the CI again (16/16 locally). The CI adds MariaDB.
+
+
 ### Ahead of its Marketplace review (0.4.13, 2026-11-02)
 The local_saipa review (MMR-462) found the issues below in that plugin; the same
 checks were applied here before this plugin's own review.
