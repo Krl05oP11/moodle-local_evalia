@@ -217,12 +217,12 @@ class get_student_exam extends external_api {
                     'id'            => new external_value(PARAM_INT, 'Question ID'),
                     'stem'          => new external_value(PARAM_RAW, 'Question text'),
                     'question_type' => new external_value(PARAM_TEXT, 'multichoice|truefalse|numerical|shortanswer'),
-                    'topic'         => new external_value(PARAM_TEXT, 'Topic name'),
+                    'topic'         => new external_value(PARAM_RAW, 'Topic name (plain text; escape it to display)'),
                     'difficulty'    => new external_value(PARAM_TEXT, 'basic|medium|advanced'),
                     'options'       => new external_multiple_structure(
                         new external_single_structure([
                             'id'          => new external_value(PARAM_INT, 'Option ID'),
-                            'option_text' => new external_value(PARAM_TEXT, 'Option text'),
+                            'option_text' => new external_value(PARAM_RAW, 'Option text (plain text; escape it to display)'),
                             'sortorder'   => new external_value(PARAM_INT, 'Display order'),
                         ]),
                         'Answer options',

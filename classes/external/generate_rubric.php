@@ -174,8 +174,8 @@ class generate_rubric extends external_api {
             'items'    => new external_multiple_structure(
                 new external_single_structure([
                     'id'                => new external_value(PARAM_INT, 'Item ID'),
-                    'topic'             => new external_value(PARAM_TEXT, 'Topic name'),
-                    'description'       => new external_value(PARAM_TEXT, 'Topic description'),
+                    'topic'             => new external_value(PARAM_RAW, 'Topic name (plain text; escape it to display)'),
+                    'description'       => new external_value(PARAM_RAW, 'Topic description (plain text; escape it to display)'),
                     'difficulty_weight' => new external_value(PARAM_TEXT, 'low|medium|high'),
                     'sortorder'         => new external_value(PARAM_INT, 'Display order'),
                 ]),

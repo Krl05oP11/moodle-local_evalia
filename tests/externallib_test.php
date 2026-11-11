@@ -134,6 +134,40 @@ final class externallib_test extends \advanced_testcase {
     }
 
     /**
+     * Text written by the AI can contain "<" and markup (maths, formatting). The services return it as raw plain
+     * text, so one such question or rubric item no longer makes the whole response invalid; the teacher panel
+     * escapes it when it renders (MMR-463 #3).
+     *
+     * @covers \local_evalia\external\get_question_bank::execute
+     * @covers \local_evalia\external\get_rubric::execute
+     */
+    public function test_ai_text_with_markup_is_returned_as_is(): void {
+        global $DB;
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric('Inequalities', 'active');
+        $text = 'If x < 5 and y > 3, is <b>x + y</b> < 8?';
+        $itemid = (int) $DB->insert_record('local_evalia_rubric_items', (object) [
+            'rubricid' => $rubricid, 'topic' => 'x < 5', 'description' => $text, 'difficulty_weight' => 'medium',
+            'sortorder' => 1, 'timecreated' => time(),
+        ]);
+        $DB->insert_record('local_evalia_question_bank', (object) [
+            'courseid' => $this->course->id, 'rubricid' => $rubricid, 'rubric_item_id' => $itemid,
+            'question_type' => 'shortanswer', 'stem' => $text, 'difficulty' => 'basic', 'topic' => 'x < 5',
+            'correct_answer' => 'No', 'status' => 'draft', 'timecreated' => time(), 'timemodified' => time(),
+        ]);
+
+        $bank = \local_evalia\external\get_question_bank::execute($this->course->id, '', '', '');
+        $bank = \core_external\external_api::clean_returnvalue(\local_evalia\external\get_question_bank::execute_returns(), $bank);
+        $this->assertSame(1, $bank['total']);
+        $this->assertSame($text, $bank['questions'][0]['stem']);
+
+        $rubric = \local_evalia\external\get_rubric::execute($this->course->id);
+        $rubric = \core_external\external_api::clean_returnvalue(\local_evalia\external\get_rubric::execute_returns(), $rubric);
+        $this->assertSame($text, $rubric['items'][0]['description']);
+        $this->assertSame('x < 5', $rubric['items'][0]['topic']);
+    }
+
+    /**
      * get_rubric throws required_capability_exception for a student.
      *
      * @covers \local_evalia\external\get_rubric::execute

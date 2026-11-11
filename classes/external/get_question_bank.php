@@ -148,17 +148,25 @@ class get_question_bank extends external_api {
                 new external_single_structure([
                     'id'             => new external_value(PARAM_INT, 'Question ID'),
                     'question_type'  => new external_value(PARAM_TEXT, 'Type'),
-                    'stem'           => new external_value(PARAM_TEXT, 'Question text'),
+                    'stem'           => new external_value(PARAM_RAW, 'Question text (plain text; escape it to display)'),
                     'difficulty'     => new external_value(PARAM_TEXT, 'basic|medium|advanced'),
-                    'topic'          => new external_value(PARAM_TEXT, 'Topic'),
+                    'topic'          => new external_value(PARAM_RAW, 'Topic (plain text; escape it to display)'),
                     'status'         => new external_value(PARAM_TEXT, 'draft|approved|rejected'),
-                    'correct_answer' => new external_value(PARAM_TEXT, 'Correct answer (plain text)', VALUE_OPTIONAL),
+                    'correct_answer' => new external_value(
+                        PARAM_RAW,
+                        'Correct answer (plain text; escape it to display)',
+                        VALUE_OPTIONAL
+                    ),
                     'options'        => new external_multiple_structure(
                         new external_single_structure([
                             'id'          => new external_value(PARAM_INT, 'Option ID'),
-                            'option_text' => new external_value(PARAM_TEXT, 'Option text'),
+                            'option_text' => new external_value(PARAM_RAW, 'Option text (plain text; escape it to display)'),
                             'is_correct'  => new external_value(PARAM_BOOL, 'Is correct answer'),
-                            'feedback'    => new external_value(PARAM_TEXT, 'Feedback text', VALUE_OPTIONAL),
+                            'feedback'    => new external_value(
+                                PARAM_RAW,
+                                'Feedback text (plain text; escape it to display)',
+                                VALUE_OPTIONAL
+                            ),
                             'sortorder'   => new external_value(PARAM_INT, 'Display order'),
                         ]),
                         'Answer options',

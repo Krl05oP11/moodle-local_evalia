@@ -262,8 +262,8 @@ class get_exam_stats extends external_api {
             'top_failed' => new external_multiple_structure(
                 new external_single_structure([
                     'question_id' => new external_value(PARAM_INT, 'Question ID'),
-                    'stem'        => new external_value(PARAM_TEXT, 'Question text'),
-                    'topic'       => new external_value(PARAM_TEXT, 'Rubric topic / theme'),
+                    'stem'        => new external_value(PARAM_RAW, 'Question text (plain text; escape it to display)'),
+                    'topic'       => new external_value(PARAM_RAW, 'Rubric topic / theme (plain text; escape it to display)'),
                     'difficulty'  => new external_value(PARAM_TEXT, 'Difficulty label'),
                     'fail_count'  => new external_value(PARAM_INT, 'Times answered wrong'),
                     'total'       => new external_value(PARAM_INT, 'Total graded exams'),
