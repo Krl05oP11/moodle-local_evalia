@@ -93,8 +93,11 @@ class assign_exam extends external_api {
             ];
         }
 
-        // Get enrolled students.
+        // Get enrolled students: in a separate-groups course, a teacher without moodle/site:accessallgroups
+        // assigns the exam to the students of their groups.
         $students = get_enrolled_users($context, 'local/evalia:take', 0, 'u.id');
+        $visible = array_flip(\local_evalia\local\access::filter_visible_users($context, array_keys($students)));
+        $students = array_intersect_key($students, $visible);
 
         if (empty($students)) {
             return [

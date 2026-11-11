@@ -67,12 +67,13 @@ class get_exam_stats extends external_api {
         require_capability('local/evalia:manage', $context);
 
         // 1. Status counts.
-        $all = $DB->get_records(
+        // In a separate-groups course, a teacher without moodle/site:accessallgroups only counts their groups.
+        $all = \local_evalia\local\access::filter_visible_records($context, $DB->get_records(
             'local_evalia_student_exams',
             ['examid' => $examid],
             '',
-            'id, status, score, answers, question_ids'
-        );
+            'id, userid, status, score, answers, question_ids'
+        ));
 
         $counts = ['assigned' => 0, 'started' => 0, 'submitted' => 0, 'graded' => 0];
         $gradedscores = [];

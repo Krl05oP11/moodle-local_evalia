@@ -664,6 +664,45 @@ final class externallib_test extends \advanced_testcase {
     }
 
     /**
+     * In separate groups, a grader without accessallgroups only counts their groups in the exam statistics.
+     *
+     * @covers \local_evalia\external\get_exam_stats::execute
+     */
+    public function test_exam_stats_respect_separate_groups(): void {
+        global $DB;
+        $gen = $this->getDataGenerator();
+        $this->setUser($this->teacher);
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $this->create_rubric(), 'Stats', '', 1, 0, 0, 30);
+
+        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
+        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
+        $roleid = $gen->create_role();
+        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
+        $grader = $gen->create_user();
+        $gen->enrol_user($grader->id, $this->course->id, $roleid);
+        $other = $gen->create_and_enrol($this->course, 'student');
+        $g1 = $gen->create_group(['courseid' => $this->course->id]);
+        $g2 = $gen->create_group(['courseid' => $this->course->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $grader->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $this->student->id]);
+        $gen->create_group_member(['groupid' => $g2->id, 'userid' => $other->id]);
+        foreach ([$this->student->id, $other->id] as $uid) {
+            $DB->insert_record('local_evalia_student_exams', (object) [
+                'examid' => $exam['examid'], 'userid' => $uid, 'question_ids' => '[]', 'answers' => '{}',
+                'status' => 'assigned', 'timecreated' => time(), 'timemodified' => time(),
+            ]);
+        }
+
+        $this->setUser($grader);
+        $stats = \local_evalia\external\get_exam_stats::execute($exam['examid']);
+        $this->assertSame(1, $stats['counts']['assigned']);
+
+        $this->setUser($this->teacher);
+        $stats = \local_evalia\external\get_exam_stats::execute($exam['examid']);
+        $this->assertSame(2, $stats['counts']['assigned']);
+    }
+
+    /**
      * In separate groups, a grader without accessallgroups cannot grade another group's exam.
      *
      * @covers \local_evalia\external\grade_exam::execute

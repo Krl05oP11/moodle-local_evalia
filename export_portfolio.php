@@ -35,13 +35,29 @@ $context = context_course::instance($courseid);
 require_login($course);
 require_capability('local/evalia:manage', $context);
 
-// Load enrolled students.
+// Load enrolled students: in a separate-groups course, a teacher without moodle/site:accessallgroups exports
+// the students of their groups.
 $students = get_enrolled_users(
     $context,
     'local/evalia:take',
     0,
     'u.id, u.firstname, u.lastname, u.email'
 );
+$visible  = array_flip(\local_evalia\local\access::filter_visible_users($context, array_keys($students)));
+$students = array_intersect_key($students, $visible);
+
+// The email column only when the site shows email addresses to this user (Show user identity).
+$showemail = in_array('email', \core_user\fields::get_identity_fields($context, false));
+
+/**
+ * Neutralises a CSV cell that a spreadsheet would read as a formula.
+ *
+ * @param string $value Cell value.
+ * @return string The value, with a leading apostrophe when it starts with =, +, -, @, tab or CR.
+ */
+function local_evalia_csv_cell(string $value): string {
+    return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
+}
 
 // Load portfolio records in one query.
 $portfoliobyuser = [];
@@ -95,14 +111,14 @@ $out = fopen('php://output', 'w');
 fwrite($out, "\xEF\xBB\xBF");
 
 // Header row.
-fputcsv($out, [
+fputcsv($out, array_values(array_filter([
     get_string('portfolio_csv_fullname', 'local_evalia'),
-    get_string('portfolio_csv_email', 'local_evalia'),
+    $showemail ? get_string('portfolio_csv_email', 'local_evalia') : null,
     get_string('portfolio_csv_total_exams', 'local_evalia'),
     get_string('portfolio_csv_avg_grade', 'local_evalia'),
     get_string('portfolio_csv_last_activity', 'local_evalia'),
     get_string('portfolio_csv_last_note', 'local_evalia'),
-]);
+], fn($v) => $v !== null)));
 
 // Data rows — sorted alphabetically.
 $studentlist = array_values((array) $students);
@@ -119,14 +135,14 @@ foreach ($studentlist as $u) {
         : '';
     $lastnote     = $lastnotebyuser[$u->id] ?? '';
 
-    fputcsv($out, [
-        $u->lastname . ', ' . $u->firstname,
-        $u->email,
+    fputcsv($out, array_values(array_filter([
+        local_evalia_csv_cell($u->lastname . ', ' . $u->firstname),
+        $showemail ? local_evalia_csv_cell($u->email) : null,
         $totalexams,
         $avggrade,
         $lastactivity,
-        $lastnote,
-    ]);
+        local_evalia_csv_cell($lastnote),
+    ], fn($v) => $v !== null)));
 }
 
 fclose($out);
