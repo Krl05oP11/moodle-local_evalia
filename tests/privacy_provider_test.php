@@ -170,7 +170,7 @@ final class privacy_provider_test extends \advanced_testcase {
     // Metadata.
 
     /**
-     * Metadata declares 4 database tables and 1 external location.
+     * Metadata declares the personal-data tables and the external locations.
      *
      * @covers \local_evalia\privacy\provider::get_metadata
      */
@@ -192,6 +192,36 @@ final class privacy_provider_test extends \advanced_testcase {
         $this->assertContains('local_evalia_portfolio_notes', $names);
         $this->assertContains('local_evalia_feedback_log', $names);
         $this->assertContains('saipa_engine', $names);
+        $this->assertContains('evalia_telegram', $names);
+    }
+
+    /**
+     * Every personal field sent outside Moodle is declared, with a language string: the engine receives the
+     * student's id, name and grade for the AI feedback, and Telegram the feedback and the submission notice.
+     *
+     * @covers \local_evalia\privacy\provider::get_metadata
+     */
+    public function test_get_metadata_external_locations(): void {
+        $collection = provider::get_metadata(new collection('local_evalia'));
+        $external = [];
+        foreach ($collection->get_collection() as $item) {
+            if ($item instanceof \core_privacy\local\metadata\types\external_location) {
+                $external[$item->get_name()] = $item;
+            }
+        }
+        $expected = [
+            'saipa_engine'    => ['question_stems', 'answers', 'userid', 'studentname', 'score', 'courseid'],
+            'evalia_telegram' => ['telegramid', 'message'],
+        ];
+        $this->assertEqualsCanonicalizing(array_keys($expected), array_keys($external));
+        $sm = get_string_manager();
+        foreach ($expected as $name => $fields) {
+            $this->assertEqualsCanonicalizing($fields, array_keys($external[$name]->get_privacy_fields()));
+            $this->assertTrue($sm->string_exists($external[$name]->get_summary(), 'local_evalia'), $name);
+            foreach ($external[$name]->get_privacy_fields() as $field => $identifier) {
+                $this->assertTrue($sm->string_exists($identifier, 'local_evalia'), "{$name}:{$field}");
+            }
+        }
     }
 
     // Context discovery.

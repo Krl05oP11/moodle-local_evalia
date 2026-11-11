@@ -107,10 +107,25 @@ class provider implements
         ], 'privacy:metadata:evalia_feedback_log');
 
         // External AI engine receives anonymised exam content (no PII).
+        // Everything sent to the SAIPA engine (lib.php local_evalia_engine_request()): questions and answers to
+        // grade an exam (grade_exam), and, for the AI feedback on Telegram after publishing (lib.php
+        // local_evalia_send_feedback), also the student's id, name and grade. Course material sent for indexing
+        // and the question pool sent to sample an exam are not personal data.
         $collection->add_external_location_link('saipa_engine', [
             'question_stems' => 'privacy:metadata:saipa_engine:question_stems',
             'answers'        => 'privacy:metadata:saipa_engine:answers',
+            'userid'         => 'privacy:metadata:saipa_engine:userid',
+            'studentname'    => 'privacy:metadata:saipa_engine:studentname',
+            'score'          => 'privacy:metadata:saipa_engine:score',
+            'courseid'       => 'privacy:metadata:saipa_engine:courseid',
         ], 'privacy:metadata:saipa_engine');
+
+        // Telegram messages relayed by the engine: the AI feedback to the student, and the notice to the teacher
+        // when a student submits an exam (submit_exam).
+        $collection->add_external_location_link('evalia_telegram', [
+            'telegramid' => 'privacy:metadata:evalia_telegram:telegramid',
+            'message'    => 'privacy:metadata:evalia_telegram:message',
+        ], 'privacy:metadata:evalia_telegram');
 
         return $collection;
     }
