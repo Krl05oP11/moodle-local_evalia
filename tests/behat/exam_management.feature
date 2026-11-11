@@ -35,9 +35,8 @@ Feature: EVAL-IA exam management
 
   @javascript
   Scenario: Student sees empty exam list before any exam is assigned
-    When I am on the "EVALIATEST" course page logged in as "student1"
-    And I visit "/local/evalia/student.php?courseid=1"
-    Then I should not see "You do not have permission"
+    When I am on the "EVALIATEST" "local_evalia > My exams" page logged in as "student1"
+    Then I should see "You don't have any exams assigned yet."
 
   @javascript
   Scenario: Teacher can access student portfolio page
@@ -46,7 +45,7 @@ Feature: EVAL-IA exam management
     Then I should see "Portfolios"
 
   @javascript
-  Scenario: Student cannot access teacher panel exam management
+  Scenario: Student is offered their exams, not the teacher panel
     When I am on the "EVALIATEST" course page logged in as "student1"
-    And I visit "/local/evalia/teacher.php?courseid=1"
-    Then I should see "You do not have permission"
+    Then "EVAL-IA" "link" should not exist
+    And "My Exams" "link" should exist

@@ -21,15 +21,15 @@ Feature: EVAL-IA privacy compliance
 
   Scenario: Privacy provider is registered for local_evalia
     Given I log in as "admin"
-    When I navigate to "Users > Privacy and policies > Data registry" in site administration
-    Then "local_evalia" "text" should exist in the page
+    When I navigate to "Users > Privacy and policies > Plugin privacy registry" in site administration
+    Then I should see "EVAL-IA"
 
+  @javascript
   Scenario: Admin can request data export for a student
     Given I log in as "admin"
     When I navigate to "Users > Privacy and policies > Data requests" in site administration
     And I follow "New request"
-    And I set the field "user" to "student1"
-    And I select "Export data" from the "requesttype" singleselect
-    And I press "Send request"
-    Then I should see "student1"
-    And I should see "Export"
+    And I set the field "User" to "Carlos Alumno"
+    And I press "Save changes"
+    Then I should see "Carlos Alumno"
+    And I should see "Awaiting approval" in the "Carlos Alumno" "table_row"

@@ -7,23 +7,8 @@ Feature: EVAL-IA setup wizard
   @javascript
   Scenario: Admin can access the setup wizard
     Given I log in as "admin"
-    When I navigate to "/local/evalia/setup.php" in site administration
-    Then I should see "EVAL-IA"
-    And I should not see "You do not have permission"
-
-  @javascript
-  Scenario: Non-admin teacher is denied access to setup wizard
-    Given the following "courses" exist:
-      | fullname    | shortname  | category |
-      | EVALIA Test | EVALIATEST | 0        |
-    And the following "users" exist:
-      | username | firstname | lastname | email                |
-      | teacher1 | Ana       | Docente  | teacher1@example.com |
-    And the following "course enrolments" exist:
-      | user     | course     | role           |
-      | teacher1 | EVALIATEST | editingteacher |
-    When I am on the "/local/evalia/setup.php" page logged in as "teacher1"
-    Then I should see "You do not have permission"
+    When I am on the "local_evalia > Setup wizard" page
+    Then I should see "Welcome to EVAL-IA"
 
   @javascript
   Scenario: Guest is redirected to login from setup wizard

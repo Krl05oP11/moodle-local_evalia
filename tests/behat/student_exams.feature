@@ -21,20 +21,20 @@ Feature: EVAL-IA student exam list
 
   @javascript
   Scenario: Student sees empty state when no exams are assigned
-    When I am on the "EVALIATEST" course page logged in as "student1"
-    And I follow "EVAL-IA"
-    Then I should see "No ten"
+    When I am on the "EVALIATEST" "local_evalia > My exams" page logged in as "student1"
+    Then I should see "You don't have any exams assigned yet."
 
   @javascript
-  Scenario: Student can access the student exam page
+  Scenario: Student reaches their exams from the course
     When I am on the "EVALIATEST" course page logged in as "student1"
-    And I visit "/local/evalia/student.php?courseid=1"
-    Then I should not see "You do not have permission"
+    And I follow "My Exams"
+    Then I should see "My Exams"
+    And I should see "EVALIA Test"
 
   @javascript
   Scenario: Unenrolled user cannot access student exam page
     Given the following "users" exist:
       | username | firstname | lastname | email               |
       | outsider | Pedro     | Externo  | outsider@example.com |
-    When I am on the "EVALIATEST" course page logged in as "outsider"
-    Then I should see "You can not enrol yourself"
+    When I am on the "EVALIATEST" "local_evalia > My exams" page logged in as "outsider"
+    Then I should see "You cannot enrol yourself in this course"

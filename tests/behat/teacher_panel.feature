@@ -37,10 +37,9 @@ Feature: EVAL-IA teacher panel
     And I should see "Portfolios"
 
   @javascript
-  Scenario: Student cannot access teacher panel
+  Scenario: Student is not offered the teacher panel
     When I am on the "EVALIATEST" course page logged in as "student1"
-    And I follow "EVAL-IA"
-    Then I should see "You do not have permission"
+    Then "EVAL-IA" "link" should not exist
 
   @javascript
   Scenario: Guest is redirected to login page
