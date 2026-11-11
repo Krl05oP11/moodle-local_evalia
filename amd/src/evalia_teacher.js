@@ -94,7 +94,7 @@ define(['core/ajax', 'core/log', 'core/str', 'core/templates'], function(Ajax, L
         error_question_update:      'Error updating the question.',
         error_rubric_first:         'First generate and activate a rubric.',
         error_rubric_must_be_active: 'Activate the rubric before generating questions.',
-        gen_questions_title:        '✨ Generate Questions with AI',
+        gen_questions_title:        '✨ Generate questions with AI',
         gen_questions_item_label:   'Rubric item',
         gen_questions_difficulty_label: 'Difficulty',
         gen_questions_count_label:  'Count',

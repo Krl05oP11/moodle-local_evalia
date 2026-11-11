@@ -32,7 +32,7 @@ Feature: EVAL-IA teacher panel
     When I am on the "EVALIATEST" course page logged in as "teacher1"
     And I navigate to "EVAL-IA" in current page administration
     Then I should see "Rubric"
-    And I should see "Question Bank"
+    And I should see "Question bank"
     And I should see "Exams"
     And I should see "Portfolios"
 

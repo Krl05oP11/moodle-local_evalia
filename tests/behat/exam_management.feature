@@ -31,7 +31,7 @@ Feature: EVAL-IA exam management
   Scenario: Teacher sees the Question Bank tab in the teacher panel
     When I am on the "EVALIATEST" course page logged in as "teacher1"
     And I navigate to "EVAL-IA" in current page administration
-    Then I should see "Question Bank"
+    Then I should see "Question bank"
 
   @javascript
   Scenario: Student sees empty exam list before any exam is assigned
@@ -48,4 +48,4 @@ Feature: EVAL-IA exam management
   Scenario: Student is offered their exams, not the teacher panel
     When I am on the "EVALIATEST" course page logged in as "student1"
     Then "EVAL-IA" "link" should not exist
-    And "My Exams" "link" should exist
+    And "My exams" "link" should exist
