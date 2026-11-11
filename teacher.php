@@ -78,7 +78,8 @@ $examlist = [];
 foreach ($allexams as $ex) {
     $examlist[] = [
         'id'       => (int) $ex->id,
-        'name'     => format_string($ex->name),
+        // Plain text: the template escapes it.
+        'name'     => format_string($ex->name, true, ['escape' => false]),
         'selected' => ((int) $ex->id === $latestexamid),
     ];
 }

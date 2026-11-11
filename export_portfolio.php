@@ -118,7 +118,7 @@ fputcsv($out, array_values(array_filter([
     get_string('portfolio_csv_avg_grade', 'local_evalia'),
     get_string('portfolio_csv_last_activity', 'local_evalia'),
     get_string('portfolio_csv_last_note', 'local_evalia'),
-], fn($v) => $v !== null)));
+], fn($v) => $v !== null)), ',', '"', '');
 
 // Data rows — sorted alphabetically.
 $studentlist = array_values((array) $students);
@@ -142,7 +142,7 @@ foreach ($studentlist as $u) {
         $avggrade,
         $lastactivity,
         local_evalia_csv_cell($lastnote),
-    ], fn($v) => $v !== null)));
+    ], fn($v) => $v !== null)), ',', '"', '');
 }
 
 fclose($out);
