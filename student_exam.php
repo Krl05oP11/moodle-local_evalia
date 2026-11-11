@@ -52,6 +52,26 @@ $PAGE->set_pagelayout('incourse');
 $PAGE->set_title(get_string('exam:page_title', 'local_evalia', $exam->name));
 $PAGE->set_heading($exam->name);
 
+// Outside the exam window the student cannot open (or start) the exam: back to the exam list with the
+// reason. get_student_exam and submit_exam enforce the same window.
+if ($isowner && in_array($studentexam->status, ['assigned', 'started'])) {
+    $now = time();
+    $notyet = $exam->timeopen > 0 && $now < $exam->timeopen;
+    $closed = $exam->timeclose > 0 && $now > $exam->timeclose;
+    if ($notyet || $closed) {
+        $dateformat = get_string('strftimedatetimeshort', 'langconfig');
+        $message = $notyet
+            ? get_string('student:window_opens', 'local_evalia', userdate($exam->timeopen, $dateformat))
+            : get_string('student:window_closed', 'local_evalia', userdate($exam->timeclose, $dateformat));
+        redirect(
+            new moodle_url('/local/evalia/student.php', ['courseid' => $course->id]),
+            $message,
+            null,
+            \core\output\notification::NOTIFY_WARNING
+        );
+    }
+}
+
 // Load questions directly from DB (no WS overhead for server-side rendering).
 $questionids = json_decode($studentexam->question_ids ?? '[]', true);
 
@@ -179,11 +199,12 @@ $studentuser = $previewmode
 // Context of templates/exam_page.mustache. Every value is escaped there except the instructions and the
 // question stems, which are the output of format_text().
 $gradedpreview = $previewmode && in_array($studentexam->status, ['graded', 'published']);
-$context = [
+$templatecontext = [
     'preview'        => $previewmode,
     'studentexamid'  => $studentexamid,
     'submittedview'  => $alreadysubmitted && !$previewmode,
-    'submittedscore' => in_array($studentexam->status, ['graded', 'published'])
+    // The student sees the grade once the teacher publishes it, as on student.php.
+    'submittedscore' => $studentexam->status === 'published'
         ? number_format((float) $studentexam->score, 1) : '',
     'gradedpreview'  => $gradedpreview,
     'previewscore'   => $gradedpreview ? number_format((float) $studentexam->score, 1) : '',
@@ -193,8 +214,8 @@ $context = [
     'questions'      => [],
 ];
 if ($previewmode) {
-    $context['studentname'] = $studentuser ? fullname($studentuser) : get_string('exam:preview_student_fallback', 'local_evalia');
-    $context['statuslabel'] = [
+    $templatecontext['studentname'] = $studentuser ? fullname($studentuser) : get_string('exam:preview_student_fallback', 'local_evalia');
+    $templatecontext['statuslabel'] = [
         'assigned'  => get_string('exam:status_assigned', 'local_evalia'),
         'started'   => get_string('exam:status_started', 'local_evalia'),
         'submitted' => get_string('exam:status_submitted_review', 'local_evalia'),
@@ -205,7 +226,7 @@ if ($previewmode) {
 
 $diffweights = ['basic' => 1, 'medium' => 2, 'advanced' => 3];
 $diffmap = ['basic' => 'info', 'medium' => 'warning', 'advanced' => 'danger'];
-foreach ($context['submittedview'] ? [] : $questionsdata as $q) {
+foreach ($templatecontext['submittedview'] ? [] : $questionsdata as $q) {
     $qid = $q['id'];
     $qweight = $diffweights[$q['difficulty']] ?? 1;
     $storedanswer = $storedanswers[(string) $qid] ?? null;
@@ -282,9 +303,9 @@ foreach ($context['submittedview'] ? [] : $questionsdata as $q) {
         $item['essayfeedback'] = $essayevals[(string) $qid]['feedback'] ?? '';
     }
 
-    $context['questions'][] = $item;
+    $templatecontext['questions'][] = $item;
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('local_evalia/exam_page', $context);
+echo $OUTPUT->render_from_template('local_evalia/exam_page', $templatecontext);
 echo $OUTPUT->footer();
