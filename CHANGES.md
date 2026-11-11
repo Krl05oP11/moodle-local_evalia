@@ -21,6 +21,11 @@ already fixed in 0.4.13 (build 2026110300, uploaded on 3 November); the review l
 #### Privacy
 - The engine location declares everything sent for the AI feedback after publishing (user id, name,
   grade, answers), and the Telegram messages relayed by the engine are a declared external location.
+- The feedback log stored the student exam id where the exam id belongs, so privacy requests could
+  miss its rows; it stores the exam id, and the upgrade fixes existing rows.
+
+#### Exam page
+- A student can no longer open an exam outside its window, and sees the grade once it is published.
 
 #### Templates, styles and strings
 - setup.php, student.php and student_exam.php render templates; no page echoes HTML (#5). The old
@@ -29,7 +34,8 @@ already fixed in 0.4.13 (build 2026110300, uploaded on 3 November); the review l
 
 #### Tests
 - templates_escaping_test, groups and markup tests; the ten Behat scenarios that failed because of the
-  tests themselves are fixed, and Behat runs in the CI again (16/16 locally). The CI adds MariaDB.
+  tests themselves are fixed, and Behat runs in the CI again (16/16 locally). The CI adds MariaDB and
+  PHP 8.4; the portfolio CSV passes fputcsv()'s escape argument explicitly (PHP 8.4).
 
 
 ### Ahead of its Marketplace review (0.4.13, 2026-11-02)
