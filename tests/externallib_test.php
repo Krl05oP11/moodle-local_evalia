@@ -664,6 +664,36 @@ final class externallib_test extends \advanced_testcase {
     }
 
     /**
+     * The feedback log stores the exam id (its foreign key and the privacy provider expect it), not the student
+     * exam id. Found in an independent review.
+     *
+     * @covers ::local_evalia_send_feedback
+     */
+    public function test_feedback_log_stores_exam_id(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/evalia/lib.php');
+        $this->setUser($this->teacher);
+        set_config('engine_url', '', 'local_evalia');
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $this->create_rubric(), 'Log', '', 1, 0, 0, 30);
+        // Shift the student exam ids away from the exam id, so that the two cannot match by chance.
+        for ($i = 0; $i < 3; $i++) {
+            $DB->insert_record('local_evalia_student_exams', (object) [
+                'examid' => $exam['examid'], 'userid' => $this->getDataGenerator()->create_user()->id,
+                'question_ids' => '[]', 'answers' => '{}', 'status' => 'assigned', 'timecreated' => time(),
+                'timemodified' => time(),
+            ]);
+        }
+        $seid = $this->create_student_exam($exam['examid'], '{"1":"a"}', 'published');
+        $DB->set_field('local_evalia_student_exams', 'question_ids', '[999999]', ['id' => $seid]);
+
+        local_evalia_send_feedback($seid, $DB);
+
+        $log = $DB->get_record('local_evalia_feedback_log', ['userid' => $this->student->id], '*', MUST_EXIST);
+        $this->assertSame((int) $exam['examid'], (int) $log->examid);
+        $this->assertNotSame($seid, (int) $log->examid);
+    }
+
+    /**
      * In separate groups, a grader without accessallgroups only counts their groups in the exam statistics.
      *
      * @covers \local_evalia\external\get_exam_stats::execute

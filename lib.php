@@ -333,7 +333,7 @@ function local_evalia_send_feedback(int $studentexamid, \moodle_database $DB): s
     try {
         $DB->insert_record('local_evalia_feedback_log', (object) [
             'userid'       => $se->userid ?? 0,
-            'examid'       => $se->id ?? 0,
+            'examid'       => $se->examid ?? 0,
             'channel'      => 'telegram',
             'message_text' => 'score=' . ($se->score ?? 0) . '/10 status=' . $status,
             'timesent'     => time(),

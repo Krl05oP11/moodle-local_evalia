@@ -306,5 +306,24 @@ function xmldb_local_evalia_upgrade(int $oldversion): bool {
         upgrade_plugin_savepoint(true, 2026091501, 'local', 'evalia');
     }
 
+    if ($oldversion < 2026111000) {
+        // The examid of local_evalia_feedback_log is an exam id (foreign key to local_evalia_exams), but
+        // local_evalia_send_feedback() stored the student exam id. Point every row at the exam of its student
+        // exam, so that the privacy export and deletion find it.
+        $rs = $DB->get_recordset('local_evalia_feedback_log', null, '', 'id, userid, examid');
+        foreach ($rs as $row) {
+            $se = $DB->get_record(
+                'local_evalia_student_exams',
+                ['id' => $row->examid, 'userid' => $row->userid],
+                'id, examid'
+            );
+            if ($se && (int) $se->examid !== (int) $row->examid) {
+                $DB->set_field('local_evalia_feedback_log', 'examid', $se->examid, ['id' => $row->id]);
+            }
+        }
+        $rs->close();
+        upgrade_plugin_savepoint(true, 2026111000, 'local', 'evalia');
+    }
+
     return true;
 }
