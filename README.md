@@ -1,8 +1,8 @@
 # EVAL-IA — AI-Powered Evaluation for Moodle
 
-**EVAL-IA** is a Moodle 4.x local plugin that automates the entire evaluation workflow using AI and Retrieval-Augmented Generation (RAG). Teachers generate rubrics and question banks from course materials in seconds; each student receives a unique, personalised exam. After submission, the AI grades the answers and delivers pedagogical feedback via Telegram.
+**EVAL-IA** is a Moodle (4.4 to 5.3) local plugin that automates the entire evaluation workflow using AI and Retrieval-Augmented Generation (RAG). Teachers generate rubrics and question banks from course materials in seconds; each student receives a unique, personalised exam. After submission, the AI grades the answers and delivers pedagogical feedback via Telegram.
 
-[![Moodle 4.4+](https://img.shields.io/badge/Moodle-4.4%2B-orange)](https://moodle.org)
+[![Moodle 4.4–5.3](https://img.shields.io/badge/Moodle-4.4%E2%80%935.3-orange)](https://moodle.org)
 [![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-blue)](https://php.net)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-green)](LICENSE)
 [![Maturity: Stable](https://img.shields.io/badge/Maturity-Stable-brightgreen)]()
@@ -57,8 +57,8 @@
 
 | Requirement | Version |
 |-------------|---------|
-| Moodle | 4.4 or 4.5 |
-| PHP | 8.1+ |
+| Moodle | 4.4 to 5.3 (`$plugin->supported = [404, 503]`) |
+| PHP | 8.1+ on Moodle 4.4 and 4.5; 8.2+ on Moodle 5.x |
 | Database | MySQL 8+ / MariaDB 10.6+ / PostgreSQL 13+ |
 | **SAIPA Engine** | Python 3.11+, FastAPI |
 
