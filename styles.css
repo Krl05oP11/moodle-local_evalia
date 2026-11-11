@@ -596,3 +596,288 @@
 #page-local-evalia-student_exam .evalia-toast-wrap {
     z-index: 9999;
 }
+
+/* Former inline styles of evalia_teacher.mustache (Marketplace review, inline styles to styles.css). */
+#page-local-evalia-teacher .evalia-t1 {
+    border-color:#a5b4fc;
+    color:#6366f1;
+    font-size:.82rem;
+}
+#page-local-evalia-teacher .evalia-t2 {
+    border:1px solid #0891b2;
+}
+#page-local-evalia-teacher .evalia-t3 {
+    background:#0891b2;
+}
+#page-local-evalia-teacher .evalia-t4 {
+    color:#fff;
+}
+#page-local-evalia-teacher .evalia-t5 {
+    color:#e0f7fa;
+}
+#page-local-evalia-teacher .evalia-t6 {
+    background:#fff;
+    color:#0891b2;
+    border:none;
+    font-weight:600;
+}
+#page-local-evalia-teacher .evalia-t7 {
+    background:#f0fdff;
+}
+#page-local-evalia-teacher .evalia-t8 {
+    cursor:pointer;
+}
+#page-local-evalia-teacher .evalia-t9 {
+    width:180px;
+}
+#page-local-evalia-teacher .evalia-t10 {
+    width:80px;
+}
+#page-local-evalia-teacher .evalia-t11 {
+    background:#f8f9fa;
+}
+#page-local-evalia-teacher .evalia-t12 {
+    font-size:.85rem;
+}
+#page-local-evalia-teacher .evalia-t13 {
+    font-size:.82rem;
+}
+#page-local-evalia-teacher .evalia-t14 {
+    max-width:220px;
+}
+#page-local-evalia-teacher .evalia-t15 {
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t16 {
+    font-size:0.82rem;
+}
+#page-local-evalia-teacher .evalia-t17 {
+    position:relative;
+    min-height:400px;
+    height:100%;
+}
+#page-local-evalia-teacher .evalia-t18 {
+    position:absolute;
+    inset:0;
+}
+#page-local-evalia-teacher .evalia-t19 {
+    font-size: 2.5rem;
+}
+#page-local-evalia-teacher .evalia-t20 {
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+}
+#page-local-evalia-teacher .evalia-t21 {
+    max-height: 220px;
+    overflow-y: auto;
+}
+#page-local-evalia-teacher .evalia-t22 {
+    z-index: 9999;
+}
+#page-local-evalia-teacher .evalia-t23 {
+    position:fixed;
+    top:60px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:10500;
+    width:700px;
+    max-width:96vw;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.22);
+    border:1px solid #e2e8f0;
+}
+#page-local-evalia-teacher .evalia-t24 {
+    cursor:move;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    color:#fff;
+    padding:14px 18px;
+    border-radius:12px 12px 0 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    user-select:none;
+}
+#page-local-evalia-teacher .evalia-t25 {
+    font-weight:700;
+    font-size:1rem;
+}
+#page-local-evalia-teacher .evalia-t26 {
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:1.4rem;
+    line-height:1;
+    cursor:pointer;
+    padding:0 4px;
+}
+#page-local-evalia-teacher .evalia-t27 {
+    padding:20px 22px 18px;
+    overflow-y:auto;
+    max-height:80vh;
+}
+#page-local-evalia-teacher .evalia-t28 {
+    display:flex;
+    flex-direction:column;
+    gap:0;
+}
+#page-local-evalia-teacher .evalia-t29 {
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+}
+#page-local-evalia-teacher .evalia-t30 {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+#page-local-evalia-teacher .evalia-t31 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#0891b2;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t32 {
+    width:2px;
+    background:#cbd5e1;
+    flex:1;
+    margin:4px 0;
+}
+#page-local-evalia-teacher .evalia-t33 {
+    flex:1;
+    padding-bottom:14px;
+}
+#page-local-evalia-teacher .evalia-t34 {
+    font-weight:700;
+    color:#0891b2;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t35 {
+    font-size:.82rem;
+    color:#475569;
+    margin-top:3px;
+}
+#page-local-evalia-teacher .evalia-t36 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#6366f1;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t37 {
+    font-weight:700;
+    color:#6366f1;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t38 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#7c3aed;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t39 {
+    font-weight:700;
+    color:#7c3aed;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t40 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#0369a1;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t41 {
+    font-weight:700;
+    color:#0369a1;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t42 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#059669;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t43 {
+    font-weight:700;
+    color:#059669;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t44 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#d97706;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t45 {
+    font-weight:700;
+    color:#d97706;
+    font-size:.9rem;
+}
+#page-local-evalia-teacher .evalia-t46 {
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+}
+#page-local-evalia-teacher .evalia-t47 {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#475569;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:.95rem;
+    flex-shrink:0;
+}
+#page-local-evalia-teacher .evalia-t48 {
+    flex:1;
+}
+#page-local-evalia-teacher .evalia-t49 {
+    font-weight:700;
+    color:#475569;
+    font-size:.9rem;
+}

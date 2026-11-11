@@ -26,8 +26,7 @@
 
     {{! ── Toolbar ─────────────────────────────────────────────────────── }}
     <div class="d-flex justify-content-end mb-2">
-        <button id="evalia-btn-workflow" class="btn btn-sm btn-outline-secondary"
-                style="border-color:#a5b4fc; color:#6366f1; font-size:.82rem;">
+        <button id="evalia-btn-workflow" class="btn btn-sm btn-outline-secondary evalia-t1">
             🗺️ {{btn_workflow}}
         </button>
     </div>
@@ -71,22 +70,20 @@
         <div class="tab-pane fade show active" id="tab-rubric" role="tabpanel">
 
             {{! ── Course material ── }}
-            <div class="card mb-3" style="border:1px solid #0891b2;">
-                <div class="card-header d-flex justify-content-between align-items-center"
-                     style="background:#0891b2;">
+            <div class="card mb-3 evalia-t2">
+                <div class="card-header d-flex justify-content-between align-items-center evalia-t3">
                     <div>
-                        <strong style="color:#fff;">📚 {{material_title}}</strong>
-                        <small style="color:#e0f7fa;" class="ms-2">{{material_subtitle}}</small>
+                        <strong class="evalia-t4">📚 {{material_title}}</strong>
+                        <small class="ms-2 evalia-t5">{{material_subtitle}}</small>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span id="evalia-index-status" class="small" style="color:#e0f7fa;"></span>
-                        <button id="evalia-btn-index-course" class="btn btn-sm"
-                                style="background:#fff;color:#0891b2;border:none;font-weight:600;">
+                        <span id="evalia-index-status" class="small evalia-t5"></span>
+                        <button id="evalia-btn-index-course" class="btn btn-sm evalia-t6">
                             🔍 {{btn_index_material}}
                         </button>
                     </div>
                 </div>
-                <div class="card-body py-2 px-3" style="background:#f0fdff;">
+                <div class="card-body py-2 px-3 evalia-t7">
                     <p class="mb-1 small text-dark">
                         <strong>{{material_how_title}}</strong>
                         {{material_how_desc}}
@@ -96,7 +93,7 @@
                         <li>{{{material_step2}}}</li>
                         <li>{{material_step3}}</li>
                     </ol>
-                    <div id="evalia-index-loading" style="display:none;" class="mt-1">
+                    <div id="evalia-index-loading" style="display: none;" class="mt-1">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-info" role="status"></div>
                             <span class="text-info small">{{material_indexing}}</span>
@@ -107,18 +104,18 @@
 
             {{! ── Source selector (lazy accordion) ── }}
             <div class="card mb-3 border-secondary-subtle">
-                <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center"
-                     id="evalia-sources-toggle" role="button" style="cursor:pointer;">
+                <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center evalia-t8"
+                     id="evalia-sources-toggle" role="button">
                     <span>
                         📖 <strong>{{sources_title}}</strong>
                         <small class="text-muted ms-1">{{sources_subtitle}}</small>
                     </span>
                     <span>
-                        <span id="evalia-sources-badge" class="badge bg-secondary me-2" style="display:none;"></span>
+                        <span id="evalia-sources-badge" class="badge bg-secondary me-2" style="display: none;"></span>
                         <span id="evalia-sources-arrow">▶</span>
                     </span>
                 </div>
-                <div id="evalia-sources-panel" class="card-body py-2 px-3" style="display:none;">
+                <div id="evalia-sources-panel" class="card-body py-2 px-3" style="display: none;">
                     <div id="evalia-sources-list" class="mb-2">
                         <span class="text-muted small">{{sources_loading}}</span>
                     </div>
@@ -136,29 +133,27 @@
                     <div class="d-flex align-items-center gap-2">
                         <input type="text"
                                id="evalia-rubric-scope"
-                               class="form-control form-control-sm"
-                               style="width:180px;"
+                               class="form-control form-control-sm evalia-t9"
                                placeholder="{{rubric_scope_placeholder}}">
                         <input type="number"
                                id="evalia-rubric-item-count"
-                               class="form-control form-control-sm"
-                               style="width:80px;"
+                               class="form-control form-control-sm evalia-t10"
                                min="5" max="40" value="{{rubric_default_items}}"
                                title="{{rubric_item_count_title}}">
                         <button id="evalia-btn-generate-rubric" class="btn btn-primary">
                             ✨ {{rubric_generate}}
                         </button>
-                        <button id="evalia-btn-save-rubric" class="btn btn-success ms-2" style="display:none;">
+                        <button id="evalia-btn-save-rubric" class="btn btn-success ms-2" style="display: none;">
                             💾 {{rubric_save}}
                         </button>
-                        <button id="evalia-btn-activate-rubric" class="btn btn-warning ms-2" style="display:none;">
+                        <button id="evalia-btn-activate-rubric" class="btn btn-warning ms-2" style="display: none;">
                             ✅ {{rubric_activate}}
                         </button>
                     </div>
                 </div>
                 <div class="card-body">
                     <div id="evalia-rubric-status" class="mb-3"></div>
-                    <div id="evalia-rubric-loading" style="display:none;">
+                    <div id="evalia-rubric-loading" style="display: none;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                             <span>{{rubric_generating}}</span>
@@ -205,7 +200,7 @@
                             </select>
                         </div>
                     </div>
-                    <div id="evalia-questions-loading" style="display:none;">
+                    <div id="evalia-questions-loading" style="display: none;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                             <span>{{questions_loading}}</span>
@@ -261,14 +256,14 @@
                                        value="{{exam_default_time_limit}}" min="0" max="300">
                             </div>
                             {{! Submission window (collapsible) }}
-                            <div class="mb-3 border rounded p-2" style="background:#f8f9fa;">
-                                <div class="d-flex align-items-center"
-                                     id="evalia-exam-window-toggle" style="cursor:pointer;">
+                            <div class="mb-3 border rounded p-2 evalia-t11">
+                                <div class="d-flex align-items-center evalia-t8"
+                                     id="evalia-exam-window-toggle">
                                     <span class="fw-semibold small">📅 {{exam_window_title}}</span>
                                     <span class="text-muted small ms-2">{{label_optional}}</span>
                                     <span id="evalia-exam-window-arrow" class="ms-auto small text-secondary">▶</span>
                                 </div>
-                                <div id="evalia-exam-window-panel" style="display:none;" class="mt-2">
+                                <div id="evalia-exam-window-panel" style="display: none;" class="mt-2">
                                     <div class="row g-2">
                                         <div class="col-12">
                                             <label class="form-label form-label-sm mb-1">{{exam_window_open_label}}</label>
@@ -294,37 +289,37 @@
                 </div>
                 {{! Right: student exam list }}
                 <div class="col-md-7">
-                    <div class="alert alert-light border d-flex align-items-center gap-2 py-2 px-3 mb-2" style="font-size:.85rem;">
+                    <div class="alert alert-light border d-flex align-items-center gap-2 py-2 px-3 mb-2 evalia-t12">
                         <span>🔗 {{student_link_label}}</span>
-                        <code id="evalia-student-url" class="flex-grow-1 text-truncate" style="font-size:.82rem;">{{student_page_url}}</code>
+                        <code id="evalia-student-url" class="flex-grow-1 text-truncate evalia-t13">{{student_page_url}}</code>
                         <button id="evalia-btn-copy-student-url" class="btn btn-sm btn-outline-secondary py-0">{{btn_copy}}</button>
                     </div>
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <h6 class="mb-0">👥 {{label_students}}</h6>
-                                <select id="evalia-exam-selector" class="form-select form-select-sm" style="max-width:220px;">
+                                <select id="evalia-exam-selector" class="form-select form-select-sm evalia-t14">
                                     <option value="">{{exam_selector_none}}</option>
                                     {{#exam_list}}
                                     <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                                     {{/exam_list}}
                                 </select>
                             </div>
-                            <div class="d-flex gap-2 align-items-center" style="flex-shrink:0;">
+                            <div class="d-flex gap-2 align-items-center evalia-t15">
                                 <span id="evalia-grade-all-status" class="text-muted small"></span>
-                                <button id="evalia-btn-publish-all" class="btn btn-success btn-sm" style="display:none;">
+                                <button id="evalia-btn-publish-all" class="btn btn-success btn-sm" style="display: none;">
                                     ✅ {{btn_publish_grades}}
                                 </button>
-                                <button id="evalia-btn-grade-all" class="btn btn-warning btn-sm" style="display:none;">
+                                <button id="evalia-btn-grade-all" class="btn btn-warning btn-sm" style="display: none;">
                                     ⚡ {{btn_grade_all}}
                                 </button>
-                                <button id="evalia-btn-assign-exam" class="btn btn-success btn-sm" style="display:none;">
+                                <button id="evalia-btn-assign-exam" class="btn btn-success btn-sm" style="display: none;">
                                     📤 {{exam_assign_all}}
                                 </button>
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div id="evalia-exams-loading" style="display:none;" class="p-3">
+                            <div id="evalia-exams-loading" style="display: none;" class="p-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                     <span>{{exam_assigning}}</span>
@@ -341,7 +336,7 @@
             </div>
 
             {{! ── Statistics panel ── }}
-            <div id="evalia-stats-section" class="mt-4" style="display:none;">
+            <div id="evalia-stats-section" class="mt-4" style="display: none;">
                 <div class="card border-info">
                     <div class="card-header d-flex justify-content-between align-items-center bg-info bg-opacity-10">
                         <h6 class="mb-0">📊 {{stats_title}}</h6>
@@ -367,7 +362,7 @@
             </div>
 
             {{! ── Customisable feedback prompt ── }}
-            <div id="evalia-feedback-prompt-section" class="mt-4" style="display:none;">
+            <div id="evalia-feedback-prompt-section" class="mt-4" style="display: none;">
                 <div class="card border-secondary">
                     <div class="card-header d-flex justify-content-between align-items-center bg-light">
                         <h6 class="mb-0">🤖 {{feedback_prompt_title}}</h6>
@@ -379,8 +374,8 @@
                         <p class="text-muted small mb-2">
                             {{feedback_prompt_desc}}
                         </p>
-                        <textarea id="evalia-feedback-prompt-textarea" class="form-control font-monospace"
-                                  rows="10" style="font-size:0.82rem;"></textarea>
+                        <textarea id="evalia-feedback-prompt-textarea" class="form-control font-monospace evalia-t16"
+                                  rows="10"></textarea>
                         <div class="d-flex justify-content-end gap-2 mt-2">
                             <span id="evalia-prompt-save-status" class="text-muted small align-self-center"></span>
                             <button id="evalia-btn-save-prompt" class="btn btn-primary btn-sm">
@@ -413,7 +408,7 @@
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div id="evalia-portfolio-loading" style="display:none;" class="p-3">
+                            <div id="evalia-portfolio-loading" style="display: none;" class="p-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                     <span>{{portfolio_loading}}</span>
@@ -428,16 +423,15 @@
 
                 {{! ── Right: student detail ───────────────────────── }}
                 <div class="col-md-7">
-                    <div style="position:relative; min-height:400px; height:100%;">
+                    <div class="evalia-t17">
                     <div id="evalia-portfolio-detail-placeholder"
-                         class="card border-dashed text-center text-muted d-flex align-items-center justify-content-center"
-                         style="position:absolute; inset:0;">
+                         class="card border-dashed text-center text-muted d-flex align-items-center justify-content-center evalia-t18">
                         <div>
-                            <div style="font-size: 2.5rem;">👈</div>
+                            <div class="evalia-t19">👈</div>
                             <p class="mt-2 mb-0">{{portfolio_select_student}}</p>
                         </div>
                     </div>
-                    <div id="evalia-portfolio-detail-panel" style="display:none; position:absolute; inset:0; overflow-y:auto;">
+                    <div class="evalia-t20" id="evalia-portfolio-detail-panel" style="display: none;">
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0" id="evalia-portfolio-student-name">—</h6>
@@ -463,9 +457,8 @@
                                             <p class="text-muted text-center py-3">{{portfolio_no_exams}}</p>
                                         </div>
                                     </div>
-                                    <div id="pdt-notes" style="display:none;">
-                                        <div id="evalia-portfolio-notes-container" class="mb-3"
-                                             style="max-height: 220px; overflow-y: auto;">
+                                    <div id="pdt-notes" style="display: none;">
+                                        <div id="evalia-portfolio-notes-container" class="mb-3 evalia-t21">
                                             <p class="text-muted small">{{portfolio_note_empty}}</p>
                                         </div>
                                         <div class="input-group">
@@ -491,7 +484,7 @@
     </div>{{! end tab-content }}
 
     {{! Toast notifications }}
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div class="position-fixed bottom-0 end-0 p-3 evalia-t22">
         <div id="evalia-toast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive">
             <div class="d-flex">
                 <div class="toast-body" id="evalia-toast-body"></div>
@@ -504,131 +497,107 @@
 </div>{{! end #evalia-teacher-panel }}
 
 {{! ── Modal: Workflow ─────────────────────────────────────────── }}
-<div id="evalia-workflow-modal"
-     style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%);
-            z-index:10500; width:700px; max-width:96vw; background:#fff;
-            border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.22);
-            border:1px solid #e2e8f0;">
-    <div id="evalia-workflow-modal-header"
-         style="cursor:move; background:linear-gradient(135deg,#6366f1,#8b5cf6);
-                color:#fff; padding:14px 18px; border-radius:12px 12px 0 0;
-                display:flex; justify-content:space-between; align-items:center;
-                user-select:none;">
-        <span style="font-weight:700; font-size:1rem;">🗺️ {{workflow_modal_title}}</span>
-        <button id="evalia-workflow-modal-close"
-                style="background:none; border:none; color:#fff; font-size:1.4rem;
-                       line-height:1; cursor:pointer; padding:0 4px;"
+<div class="evalia-t23" id="evalia-workflow-modal" style="display: none;">
+    <div class="evalia-t24" id="evalia-workflow-modal-header">
+        <span class="evalia-t25">🗺️ {{workflow_modal_title}}</span>
+        <button class="evalia-t26" id="evalia-workflow-modal-close"
                 aria-label="{{btn_close}}">&times;</button>
     </div>
-    <div style="padding:20px 22px 18px; overflow-y:auto; max-height:80vh;">
+    <div class="evalia-t27">
 
         {{! Step row helper — each step is a card with an arrow after }}
-        <div style="display:flex; flex-direction:column; gap:0;">
+        <div class="evalia-t28">
 
             {{! Step 1 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#0891b2;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">1</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t31">1</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#0891b2; font-size:.9rem;">📚 {{workflow_step1_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t34">📚 {{workflow_step1_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step1_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 2 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#6366f1;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">2</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t36">2</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#6366f1; font-size:.9rem;">📋 {{workflow_step2_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t37">📋 {{workflow_step2_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step2_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 3 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#7c3aed;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">3</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t38">3</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#7c3aed; font-size:.9rem;">❓ {{workflow_step3_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t39">❓ {{workflow_step3_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step3_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 4 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#0369a1;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">4</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t40">4</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#0369a1; font-size:.9rem;">📝 {{workflow_step4_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t41">📝 {{workflow_step4_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step4_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 5 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#059669;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">5</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t42">5</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#059669; font-size:.9rem;">👩‍🎓 {{workflow_step5_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t43">👩‍🎓 {{workflow_step5_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step5_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 6 }}
-            <div style="display:flex; align-items:stretch; gap:10px;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#d97706;
-                                color:#fff; display:flex; align-items:center; justify-content:center;
-                                font-weight:700; font-size:.95rem; flex-shrink:0;">6</div>
-                    <div style="width:2px; background:#cbd5e1; flex:1; margin:4px 0;"></div>
+            <div class="evalia-t29">
+                <div class="evalia-t30">
+                    <div class="evalia-t44">6</div>
+                    <div class="evalia-t32"></div>
                 </div>
-                <div style="flex:1; padding-bottom:14px;">
-                    <div style="font-weight:700; color:#d97706; font-size:.9rem;">⚡ {{workflow_step6_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+                <div class="evalia-t33">
+                    <div class="evalia-t45">⚡ {{workflow_step6_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step6_desc}}}
                     </div>
                 </div>
             </div>
 
             {{! Step 7 — last, no connector }}
-            <div style="display:flex; align-items:flex-start; gap:10px;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#475569;
-                            color:#fff; display:flex; align-items:center; justify-content:center;
-                            font-weight:700; font-size:.95rem; flex-shrink:0;">7</div>
-                <div style="flex:1;">
-                    <div style="font-weight:700; color:#475569; font-size:.9rem;">📁 {{workflow_step7_title}}</div>
-                    <div style="font-size:.82rem; color:#475569; margin-top:3px;">
+            <div class="evalia-t46">
+                <div class="evalia-t47">7</div>
+                <div class="evalia-t48">
+                    <div class="evalia-t49">📁 {{workflow_step7_title}}</div>
+                    <div class="evalia-t35">
                         {{{workflow_step7_desc}}}
                     </div>
                 </div>
@@ -645,7 +614,7 @@
     🤖
 </button>
 
-<div id="evalia-chat-panel" class="evalia-chat-panel" style="display:none;">
+<div id="evalia-chat-panel" class="evalia-chat-panel" style="display: none;">
     <div class="evalia-chat-header">
         <span>✨ {{fab_title}}</span>
         <button id="evalia-chat-close" class="evalia-chat-close" aria-label="{{btn_close}}">&times;</button>
