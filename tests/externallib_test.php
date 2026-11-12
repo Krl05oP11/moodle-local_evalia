@@ -477,6 +477,30 @@ final class externallib_test extends \advanced_testcase {
     }
 
     /**
+     * Force separate groups on the course and create a grader (local/evalia:manage, no accessallgroups) who shares a
+     * group with $this->student, plus another student in a second group.
+     *
+     * @return array [grader user, other student]
+     */
+    private function separate_groups_grader(): array {
+        global $DB;
+        $gen = $this->getDataGenerator();
+        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
+        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
+        $roleid = $gen->create_role();
+        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
+        $grader = $gen->create_user();
+        $gen->enrol_user($grader->id, $this->course->id, $roleid);
+        $other = $gen->create_and_enrol($this->course, 'student');
+        $g1 = $gen->create_group(['courseid' => $this->course->id]);
+        $g2 = $gen->create_group(['courseid' => $this->course->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $grader->id]);
+        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $this->student->id]);
+        $gen->create_group_member(['groupid' => $g2->id, 'userid' => $other->id]);
+        return [$grader, $other];
+    }
+
+    /**
      * A submission with answers="[]" (PHP's json_encode([]) shape for an
      * empty array -- what a genuinely blank submit_exam call stores) must
      * not be silently scored 0.0/10.0 and marked graded. Found live
@@ -643,20 +667,7 @@ final class externallib_test extends \advanced_testcase {
      * @covers \local_evalia\external\get_student_portfolio::execute
      */
     public function test_student_portfolio_respects_separate_groups(): void {
-        global $DB;
-        $gen = $this->getDataGenerator();
-        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
-        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
-        $roleid = $gen->create_role();
-        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
-        $grader = $gen->create_user();
-        $gen->enrol_user($grader->id, $this->course->id, $roleid);
-        $other = $gen->create_and_enrol($this->course, 'student');
-        $g1 = $gen->create_group(['courseid' => $this->course->id]);
-        $g2 = $gen->create_group(['courseid' => $this->course->id]);
-        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $grader->id]);
-        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $this->student->id]);
-        $gen->create_group_member(['groupid' => $g2->id, 'userid' => $other->id]);
+        [$grader] = $this->separate_groups_grader();
 
         $this->setUser($grader);
         $result = \local_evalia\external\get_student_portfolio::execute($this->course->id);
@@ -700,22 +711,10 @@ final class externallib_test extends \advanced_testcase {
      */
     public function test_exam_stats_respect_separate_groups(): void {
         global $DB;
-        $gen = $this->getDataGenerator();
         $this->setUser($this->teacher);
         $exam = \local_evalia\external\create_exam::execute($this->course->id, $this->create_rubric(), 'Stats', '', 1, 0, 0, 30);
 
-        $DB->set_field('course', 'groupmode', SEPARATEGROUPS, ['id' => $this->course->id]);
-        $DB->set_field('course', 'groupmodeforce', 1, ['id' => $this->course->id]);
-        $roleid = $gen->create_role();
-        assign_capability('local/evalia:manage', CAP_ALLOW, $roleid, \context_system::instance());
-        $grader = $gen->create_user();
-        $gen->enrol_user($grader->id, $this->course->id, $roleid);
-        $other = $gen->create_and_enrol($this->course, 'student');
-        $g1 = $gen->create_group(['courseid' => $this->course->id]);
-        $g2 = $gen->create_group(['courseid' => $this->course->id]);
-        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $grader->id]);
-        $gen->create_group_member(['groupid' => $g1->id, 'userid' => $this->student->id]);
-        $gen->create_group_member(['groupid' => $g2->id, 'userid' => $other->id]);
+        [$grader, $other] = $this->separate_groups_grader();
         foreach ([$this->student->id, $other->id] as $uid) {
             $DB->insert_record('local_evalia_student_exams', (object) [
                 'examid' => $exam['examid'], 'userid' => $uid, 'question_ids' => '[]', 'answers' => '{}',

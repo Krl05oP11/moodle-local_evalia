@@ -27,7 +27,7 @@ Feature: EVAL-IA student exam list
   @javascript
   Scenario: Student reaches their exams from the course
     When I am on the "EVALIATEST" course page logged in as "student1"
-    And I follow "My exams"
+    And I navigate to "My exams" in current page administration
     Then I should see "My exams"
     And I should see "EVALIA Test"
 

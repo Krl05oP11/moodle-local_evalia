@@ -214,7 +214,9 @@ $templatecontext = [
     'questions'      => [],
 ];
 if ($previewmode) {
-    $templatecontext['studentname'] = $studentuser ? fullname($studentuser) : get_string('exam:preview_student_fallback', 'local_evalia');
+    $templatecontext['studentname'] = $studentuser
+        ? fullname($studentuser)
+        : get_string('exam:preview_student_fallback', 'local_evalia');
     $templatecontext['statuslabel'] = [
         'assigned'  => get_string('exam:status_assigned', 'local_evalia'),
         'started'   => get_string('exam:status_started', 'local_evalia'),
