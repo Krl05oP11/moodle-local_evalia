@@ -4,6 +4,11 @@ All notable changes to the EVAL-IA plugin (local_evalia) are documented in this 
 
 ## [Unreleased]
 
+### Marketplace review MMR-463, round 3 (0.4.15, 2026-11-17; build 2026111700)
+- Publishing all the grades of an exam marks the student exams as published with
+  `$DB->set_field_select()` inside a delegated transaction instead of a raw `UPDATE` through
+  `$DB->execute()` (#10). New PHPUnit test: only the graded exams of that exam are published.
+
 ### Marketplace review MMR-463 (0.4.14, 2026-11-10; build 2026111000)
 The reviewer's findings are the GitHub issues 1-9 of this repository. Issues 1, 2, 4, 6, 7 and 8 were
 already fixed in 0.4.13 (build 2026110300, uploaded on 3 November); the review looked at the October build.

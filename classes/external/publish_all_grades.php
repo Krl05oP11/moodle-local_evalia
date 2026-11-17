@@ -92,16 +92,15 @@ class publish_all_grades extends external_api {
             );
         }
 
-        // Batch-update student_exam status to published.
-        $ids = array_keys($graded);
-        [$insql, $inparams] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'seid');
-        $DB->execute(
-            "UPDATE {local_evalia_student_exams} SET status = 'published', timemodified = :now WHERE id $insql",
-            array_merge(['now' => time()], $inparams)
-        );
+        // Mark the student exams as published, both fields in one transaction.
+        $now = time();
+        [$insql, $inparams] = $DB->get_in_or_equal(array_keys($graded), SQL_PARAMS_NAMED, 'seid');
+        $transaction = $DB->start_delegated_transaction();
+        $DB->set_field_select('local_evalia_student_exams', 'status', 'published', "id $insql", $inparams);
+        $DB->set_field_select('local_evalia_student_exams', 'timemodified', $now, "id $insql", $inparams);
+        $transaction->allow_commit();
 
         // Recalculate portfolio for each affected student.
-        $now = time();
         $affectedusers = array_unique(array_column((array) $graded, 'userid'));
         foreach ($affectedusers as $uid) {
             publish_grade::recalculate_portfolio((int) $uid, (int) $exam->courseid, $now, $DB);

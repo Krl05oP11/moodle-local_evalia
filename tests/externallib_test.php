@@ -758,4 +758,48 @@ final class externallib_test extends \advanced_testcase {
         $this->expectExceptionMessage(get_string('notsamegroup', 'local_evalia'));
         \local_evalia\external\grade_exam::execute($studentexamid, '{}');
     }
+
+    /**
+     * publish_all_grades publishes only the graded exams of that exam and updates their timemodified.
+     *
+     * @covers \local_evalia\external\publish_all_grades::execute
+     */
+    public function test_publish_all_grades_publishes_only_graded_exams(): void {
+        global $DB;
+        set_config('feedback_telegram', '0', 'local_evalia');
+        $this->setUser($this->teacher);
+        $rubricid = $this->create_rubric();
+        $exam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Publish', '', 1, 0, 0, 30);
+        $otherexam = \local_evalia\external\create_exam::execute($this->course->id, $rubricid, 'Other', '', 1, 0, 0, 30);
+
+        $old = time() - 1000;
+        $rows = [
+            'graded1' => [$exam['examid'], $this->student->id, 'graded'],
+            'graded2' => [$exam['examid'], $this->getDataGenerator()->create_and_enrol($this->course)->id, 'graded'],
+            'submitted' => [$exam['examid'], $this->getDataGenerator()->create_and_enrol($this->course)->id, 'submitted'],
+            'otherexam' => [$otherexam['examid'], $this->student->id, 'graded'],
+        ];
+        $ids = [];
+        foreach ($rows as $key => [$examid, $userid, $status]) {
+            $ids[$key] = (int) $DB->insert_record('local_evalia_student_exams', (object) [
+                'examid' => $examid, 'userid' => $userid, 'question_ids' => '[]', 'answers' => '{}',
+                'status' => $status, 'score' => 7.0, 'timecreated' => $old, 'timemodified' => $old,
+            ]);
+        }
+
+        $result = \local_evalia\external\publish_all_grades::execute($exam['examid']);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(2, $result['published']);
+        foreach (['graded1', 'graded2'] as $key) {
+            $se = $DB->get_record('local_evalia_student_exams', ['id' => $ids[$key]]);
+            $this->assertSame('published', $se->status);
+            $this->assertGreaterThan($old, (int) $se->timemodified);
+        }
+        foreach (['submitted' => 'submitted', 'otherexam' => 'graded'] as $key => $status) {
+            $se = $DB->get_record('local_evalia_student_exams', ['id' => $ids[$key]]);
+            $this->assertSame($status, $se->status);
+            $this->assertSame($old, (int) $se->timemodified);
+        }
+    }
 }
